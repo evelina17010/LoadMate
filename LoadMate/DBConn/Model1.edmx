@@ -1,0 +1,1911 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="Хранилище LoadMateModel" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Address">
+          <Key>
+            <PropertyRef Name="Address_id" />
+          </Key>
+          <Property Name="Address_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Street_id" Type="int" Nullable="false" />
+          <Property Name="House_number" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Apartment_number" Type="nvarchar" MaxLength="20" />
+          <Property Name="Additional_info" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="Cargo">
+          <Key>
+            <PropertyRef Name="Cargo_id" />
+          </Key>
+          <Property Name="Cargo_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Client_id" Type="int" Nullable="false" />
+          <Property Name="CargoType_id" Type="int" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="Weight_kg" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Volume_m3" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Is_fragile" Type="bit" Nullable="false" />
+          <Property Name="Is_dangerous" Type="bit" Nullable="false" />
+          <Property Name="Special_requirements" Type="nvarchar" MaxLength="500" />
+          <Property Name="Created_at" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CargoType">
+          <Key>
+            <PropertyRef Name="CargoType_id" />
+          </Key>
+          <Property Name="CargoType_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="City">
+          <Key>
+            <PropertyRef Name="City_id" />
+          </Key>
+          <Property Name="City_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Region_id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="PostalCode" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="Country">
+          <Key>
+            <PropertyRef Name="Country_id" />
+          </Key>
+          <Property Name="Country_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Code" Type="nvarchar" MaxLength="3" />
+        </EntityType>
+        <EntityType Name="Driver">
+          <Key>
+            <PropertyRef Name="Driver_id" />
+          </Key>
+          <Property Name="Driver_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="DriverStatus_id" Type="int" Nullable="false" />
+          <Property Name="License_number" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="License_expiry_date" Type="date" />
+          <Property Name="Experience_years" Type="int" />
+          <Property Name="Hire_date" Type="date" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DriverStatus">
+          <Key>
+            <PropertyRef Name="DriverStatus_id" />
+          </Key>
+          <Property Name="DriverStatus_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="Gender">
+          <Key>
+            <PropertyRef Name="Gender_id" />
+          </Key>
+          <Property Name="Gender_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Login">
+          <Key>
+            <PropertyRef Name="Login_id" />
+          </Key>
+          <Property Name="Login_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="Username" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Password_hash" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Is_active" Type="bit" Nullable="false" />
+          <Property Name="Failed_attempts" Type="int" Nullable="false" />
+          <Property Name="Last_login_attempt" Type="datetime" />
+          <Property Name="Password_changed_at" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Order">
+          <Key>
+            <PropertyRef Name="Order_id" />
+          </Key>
+          <Property Name="Order_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Manager_id" Type="int" Nullable="false" />
+          <Property Name="Cargo_id" Type="int" Nullable="false" />
+          <Property Name="Tariff_id" Type="int" Nullable="false" />
+          <Property Name="Truck_id" Type="int" Nullable="false" />
+          <Property Name="Route_id" Type="int" Nullable="false" />
+          <Property Name="OrderStatus_id" Type="int" Nullable="false" />
+          <Property Name="Order_number" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Order_date" Type="datetime" Nullable="false" />
+          <Property Name="Price" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Scheduled_pickup" Type="datetime" />
+          <Property Name="Scheduled_delivery" Type="datetime" />
+          <Property Name="Actual_pickup" Type="datetime" />
+          <Property Name="Actual_delivery" Type="datetime" />
+          <Property Name="Notes" Type="nvarchar" MaxLength="500" />
+        </EntityType>
+        <EntityType Name="OrderHistory">
+          <Key>
+            <PropertyRef Name="History_id" />
+          </Key>
+          <Property Name="History_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Order_id" Type="int" Nullable="false" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="Old_status_id" Type="int" />
+          <Property Name="New_status_id" Type="int" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar" MaxLength="500" />
+          <Property Name="Changed_at" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OrderStatus">
+          <Key>
+            <PropertyRef Name="OrderStatus_id" />
+          </Key>
+          <Property Name="OrderStatus_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="Payment">
+          <Key>
+            <PropertyRef Name="Payment_id" />
+          </Key>
+          <Property Name="Payment_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Order_id" Type="int" Nullable="false" />
+          <Property Name="PaymentStatus_id" Type="int" Nullable="false" />
+          <Property Name="Amount" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Payment_method" Type="nvarchar" MaxLength="50" />
+          <Property Name="Transaction_id" Type="nvarchar" MaxLength="100" />
+          <Property Name="Transaction_date" Type="datetime" Nullable="false" />
+          <Property Name="Paid_date" Type="datetime" />
+        </EntityType>
+        <EntityType Name="PaymentStatus">
+          <Key>
+            <PropertyRef Name="PaymentStatus_id" />
+          </Key>
+          <Property Name="PaymentStatus_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="Region">
+          <Key>
+            <PropertyRef Name="Region_id" />
+          </Key>
+          <Property Name="Region_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Country_id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="Role_id" />
+          </Key>
+          <Property Name="Role_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="Route">
+          <Key>
+            <PropertyRef Name="Route_id" />
+          </Key>
+          <Property Name="Route_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Start_address_id" Type="int" Nullable="false" />
+          <Property Name="End_address_id" Type="int" Nullable="false" />
+          <Property Name="Distance_km" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Estimated_time_hours" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Waypoints" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Street">
+          <Key>
+            <PropertyRef Name="Street_id" />
+          </Key>
+          <Property Name="Street_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="City_id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" Nullable="false" />
+        </EntityType>
+        <EntityType Name="sysdiagrams">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="principal_id" Type="int" Nullable="false" />
+          <Property Name="diagram_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="version" Type="int" />
+          <Property Name="definition" Type="varbinary(max)" />
+        </EntityType>
+        <EntityType Name="Tariff">
+          <Key>
+            <PropertyRef Name="Tariff_id" />
+          </Key>
+          <Property Name="Tariff_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+          <Property Name="Cost_per_km" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Cost_per_kg" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Cost_per_m3" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Additional_cost" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Min_price" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="Is_active" Type="bit" Nullable="false" />
+          <Property Name="Created_time" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Truck">
+          <Key>
+            <PropertyRef Name="Truck_id" />
+          </Key>
+          <Property Name="Truck_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Driver_id" Type="int" />
+          <Property Name="TruckStatus_id" Type="int" Nullable="false" />
+          <Property Name="Model" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Registration_number" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Capacity_kg" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Capacity_m3" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Dimensions" Type="nvarchar" MaxLength="50" />
+          <Property Name="Year_manufacture" Type="int" />
+          <Property Name="Fuel_consumption" Type="decimal" Precision="8" Scale="2" />
+        </EntityType>
+        <EntityType Name="TruckStatus">
+          <Key>
+            <PropertyRef Name="TruckStatus_id" />
+          </Key>
+          <Property Name="TruckStatus_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="User_id" />
+          </Key>
+          <Property Name="User_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Role_id" Type="int" Nullable="false" />
+          <Property Name="Gender_id" Type="int" />
+          <Property Name="UserStatus_id" Type="int" Nullable="false" />
+          <Property Name="Full_name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Phone" Type="nvarchar" MaxLength="20" />
+          <Property Name="Email" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Created_at" Type="datetime" Nullable="false" />
+          <Property Name="Updated_at" Type="datetime" />
+          <Property Name="Last_login" Type="datetime" />
+        </EntityType>
+        <EntityType Name="UserActivityLog">
+          <Key>
+            <PropertyRef Name="Log_id" />
+          </Key>
+          <Property Name="Log_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="User_id" Type="int" Nullable="false" />
+          <Property Name="Action_type" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="500" />
+          <Property Name="IP_address" Type="nvarchar" MaxLength="45" />
+          <Property Name="Created_at" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UserStatus">
+          <Key>
+            <PropertyRef Name="UserStatus_id" />
+          </Key>
+          <Property Name="UserStatus_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+        </EntityType>
+        <Association Name="FK_Address_Street">
+          <End Role="Street" Type="Self.Street" Multiplicity="1" />
+          <End Role="Address" Type="Self.Address" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Street">
+              <PropertyRef Name="Street_id" />
+            </Principal>
+            <Dependent Role="Address">
+              <PropertyRef Name="Street_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Cargo_CargoType">
+          <End Role="CargoType" Type="Self.CargoType" Multiplicity="1" />
+          <End Role="Cargo" Type="Self.Cargo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CargoType">
+              <PropertyRef Name="CargoType_id" />
+            </Principal>
+            <Dependent Role="Cargo">
+              <PropertyRef Name="CargoType_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Cargo_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Cargo" Type="Self.Cargo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Cargo">
+              <PropertyRef Name="Client_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_City_Region">
+          <End Role="Region" Type="Self.Region" Multiplicity="1" />
+          <End Role="City" Type="Self.City" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Region">
+              <PropertyRef Name="Region_id" />
+            </Principal>
+            <Dependent Role="City">
+              <PropertyRef Name="Region_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Driver_DriverStatus">
+          <End Role="DriverStatus" Type="Self.DriverStatus" Multiplicity="1" />
+          <End Role="Driver" Type="Self.Driver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DriverStatus">
+              <PropertyRef Name="DriverStatus_id" />
+            </Principal>
+            <Dependent Role="Driver">
+              <PropertyRef Name="DriverStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Driver_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Driver" Type="Self.Driver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Driver">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Login_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Login" Type="Self.Login" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Login">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Cargo">
+          <End Role="Cargo" Type="Self.Cargo" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cargo">
+              <PropertyRef Name="Cargo_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Cargo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Manager">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Manager_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_OrderStatus">
+          <End Role="OrderStatus" Type="Self.OrderStatus" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderStatus">
+              <PropertyRef Name="OrderStatus_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="OrderStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Route">
+          <End Role="Route" Type="Self.Route" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Route">
+              <PropertyRef Name="Route_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Route_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Tariff">
+          <End Role="Tariff" Type="Self.Tariff" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tariff">
+              <PropertyRef Name="Tariff_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Tariff_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Truck">
+          <End Role="Truck" Type="Self.Truck" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Truck">
+              <PropertyRef Name="Truck_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Truck_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_NewStatus">
+          <End Role="OrderStatus" Type="Self.OrderStatus" Multiplicity="1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderStatus">
+              <PropertyRef Name="OrderStatus_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="New_status_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_OldStatus">
+          <End Role="OrderStatus" Type="Self.OrderStatus" Multiplicity="0..1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderStatus">
+              <PropertyRef Name="OrderStatus_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="Old_status_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_Order">
+          <End Role="Order" Type="Self.Order" Multiplicity="1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="Order_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="Order_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payment_Order">
+          <End Role="Order" Type="Self.Order" Multiplicity="1" />
+          <End Role="Payment" Type="Self.Payment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="Order_id" />
+            </Principal>
+            <Dependent Role="Payment">
+              <PropertyRef Name="Order_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payment_PaymentStatus">
+          <End Role="PaymentStatus" Type="Self.PaymentStatus" Multiplicity="1" />
+          <End Role="Payment" Type="Self.Payment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PaymentStatus">
+              <PropertyRef Name="PaymentStatus_id" />
+            </Principal>
+            <Dependent Role="Payment">
+              <PropertyRef Name="PaymentStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Region_Country">
+          <End Role="Country" Type="Self.Country" Multiplicity="1" />
+          <End Role="Region" Type="Self.Region" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Country">
+              <PropertyRef Name="Country_id" />
+            </Principal>
+            <Dependent Role="Region">
+              <PropertyRef Name="Country_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Route_EndAddress">
+          <End Role="Address" Type="Self.Address" Multiplicity="1" />
+          <End Role="Route" Type="Self.Route" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Address">
+              <PropertyRef Name="Address_id" />
+            </Principal>
+            <Dependent Role="Route">
+              <PropertyRef Name="End_address_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Route_StartAddress">
+          <End Role="Address" Type="Self.Address" Multiplicity="1" />
+          <End Role="Route" Type="Self.Route" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Address">
+              <PropertyRef Name="Address_id" />
+            </Principal>
+            <Dependent Role="Route">
+              <PropertyRef Name="Start_address_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Street_City">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="Street" Type="Self.Street" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="Street">
+              <PropertyRef Name="City_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Truck_Driver">
+          <End Role="Driver" Type="Self.Driver" Multiplicity="0..1" />
+          <End Role="Truck" Type="Self.Truck" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Driver">
+              <PropertyRef Name="Driver_id" />
+            </Principal>
+            <Dependent Role="Truck">
+              <PropertyRef Name="Driver_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Truck_TruckStatus">
+          <End Role="TruckStatus" Type="Self.TruckStatus" Multiplicity="1" />
+          <End Role="Truck" Type="Self.Truck" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TruckStatus">
+              <PropertyRef Name="TruckStatus_id" />
+            </Principal>
+            <Dependent Role="Truck">
+              <PropertyRef Name="TruckStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_Gender">
+          <End Role="Gender" Type="Self.Gender" Multiplicity="0..1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gender">
+              <PropertyRef Name="Gender_id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="Gender_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_Role">
+          <End Role="Role" Type="Self.Role" Multiplicity="1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="Role_id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="Role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_UserStatus">
+          <End Role="UserStatus" Type="Self.UserStatus" Multiplicity="1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserStatus">
+              <PropertyRef Name="UserStatus_id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="UserStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserActivityLog_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="UserActivityLog" Type="Self.UserActivityLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="UserActivityLog">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Хранилище LoadMateModelContainer">
+          <EntitySet Name="Address" EntityType="Self.Address" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Cargo" EntityType="Self.Cargo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CargoType" EntityType="Self.CargoType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="City" EntityType="Self.City" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Country" EntityType="Self.Country" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Driver" EntityType="Self.Driver" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DriverStatus" EntityType="Self.DriverStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Gender" EntityType="Self.Gender" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Login" EntityType="Self.Login" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Order" EntityType="Self.Order" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OrderHistory" EntityType="Self.OrderHistory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OrderStatus" EntityType="Self.OrderStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Payment" EntityType="Self.Payment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PaymentStatus" EntityType="Self.PaymentStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Region" EntityType="Self.Region" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Role" EntityType="Self.Role" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Route" EntityType="Self.Route" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Street" EntityType="Self.Street" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Tariff" EntityType="Self.Tariff" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Truck" EntityType="Self.Truck" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TruckStatus" EntityType="Self.TruckStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserActivityLog" EntityType="Self.UserActivityLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserStatus" EntityType="Self.UserStatus" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Address_Street" Association="Self.FK_Address_Street">
+            <End Role="Street" EntitySet="Street" />
+            <End Role="Address" EntitySet="Address" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Cargo_CargoType" Association="Self.FK_Cargo_CargoType">
+            <End Role="CargoType" EntitySet="CargoType" />
+            <End Role="Cargo" EntitySet="Cargo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Cargo_User" Association="Self.FK_Cargo_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="Cargo" EntitySet="Cargo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_City_Region" Association="Self.FK_City_Region">
+            <End Role="Region" EntitySet="Region" />
+            <End Role="City" EntitySet="City" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Driver_DriverStatus" Association="Self.FK_Driver_DriverStatus">
+            <End Role="DriverStatus" EntitySet="DriverStatus" />
+            <End Role="Driver" EntitySet="Driver" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Driver_User" Association="Self.FK_Driver_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="Driver" EntitySet="Driver" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Login_User" Association="Self.FK_Login_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="Login" EntitySet="Login" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Cargo" Association="Self.FK_Order_Cargo">
+            <End Role="Cargo" EntitySet="Cargo" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Manager" Association="Self.FK_Order_Manager">
+            <End Role="User" EntitySet="User" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_OrderStatus" Association="Self.FK_Order_OrderStatus">
+            <End Role="OrderStatus" EntitySet="OrderStatus" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Route" Association="Self.FK_Order_Route">
+            <End Role="Route" EntitySet="Route" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Tariff" Association="Self.FK_Order_Tariff">
+            <End Role="Tariff" EntitySet="Tariff" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Truck" Association="Self.FK_Order_Truck">
+            <End Role="Truck" EntitySet="Truck" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_NewStatus" Association="Self.FK_OrderHistory_NewStatus">
+            <End Role="OrderStatus" EntitySet="OrderStatus" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_OldStatus" Association="Self.FK_OrderHistory_OldStatus">
+            <End Role="OrderStatus" EntitySet="OrderStatus" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_Order" Association="Self.FK_OrderHistory_Order">
+            <End Role="Order" EntitySet="Order" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_User" Association="Self.FK_OrderHistory_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payment_Order" Association="Self.FK_Payment_Order">
+            <End Role="Order" EntitySet="Order" />
+            <End Role="Payment" EntitySet="Payment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payment_PaymentStatus" Association="Self.FK_Payment_PaymentStatus">
+            <End Role="PaymentStatus" EntitySet="PaymentStatus" />
+            <End Role="Payment" EntitySet="Payment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Region_Country" Association="Self.FK_Region_Country">
+            <End Role="Country" EntitySet="Country" />
+            <End Role="Region" EntitySet="Region" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Route_EndAddress" Association="Self.FK_Route_EndAddress">
+            <End Role="Address" EntitySet="Address" />
+            <End Role="Route" EntitySet="Route" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Route_StartAddress" Association="Self.FK_Route_StartAddress">
+            <End Role="Address" EntitySet="Address" />
+            <End Role="Route" EntitySet="Route" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Street_City" Association="Self.FK_Street_City">
+            <End Role="City" EntitySet="City" />
+            <End Role="Street" EntitySet="Street" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Truck_Driver" Association="Self.FK_Truck_Driver">
+            <End Role="Driver" EntitySet="Driver" />
+            <End Role="Truck" EntitySet="Truck" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Truck_TruckStatus" Association="Self.FK_Truck_TruckStatus">
+            <End Role="TruckStatus" EntitySet="TruckStatus" />
+            <End Role="Truck" EntitySet="Truck" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_Gender" Association="Self.FK_User_Gender">
+            <End Role="Gender" EntitySet="Gender" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_Role" Association="Self.FK_User_Role">
+            <End Role="Role" EntitySet="Role" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_UserStatus" Association="Self.FK_User_UserStatus">
+            <End Role="UserStatus" EntitySet="UserStatus" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserActivityLog_User" Association="Self.FK_UserActivityLog_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="UserActivityLog" EntitySet="UserActivityLog" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="LoadMateModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Address">
+          <Key>
+            <PropertyRef Name="Address_id" />
+          </Key>
+          <Property Name="Address_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Street_id" Type="Int32" Nullable="false" />
+          <Property Name="House_number" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Apartment_number" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Additional_info" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Street" Relationship="Self.FK_Address_Street" FromRole="Address" ToRole="Street" />
+          <NavigationProperty Name="Route" Relationship="Self.FK_Route_EndAddress" FromRole="Address" ToRole="Route" />
+          <NavigationProperty Name="Route1" Relationship="Self.FK_Route_StartAddress" FromRole="Address" ToRole="Route" />
+        </EntityType>
+        <EntityType Name="Cargo">
+          <Key>
+            <PropertyRef Name="Cargo_id" />
+          </Key>
+          <Property Name="Cargo_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Client_id" Type="Int32" Nullable="false" />
+          <Property Name="CargoType_id" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Weight_kg" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Volume_m3" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Is_fragile" Type="Boolean" Nullable="false" />
+          <Property Name="Is_dangerous" Type="Boolean" Nullable="false" />
+          <Property Name="Special_requirements" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Created_at" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="CargoType" Relationship="Self.FK_Cargo_CargoType" FromRole="Cargo" ToRole="CargoType" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Cargo_User" FromRole="Cargo" ToRole="User" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Order_Cargo" FromRole="Cargo" ToRole="Order" />
+        </EntityType>
+        <EntityType Name="CargoType">
+          <Key>
+            <PropertyRef Name="CargoType_id" />
+          </Key>
+          <Property Name="CargoType_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Cargo" Relationship="Self.FK_Cargo_CargoType" FromRole="CargoType" ToRole="Cargo" />
+        </EntityType>
+        <EntityType Name="City">
+          <Key>
+            <PropertyRef Name="City_id" />
+          </Key>
+          <Property Name="City_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Region_id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PostalCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Region" Relationship="Self.FK_City_Region" FromRole="City" ToRole="Region" />
+          <NavigationProperty Name="Street" Relationship="Self.FK_Street_City" FromRole="City" ToRole="Street" />
+        </EntityType>
+        <EntityType Name="Country">
+          <Key>
+            <PropertyRef Name="Country_id" />
+          </Key>
+          <Property Name="Country_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Code" Type="String" MaxLength="3" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Region" Relationship="Self.FK_Region_Country" FromRole="Country" ToRole="Region" />
+        </EntityType>
+        <EntityType Name="Driver">
+          <Key>
+            <PropertyRef Name="Driver_id" />
+          </Key>
+          <Property Name="Driver_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="DriverStatus_id" Type="Int32" Nullable="false" />
+          <Property Name="License_number" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="License_expiry_date" Type="DateTime" Precision="0" />
+          <Property Name="Experience_years" Type="Int32" />
+          <Property Name="Hire_date" Type="DateTime" Nullable="false" Precision="0" />
+          <NavigationProperty Name="DriverStatus" Relationship="Self.FK_Driver_DriverStatus" FromRole="Driver" ToRole="DriverStatus" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Driver_User" FromRole="Driver" ToRole="User" />
+          <NavigationProperty Name="Truck" Relationship="Self.FK_Truck_Driver" FromRole="Driver" ToRole="Truck" />
+        </EntityType>
+        <EntityType Name="DriverStatus">
+          <Key>
+            <PropertyRef Name="DriverStatus_id" />
+          </Key>
+          <Property Name="DriverStatus_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Driver" Relationship="Self.FK_Driver_DriverStatus" FromRole="DriverStatus" ToRole="Driver" />
+        </EntityType>
+        <EntityType Name="Gender">
+          <Key>
+            <PropertyRef Name="Gender_id" />
+          </Key>
+          <Property Name="Gender_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="User" Relationship="Self.FK_User_Gender" FromRole="Gender" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Login">
+          <Key>
+            <PropertyRef Name="Login_id" />
+          </Key>
+          <Property Name="Login_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="Username" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Password_hash" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Is_active" Type="Boolean" Nullable="false" />
+          <Property Name="Failed_attempts" Type="Int32" Nullable="false" />
+          <Property Name="Last_login_attempt" Type="DateTime" Precision="3" />
+          <Property Name="Password_changed_at" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Login_User" FromRole="Login" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Order">
+          <Key>
+            <PropertyRef Name="Order_id" />
+          </Key>
+          <Property Name="Order_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Manager_id" Type="Int32" Nullable="false" />
+          <Property Name="Cargo_id" Type="Int32" Nullable="false" />
+          <Property Name="Tariff_id" Type="Int32" Nullable="false" />
+          <Property Name="Truck_id" Type="Int32" Nullable="false" />
+          <Property Name="Route_id" Type="Int32" Nullable="false" />
+          <Property Name="OrderStatus_id" Type="Int32" Nullable="false" />
+          <Property Name="Order_number" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Order_date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Price" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Scheduled_pickup" Type="DateTime" Precision="3" />
+          <Property Name="Scheduled_delivery" Type="DateTime" Precision="3" />
+          <Property Name="Actual_pickup" Type="DateTime" Precision="3" />
+          <Property Name="Actual_delivery" Type="DateTime" Precision="3" />
+          <Property Name="Notes" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Cargo" Relationship="Self.FK_Order_Cargo" FromRole="Order" ToRole="Cargo" />
+          <NavigationProperty Name="User" Relationship="Self.FK_Order_Manager" FromRole="Order" ToRole="User" />
+          <NavigationProperty Name="OrderStatus" Relationship="Self.FK_Order_OrderStatus" FromRole="Order" ToRole="OrderStatus" />
+          <NavigationProperty Name="Route" Relationship="Self.FK_Order_Route" FromRole="Order" ToRole="Route" />
+          <NavigationProperty Name="Tariff" Relationship="Self.FK_Order_Tariff" FromRole="Order" ToRole="Tariff" />
+          <NavigationProperty Name="Truck" Relationship="Self.FK_Order_Truck" FromRole="Order" ToRole="Truck" />
+          <NavigationProperty Name="OrderHistory" Relationship="Self.FK_OrderHistory_Order" FromRole="Order" ToRole="OrderHistory" />
+          <NavigationProperty Name="Payment" Relationship="Self.FK_Payment_Order" FromRole="Order" ToRole="Payment" />
+        </EntityType>
+        <EntityType Name="OrderHistory">
+          <Key>
+            <PropertyRef Name="History_id" />
+          </Key>
+          <Property Name="History_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Order_id" Type="Int32" Nullable="false" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="Old_status_id" Type="Int32" />
+          <Property Name="New_status_id" Type="Int32" Nullable="false" />
+          <Property Name="Comment" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Changed_at" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_OrderHistory_Order" FromRole="OrderHistory" ToRole="Order" />
+          <NavigationProperty Name="OrderStatus" Relationship="Self.FK_OrderHistory_NewStatus" FromRole="OrderHistory" ToRole="OrderStatus" />
+          <NavigationProperty Name="OrderStatus1" Relationship="Self.FK_OrderHistory_OldStatus" FromRole="OrderHistory" ToRole="OrderStatus" />
+          <NavigationProperty Name="User" Relationship="Self.FK_OrderHistory_User" FromRole="OrderHistory" ToRole="User" />
+        </EntityType>
+        <EntityType Name="OrderStatus">
+          <Key>
+            <PropertyRef Name="OrderStatus_id" />
+          </Key>
+          <Property Name="OrderStatus_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Order_OrderStatus" FromRole="OrderStatus" ToRole="Order" />
+          <NavigationProperty Name="OrderHistory" Relationship="Self.FK_OrderHistory_NewStatus" FromRole="OrderStatus" ToRole="OrderHistory" />
+          <NavigationProperty Name="OrderHistory1" Relationship="Self.FK_OrderHistory_OldStatus" FromRole="OrderStatus" ToRole="OrderHistory" />
+        </EntityType>
+        <EntityType Name="Payment">
+          <Key>
+            <PropertyRef Name="Payment_id" />
+          </Key>
+          <Property Name="Payment_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Order_id" Type="Int32" Nullable="false" />
+          <Property Name="PaymentStatus_id" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Payment_method" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Transaction_id" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Transaction_date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Paid_date" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Payment_Order" FromRole="Payment" ToRole="Order" />
+          <NavigationProperty Name="PaymentStatus" Relationship="Self.FK_Payment_PaymentStatus" FromRole="Payment" ToRole="PaymentStatus" />
+        </EntityType>
+        <EntityType Name="PaymentStatus">
+          <Key>
+            <PropertyRef Name="PaymentStatus_id" />
+          </Key>
+          <Property Name="PaymentStatus_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Payment" Relationship="Self.FK_Payment_PaymentStatus" FromRole="PaymentStatus" ToRole="Payment" />
+        </EntityType>
+        <EntityType Name="Region">
+          <Key>
+            <PropertyRef Name="Region_id" />
+          </Key>
+          <Property Name="Region_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Country_id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="City" Relationship="Self.FK_City_Region" FromRole="Region" ToRole="City" />
+          <NavigationProperty Name="Country" Relationship="Self.FK_Region_Country" FromRole="Region" ToRole="Country" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="Role_id" />
+          </Key>
+          <Property Name="Role_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="User" Relationship="Self.FK_User_Role" FromRole="Role" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Route">
+          <Key>
+            <PropertyRef Name="Route_id" />
+          </Key>
+          <Property Name="Route_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Start_address_id" Type="Int32" Nullable="false" />
+          <Property Name="End_address_id" Type="Int32" Nullable="false" />
+          <Property Name="Distance_km" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Estimated_time_hours" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Waypoints" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Address" Relationship="Self.FK_Route_EndAddress" FromRole="Route" ToRole="Address" />
+          <NavigationProperty Name="Address1" Relationship="Self.FK_Route_StartAddress" FromRole="Route" ToRole="Address" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Order_Route" FromRole="Route" ToRole="Order" />
+        </EntityType>
+        <EntityType Name="Street">
+          <Key>
+            <PropertyRef Name="Street_id" />
+          </Key>
+          <Property Name="Street_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="City_id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Address" Relationship="Self.FK_Address_Street" FromRole="Street" ToRole="Address" />
+          <NavigationProperty Name="City" Relationship="Self.FK_Street_City" FromRole="Street" ToRole="City" />
+        </EntityType>
+        <EntityType Name="sysdiagrams">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="principal_id" Type="Int32" Nullable="false" />
+          <Property Name="diagram_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="version" Type="Int32" />
+          <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="Tariff">
+          <Key>
+            <PropertyRef Name="Tariff_id" />
+          </Key>
+          <Property Name="Tariff_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Cost_per_km" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Cost_per_kg" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Cost_per_m3" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Additional_cost" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Min_price" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="Is_active" Type="Boolean" Nullable="false" />
+          <Property Name="Created_time" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Order_Tariff" FromRole="Tariff" ToRole="Order" />
+        </EntityType>
+        <EntityType Name="Truck">
+          <Key>
+            <PropertyRef Name="Truck_id" />
+          </Key>
+          <Property Name="Truck_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Driver_id" Type="Int32" />
+          <Property Name="TruckStatus_id" Type="Int32" Nullable="false" />
+          <Property Name="Model" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Registration_number" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Capacity_kg" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Capacity_m3" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="Dimensions" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Year_manufacture" Type="Int32" />
+          <Property Name="Fuel_consumption" Type="Decimal" Precision="8" Scale="2" />
+          <NavigationProperty Name="Driver" Relationship="Self.FK_Truck_Driver" FromRole="Truck" ToRole="Driver" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Order_Truck" FromRole="Truck" ToRole="Order" />
+          <NavigationProperty Name="TruckStatus" Relationship="Self.FK_Truck_TruckStatus" FromRole="Truck" ToRole="TruckStatus" />
+        </EntityType>
+        <EntityType Name="TruckStatus">
+          <Key>
+            <PropertyRef Name="TruckStatus_id" />
+          </Key>
+          <Property Name="TruckStatus_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Truck" Relationship="Self.FK_Truck_TruckStatus" FromRole="TruckStatus" ToRole="Truck" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="User_id" />
+          </Key>
+          <Property Name="User_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Role_id" Type="Int32" Nullable="false" />
+          <Property Name="Gender_id" Type="Int32" />
+          <Property Name="UserStatus_id" Type="Int32" Nullable="false" />
+          <Property Name="Full_name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Phone" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Created_at" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Updated_at" Type="DateTime" Precision="3" />
+          <Property Name="Last_login" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Cargo" Relationship="Self.FK_Cargo_User" FromRole="User" ToRole="Cargo" />
+          <NavigationProperty Name="Driver" Relationship="Self.FK_Driver_User" FromRole="User" ToRole="Driver" />
+          <NavigationProperty Name="Gender" Relationship="Self.FK_User_Gender" FromRole="User" ToRole="Gender" />
+          <NavigationProperty Name="Login" Relationship="Self.FK_Login_User" FromRole="User" ToRole="Login" />
+          <NavigationProperty Name="Order" Relationship="Self.FK_Order_Manager" FromRole="User" ToRole="Order" />
+          <NavigationProperty Name="OrderHistory" Relationship="Self.FK_OrderHistory_User" FromRole="User" ToRole="OrderHistory" />
+          <NavigationProperty Name="Role" Relationship="Self.FK_User_Role" FromRole="User" ToRole="Role" />
+          <NavigationProperty Name="UserStatus" Relationship="Self.FK_User_UserStatus" FromRole="User" ToRole="UserStatus" />
+          <NavigationProperty Name="UserActivityLog" Relationship="Self.FK_UserActivityLog_User" FromRole="User" ToRole="UserActivityLog" />
+        </EntityType>
+        <EntityType Name="UserActivityLog">
+          <Key>
+            <PropertyRef Name="Log_id" />
+          </Key>
+          <Property Name="Log_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="User_id" Type="Int32" Nullable="false" />
+          <Property Name="Action_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="IP_address" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="Created_at" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="User" Relationship="Self.FK_UserActivityLog_User" FromRole="UserActivityLog" ToRole="User" />
+        </EntityType>
+        <EntityType Name="UserStatus">
+          <Key>
+            <PropertyRef Name="UserStatus_id" />
+          </Key>
+          <Property Name="UserStatus_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="User" Relationship="Self.FK_User_UserStatus" FromRole="UserStatus" ToRole="User" />
+        </EntityType>
+        <Association Name="FK_Address_Street">
+          <End Role="Street" Type="Self.Street" Multiplicity="1" />
+          <End Role="Address" Type="Self.Address" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Street">
+              <PropertyRef Name="Street_id" />
+            </Principal>
+            <Dependent Role="Address">
+              <PropertyRef Name="Street_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Route_EndAddress">
+          <End Role="Address" Type="Self.Address" Multiplicity="1" />
+          <End Role="Route" Type="Self.Route" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Address">
+              <PropertyRef Name="Address_id" />
+            </Principal>
+            <Dependent Role="Route">
+              <PropertyRef Name="End_address_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Route_StartAddress">
+          <End Role="Address" Type="Self.Address" Multiplicity="1" />
+          <End Role="Route" Type="Self.Route" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Address">
+              <PropertyRef Name="Address_id" />
+            </Principal>
+            <Dependent Role="Route">
+              <PropertyRef Name="Start_address_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Cargo_CargoType">
+          <End Role="CargoType" Type="Self.CargoType" Multiplicity="1" />
+          <End Role="Cargo" Type="Self.Cargo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CargoType">
+              <PropertyRef Name="CargoType_id" />
+            </Principal>
+            <Dependent Role="Cargo">
+              <PropertyRef Name="CargoType_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Cargo_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Cargo" Type="Self.Cargo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Cargo">
+              <PropertyRef Name="Client_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Cargo">
+          <End Role="Cargo" Type="Self.Cargo" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cargo">
+              <PropertyRef Name="Cargo_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Cargo_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_City_Region">
+          <End Role="Region" Type="Self.Region" Multiplicity="1" />
+          <End Role="City" Type="Self.City" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Region">
+              <PropertyRef Name="Region_id" />
+            </Principal>
+            <Dependent Role="City">
+              <PropertyRef Name="Region_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Street_City">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="Street" Type="Self.Street" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="Street">
+              <PropertyRef Name="City_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Region_Country">
+          <End Role="Country" Type="Self.Country" Multiplicity="1" />
+          <End Role="Region" Type="Self.Region" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Country">
+              <PropertyRef Name="Country_id" />
+            </Principal>
+            <Dependent Role="Region">
+              <PropertyRef Name="Country_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Driver_DriverStatus">
+          <End Role="DriverStatus" Type="Self.DriverStatus" Multiplicity="1" />
+          <End Role="Driver" Type="Self.Driver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DriverStatus">
+              <PropertyRef Name="DriverStatus_id" />
+            </Principal>
+            <Dependent Role="Driver">
+              <PropertyRef Name="DriverStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Driver_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Driver" Type="Self.Driver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Driver">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Truck_Driver">
+          <End Role="Driver" Type="Self.Driver" Multiplicity="0..1" />
+          <End Role="Truck" Type="Self.Truck" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Driver">
+              <PropertyRef Name="Driver_id" />
+            </Principal>
+            <Dependent Role="Truck">
+              <PropertyRef Name="Driver_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_Gender">
+          <End Role="Gender" Type="Self.Gender" Multiplicity="0..1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gender">
+              <PropertyRef Name="Gender_id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="Gender_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Login_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Login" Type="Self.Login" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Login">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Manager">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Manager_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_OrderStatus">
+          <End Role="OrderStatus" Type="Self.OrderStatus" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderStatus">
+              <PropertyRef Name="OrderStatus_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="OrderStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Route">
+          <End Role="Route" Type="Self.Route" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Route">
+              <PropertyRef Name="Route_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Route_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Tariff">
+          <End Role="Tariff" Type="Self.Tariff" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tariff">
+              <PropertyRef Name="Tariff_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Tariff_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Order_Truck">
+          <End Role="Truck" Type="Self.Truck" Multiplicity="1" />
+          <End Role="Order" Type="Self.Order" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Truck">
+              <PropertyRef Name="Truck_id" />
+            </Principal>
+            <Dependent Role="Order">
+              <PropertyRef Name="Truck_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_Order">
+          <End Role="Order" Type="Self.Order" Multiplicity="1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="Order_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="Order_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payment_Order">
+          <End Role="Order" Type="Self.Order" Multiplicity="1" />
+          <End Role="Payment" Type="Self.Payment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="Order_id" />
+            </Principal>
+            <Dependent Role="Payment">
+              <PropertyRef Name="Order_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_NewStatus">
+          <End Role="OrderStatus" Type="Self.OrderStatus" Multiplicity="1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderStatus">
+              <PropertyRef Name="OrderStatus_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="New_status_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_OldStatus">
+          <End Role="OrderStatus" Type="Self.OrderStatus" Multiplicity="0..1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="OrderStatus">
+              <PropertyRef Name="OrderStatus_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="Old_status_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderHistory_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="OrderHistory" Type="Self.OrderHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="OrderHistory">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payment_PaymentStatus">
+          <End Role="PaymentStatus" Type="Self.PaymentStatus" Multiplicity="1" />
+          <End Role="Payment" Type="Self.Payment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PaymentStatus">
+              <PropertyRef Name="PaymentStatus_id" />
+            </Principal>
+            <Dependent Role="Payment">
+              <PropertyRef Name="PaymentStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_Role">
+          <End Role="Role" Type="Self.Role" Multiplicity="1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="Role_id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="Role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Truck_TruckStatus">
+          <End Role="TruckStatus" Type="Self.TruckStatus" Multiplicity="1" />
+          <End Role="Truck" Type="Self.Truck" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TruckStatus">
+              <PropertyRef Name="TruckStatus_id" />
+            </Principal>
+            <Dependent Role="Truck">
+              <PropertyRef Name="TruckStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_UserStatus">
+          <End Role="UserStatus" Type="Self.UserStatus" Multiplicity="1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserStatus">
+              <PropertyRef Name="UserStatus_id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="UserStatus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserActivityLog_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="UserActivityLog" Type="Self.UserActivityLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="User_id" />
+            </Principal>
+            <Dependent Role="UserActivityLog">
+              <PropertyRef Name="User_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="LoadMateEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Address" EntityType="Self.Address" />
+          <EntitySet Name="Cargo" EntityType="Self.Cargo" />
+          <EntitySet Name="CargoType" EntityType="Self.CargoType" />
+          <EntitySet Name="City" EntityType="Self.City" />
+          <EntitySet Name="Country" EntityType="Self.Country" />
+          <EntitySet Name="Driver" EntityType="Self.Driver" />
+          <EntitySet Name="DriverStatus" EntityType="Self.DriverStatus" />
+          <EntitySet Name="Gender" EntityType="Self.Gender" />
+          <EntitySet Name="Login" EntityType="Self.Login" />
+          <EntitySet Name="Order" EntityType="Self.Order" />
+          <EntitySet Name="OrderHistory" EntityType="Self.OrderHistory" />
+          <EntitySet Name="OrderStatus" EntityType="Self.OrderStatus" />
+          <EntitySet Name="Payment" EntityType="Self.Payment" />
+          <EntitySet Name="PaymentStatus" EntityType="Self.PaymentStatus" />
+          <EntitySet Name="Region" EntityType="Self.Region" />
+          <EntitySet Name="Role" EntityType="Self.Role" />
+          <EntitySet Name="Route" EntityType="Self.Route" />
+          <EntitySet Name="Street" EntityType="Self.Street" />
+          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" />
+          <EntitySet Name="Tariff" EntityType="Self.Tariff" />
+          <EntitySet Name="Truck" EntityType="Self.Truck" />
+          <EntitySet Name="TruckStatus" EntityType="Self.TruckStatus" />
+          <EntitySet Name="User" EntityType="Self.User" />
+          <EntitySet Name="UserActivityLog" EntityType="Self.UserActivityLog" />
+          <EntitySet Name="UserStatus" EntityType="Self.UserStatus" />
+          <AssociationSet Name="FK_Address_Street" Association="Self.FK_Address_Street">
+            <End Role="Street" EntitySet="Street" />
+            <End Role="Address" EntitySet="Address" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Route_EndAddress" Association="Self.FK_Route_EndAddress">
+            <End Role="Address" EntitySet="Address" />
+            <End Role="Route" EntitySet="Route" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Route_StartAddress" Association="Self.FK_Route_StartAddress">
+            <End Role="Address" EntitySet="Address" />
+            <End Role="Route" EntitySet="Route" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Cargo_CargoType" Association="Self.FK_Cargo_CargoType">
+            <End Role="CargoType" EntitySet="CargoType" />
+            <End Role="Cargo" EntitySet="Cargo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Cargo_User" Association="Self.FK_Cargo_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="Cargo" EntitySet="Cargo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Cargo" Association="Self.FK_Order_Cargo">
+            <End Role="Cargo" EntitySet="Cargo" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_City_Region" Association="Self.FK_City_Region">
+            <End Role="Region" EntitySet="Region" />
+            <End Role="City" EntitySet="City" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Street_City" Association="Self.FK_Street_City">
+            <End Role="City" EntitySet="City" />
+            <End Role="Street" EntitySet="Street" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Region_Country" Association="Self.FK_Region_Country">
+            <End Role="Country" EntitySet="Country" />
+            <End Role="Region" EntitySet="Region" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Driver_DriverStatus" Association="Self.FK_Driver_DriverStatus">
+            <End Role="DriverStatus" EntitySet="DriverStatus" />
+            <End Role="Driver" EntitySet="Driver" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Driver_User" Association="Self.FK_Driver_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="Driver" EntitySet="Driver" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Truck_Driver" Association="Self.FK_Truck_Driver">
+            <End Role="Driver" EntitySet="Driver" />
+            <End Role="Truck" EntitySet="Truck" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_Gender" Association="Self.FK_User_Gender">
+            <End Role="Gender" EntitySet="Gender" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Login_User" Association="Self.FK_Login_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="Login" EntitySet="Login" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Manager" Association="Self.FK_Order_Manager">
+            <End Role="User" EntitySet="User" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_OrderStatus" Association="Self.FK_Order_OrderStatus">
+            <End Role="OrderStatus" EntitySet="OrderStatus" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Route" Association="Self.FK_Order_Route">
+            <End Role="Route" EntitySet="Route" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Tariff" Association="Self.FK_Order_Tariff">
+            <End Role="Tariff" EntitySet="Tariff" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Order_Truck" Association="Self.FK_Order_Truck">
+            <End Role="Truck" EntitySet="Truck" />
+            <End Role="Order" EntitySet="Order" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_Order" Association="Self.FK_OrderHistory_Order">
+            <End Role="Order" EntitySet="Order" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payment_Order" Association="Self.FK_Payment_Order">
+            <End Role="Order" EntitySet="Order" />
+            <End Role="Payment" EntitySet="Payment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_NewStatus" Association="Self.FK_OrderHistory_NewStatus">
+            <End Role="OrderStatus" EntitySet="OrderStatus" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_OldStatus" Association="Self.FK_OrderHistory_OldStatus">
+            <End Role="OrderStatus" EntitySet="OrderStatus" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderHistory_User" Association="Self.FK_OrderHistory_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="OrderHistory" EntitySet="OrderHistory" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payment_PaymentStatus" Association="Self.FK_Payment_PaymentStatus">
+            <End Role="PaymentStatus" EntitySet="PaymentStatus" />
+            <End Role="Payment" EntitySet="Payment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_Role" Association="Self.FK_User_Role">
+            <End Role="Role" EntitySet="Role" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Truck_TruckStatus" Association="Self.FK_Truck_TruckStatus">
+            <End Role="TruckStatus" EntitySet="TruckStatus" />
+            <End Role="Truck" EntitySet="Truck" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_UserStatus" Association="Self.FK_User_UserStatus">
+            <End Role="UserStatus" EntitySet="UserStatus" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserActivityLog_User" Association="Self.FK_UserActivityLog_User">
+            <End Role="User" EntitySet="User" />
+            <End Role="UserActivityLog" EntitySet="UserActivityLog" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Хранилище LoadMateModelContainer" CdmEntityContainer="LoadMateEntities">
+          <EntitySetMapping Name="Address">
+            <EntityTypeMapping TypeName="LoadMateModel.Address">
+              <MappingFragment StoreEntitySet="Address">
+                <ScalarProperty Name="Address_id" ColumnName="Address_id" />
+                <ScalarProperty Name="Street_id" ColumnName="Street_id" />
+                <ScalarProperty Name="House_number" ColumnName="House_number" />
+                <ScalarProperty Name="Apartment_number" ColumnName="Apartment_number" />
+                <ScalarProperty Name="Additional_info" ColumnName="Additional_info" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Cargo">
+            <EntityTypeMapping TypeName="LoadMateModel.Cargo">
+              <MappingFragment StoreEntitySet="Cargo">
+                <ScalarProperty Name="Cargo_id" ColumnName="Cargo_id" />
+                <ScalarProperty Name="Client_id" ColumnName="Client_id" />
+                <ScalarProperty Name="CargoType_id" ColumnName="CargoType_id" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Weight_kg" ColumnName="Weight_kg" />
+                <ScalarProperty Name="Volume_m3" ColumnName="Volume_m3" />
+                <ScalarProperty Name="Is_fragile" ColumnName="Is_fragile" />
+                <ScalarProperty Name="Is_dangerous" ColumnName="Is_dangerous" />
+                <ScalarProperty Name="Special_requirements" ColumnName="Special_requirements" />
+                <ScalarProperty Name="Created_at" ColumnName="Created_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CargoType">
+            <EntityTypeMapping TypeName="LoadMateModel.CargoType">
+              <MappingFragment StoreEntitySet="CargoType">
+                <ScalarProperty Name="CargoType_id" ColumnName="CargoType_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="City">
+            <EntityTypeMapping TypeName="LoadMateModel.City">
+              <MappingFragment StoreEntitySet="City">
+                <ScalarProperty Name="City_id" ColumnName="City_id" />
+                <ScalarProperty Name="Region_id" ColumnName="Region_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Country">
+            <EntityTypeMapping TypeName="LoadMateModel.Country">
+              <MappingFragment StoreEntitySet="Country">
+                <ScalarProperty Name="Country_id" ColumnName="Country_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Driver">
+            <EntityTypeMapping TypeName="LoadMateModel.Driver">
+              <MappingFragment StoreEntitySet="Driver">
+                <ScalarProperty Name="Driver_id" ColumnName="Driver_id" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="DriverStatus_id" ColumnName="DriverStatus_id" />
+                <ScalarProperty Name="License_number" ColumnName="License_number" />
+                <ScalarProperty Name="License_expiry_date" ColumnName="License_expiry_date" />
+                <ScalarProperty Name="Experience_years" ColumnName="Experience_years" />
+                <ScalarProperty Name="Hire_date" ColumnName="Hire_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DriverStatus">
+            <EntityTypeMapping TypeName="LoadMateModel.DriverStatus">
+              <MappingFragment StoreEntitySet="DriverStatus">
+                <ScalarProperty Name="DriverStatus_id" ColumnName="DriverStatus_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Gender">
+            <EntityTypeMapping TypeName="LoadMateModel.Gender">
+              <MappingFragment StoreEntitySet="Gender">
+                <ScalarProperty Name="Gender_id" ColumnName="Gender_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Login">
+            <EntityTypeMapping TypeName="LoadMateModel.Login">
+              <MappingFragment StoreEntitySet="Login">
+                <ScalarProperty Name="Login_id" ColumnName="Login_id" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Username" ColumnName="Username" />
+                <ScalarProperty Name="Password_hash" ColumnName="Password_hash" />
+                <ScalarProperty Name="Is_active" ColumnName="Is_active" />
+                <ScalarProperty Name="Failed_attempts" ColumnName="Failed_attempts" />
+                <ScalarProperty Name="Last_login_attempt" ColumnName="Last_login_attempt" />
+                <ScalarProperty Name="Password_changed_at" ColumnName="Password_changed_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Order">
+            <EntityTypeMapping TypeName="LoadMateModel.Order">
+              <MappingFragment StoreEntitySet="Order">
+                <ScalarProperty Name="Order_id" ColumnName="Order_id" />
+                <ScalarProperty Name="Manager_id" ColumnName="Manager_id" />
+                <ScalarProperty Name="Cargo_id" ColumnName="Cargo_id" />
+                <ScalarProperty Name="Tariff_id" ColumnName="Tariff_id" />
+                <ScalarProperty Name="Truck_id" ColumnName="Truck_id" />
+                <ScalarProperty Name="Route_id" ColumnName="Route_id" />
+                <ScalarProperty Name="OrderStatus_id" ColumnName="OrderStatus_id" />
+                <ScalarProperty Name="Order_number" ColumnName="Order_number" />
+                <ScalarProperty Name="Order_date" ColumnName="Order_date" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Scheduled_pickup" ColumnName="Scheduled_pickup" />
+                <ScalarProperty Name="Scheduled_delivery" ColumnName="Scheduled_delivery" />
+                <ScalarProperty Name="Actual_pickup" ColumnName="Actual_pickup" />
+                <ScalarProperty Name="Actual_delivery" ColumnName="Actual_delivery" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OrderHistory">
+            <EntityTypeMapping TypeName="LoadMateModel.OrderHistory">
+              <MappingFragment StoreEntitySet="OrderHistory">
+                <ScalarProperty Name="History_id" ColumnName="History_id" />
+                <ScalarProperty Name="Order_id" ColumnName="Order_id" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Old_status_id" ColumnName="Old_status_id" />
+                <ScalarProperty Name="New_status_id" ColumnName="New_status_id" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="Changed_at" ColumnName="Changed_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OrderStatus">
+            <EntityTypeMapping TypeName="LoadMateModel.OrderStatus">
+              <MappingFragment StoreEntitySet="OrderStatus">
+                <ScalarProperty Name="OrderStatus_id" ColumnName="OrderStatus_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Payment">
+            <EntityTypeMapping TypeName="LoadMateModel.Payment">
+              <MappingFragment StoreEntitySet="Payment">
+                <ScalarProperty Name="Payment_id" ColumnName="Payment_id" />
+                <ScalarProperty Name="Order_id" ColumnName="Order_id" />
+                <ScalarProperty Name="PaymentStatus_id" ColumnName="PaymentStatus_id" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="Payment_method" ColumnName="Payment_method" />
+                <ScalarProperty Name="Transaction_id" ColumnName="Transaction_id" />
+                <ScalarProperty Name="Transaction_date" ColumnName="Transaction_date" />
+                <ScalarProperty Name="Paid_date" ColumnName="Paid_date" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PaymentStatus">
+            <EntityTypeMapping TypeName="LoadMateModel.PaymentStatus">
+              <MappingFragment StoreEntitySet="PaymentStatus">
+                <ScalarProperty Name="PaymentStatus_id" ColumnName="PaymentStatus_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Region">
+            <EntityTypeMapping TypeName="LoadMateModel.Region">
+              <MappingFragment StoreEntitySet="Region">
+                <ScalarProperty Name="Region_id" ColumnName="Region_id" />
+                <ScalarProperty Name="Country_id" ColumnName="Country_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Role">
+            <EntityTypeMapping TypeName="LoadMateModel.Role">
+              <MappingFragment StoreEntitySet="Role">
+                <ScalarProperty Name="Role_id" ColumnName="Role_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Route">
+            <EntityTypeMapping TypeName="LoadMateModel.Route">
+              <MappingFragment StoreEntitySet="Route">
+                <ScalarProperty Name="Route_id" ColumnName="Route_id" />
+                <ScalarProperty Name="Start_address_id" ColumnName="Start_address_id" />
+                <ScalarProperty Name="End_address_id" ColumnName="End_address_id" />
+                <ScalarProperty Name="Distance_km" ColumnName="Distance_km" />
+                <ScalarProperty Name="Estimated_time_hours" ColumnName="Estimated_time_hours" />
+                <ScalarProperty Name="Waypoints" ColumnName="Waypoints" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Street">
+            <EntityTypeMapping TypeName="LoadMateModel.Street">
+              <MappingFragment StoreEntitySet="Street">
+                <ScalarProperty Name="Street_id" ColumnName="Street_id" />
+                <ScalarProperty Name="City_id" ColumnName="City_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sysdiagrams">
+            <EntityTypeMapping TypeName="LoadMateModel.sysdiagrams">
+              <MappingFragment StoreEntitySet="sysdiagrams">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="principal_id" ColumnName="principal_id" />
+                <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="definition" ColumnName="definition" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tariff">
+            <EntityTypeMapping TypeName="LoadMateModel.Tariff">
+              <MappingFragment StoreEntitySet="Tariff">
+                <ScalarProperty Name="Tariff_id" ColumnName="Tariff_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Cost_per_km" ColumnName="Cost_per_km" />
+                <ScalarProperty Name="Cost_per_kg" ColumnName="Cost_per_kg" />
+                <ScalarProperty Name="Cost_per_m3" ColumnName="Cost_per_m3" />
+                <ScalarProperty Name="Additional_cost" ColumnName="Additional_cost" />
+                <ScalarProperty Name="Min_price" ColumnName="Min_price" />
+                <ScalarProperty Name="Is_active" ColumnName="Is_active" />
+                <ScalarProperty Name="Created_time" ColumnName="Created_time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Truck">
+            <EntityTypeMapping TypeName="LoadMateModel.Truck">
+              <MappingFragment StoreEntitySet="Truck">
+                <ScalarProperty Name="Truck_id" ColumnName="Truck_id" />
+                <ScalarProperty Name="Driver_id" ColumnName="Driver_id" />
+                <ScalarProperty Name="TruckStatus_id" ColumnName="TruckStatus_id" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="Registration_number" ColumnName="Registration_number" />
+                <ScalarProperty Name="Capacity_kg" ColumnName="Capacity_kg" />
+                <ScalarProperty Name="Capacity_m3" ColumnName="Capacity_m3" />
+                <ScalarProperty Name="Dimensions" ColumnName="Dimensions" />
+                <ScalarProperty Name="Year_manufacture" ColumnName="Year_manufacture" />
+                <ScalarProperty Name="Fuel_consumption" ColumnName="Fuel_consumption" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TruckStatus">
+            <EntityTypeMapping TypeName="LoadMateModel.TruckStatus">
+              <MappingFragment StoreEntitySet="TruckStatus">
+                <ScalarProperty Name="TruckStatus_id" ColumnName="TruckStatus_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="User">
+            <EntityTypeMapping TypeName="LoadMateModel.User">
+              <MappingFragment StoreEntitySet="User">
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Role_id" ColumnName="Role_id" />
+                <ScalarProperty Name="Gender_id" ColumnName="Gender_id" />
+                <ScalarProperty Name="UserStatus_id" ColumnName="UserStatus_id" />
+                <ScalarProperty Name="Full_name" ColumnName="Full_name" />
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Created_at" ColumnName="Created_at" />
+                <ScalarProperty Name="Updated_at" ColumnName="Updated_at" />
+                <ScalarProperty Name="Last_login" ColumnName="Last_login" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserActivityLog">
+            <EntityTypeMapping TypeName="LoadMateModel.UserActivityLog">
+              <MappingFragment StoreEntitySet="UserActivityLog">
+                <ScalarProperty Name="Log_id" ColumnName="Log_id" />
+                <ScalarProperty Name="User_id" ColumnName="User_id" />
+                <ScalarProperty Name="Action_type" ColumnName="Action_type" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="IP_address" ColumnName="IP_address" />
+                <ScalarProperty Name="Created_at" ColumnName="Created_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserStatus">
+            <EntityTypeMapping TypeName="LoadMateModel.UserStatus">
+              <MappingFragment StoreEntitySet="UserStatus">
+                <ScalarProperty Name="UserStatus_id" ColumnName="UserStatus_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="true" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
