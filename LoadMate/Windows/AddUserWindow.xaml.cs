@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,91 +27,112 @@ namespace LoadMate.Windows
             InitializeComponent();
             LoadRoles();
         }
-
         private void LoadRoles()
         {
-            var roles = Conn.loadMateEntities.Role.ToList();
-            cmbRole.ItemsSource = roles;
-            cmbRole.DisplayMemberPath = "Name";
-            cmbRole.SelectedValuePath = "Role_id";
-            if (roles.Count > 0) cmbRole.SelectedIndex = 0;
+            try
+            {
+                var roles = Conn.loadMateEntities.Role.ToList();
+                cmbRole.SelectedValuePath = "Role_id";
+                cmbRole.ItemsSource = roles;
+                if (roles.Count > 0) cmbRole.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при загрузке ролей: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
-
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
             {
                 byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
+                foreach (byte b in bytes)
                 {
-                    builder.Append(bytes[i].ToString("x2"));
+                    builder.Append(b.ToString("x2"));
                 }
                 return builder.ToString();
             }
         }
-
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(txtFullName.Text) ||
-                    string.IsNullOrWhiteSpace(txtEmail.Text) ||
-                    string.IsNullOrWhiteSpace(txtUsername.Text) ||
-                    string.IsNullOrWhiteSpace(txtPassword.Password))
+                string fullName = txtFullName.Text.Trim();
+                string email = txtEmail.Text.Trim();
+                string phone = txtPhone.Text.Trim();
+                string username = txtUsername.Text.Trim();
+                string password = txtPassword.Password;
+                if (string.IsNullOrWhiteSpace(fullName) ||
+                    string.IsNullOrWhiteSpace(email) ||
+                    string.IsNullOrWhiteSpace(username) ||
+                    string.IsNullOrWhiteSpace(password))
                 {
-                    MessageBox.Show("Заполните все обязательные поля", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Пожалуйста, заполните все обязательные поля.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                var existingLogin = Conn.loadMateEntities.Login.FirstOrDefault(l => l.Username == txtUsername.Text.Trim());
-                if (existingLogin != null)
+                if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                 {
-                    MessageBox.Show("Пользователь с таким логином уже существует", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Введите корректный адрес электронной почты.", "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
-                var existingUser = Conn.loadMateEntities.User.FirstOrDefault(u => u.Email == txtEmail.Text.Trim());
-                if (existingUser != null)
+                if (!string.IsNullOrEmpty(phone) && !Regex.IsMatch(phone, @"^((\+7|8)+([0-9]){10})$"))
                 {
-                    MessageBox.Show("Пользователь с таким email уже существует", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Введите телефон в формате +7XXXXXXXXXX или 8XXXXXXXXXX.", "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
+                if (password.Length < 6 || !password.Any(char.IsDigit) || !password.Any(char.IsLetter))
+                {
+                    MessageBox.Show("Пароль должен быть не менее 6 символов и содержать как буквы, так и цифры.", "Безопасность", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (cmbRole.SelectedValue == null)
+                {
+                    MessageBox.Show("Выберите роль для нового пользователя.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (Conn.loadMateEntities.Login.Any(l => l.Username.ToLower() == username.ToLower()))
+                {
+                    MessageBox.Show("Пользователь с таким логином уже существует.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (Conn.loadMateEntities.User.Any(u => u.Email.ToLower() == email.ToLower()))
+                {
+                    MessageBox.Show("Пользователь с такой почтой уже зарегистрирован.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 var newUser = new User
                 {
-                    Full_name = txtFullName.Text.Trim(),
-                    Email = txtEmail.Text.Trim(),
-                    Phone = txtPhone.Text.Trim(),
+                    Full_name = fullName,
+                    Email = email,
+                    Phone = phone,
                     Role_id = (int)cmbRole.SelectedValue,
                     UserStatus_id = 1,
                     Created_at = DateTime.Now
                 };
-
-                Conn.loadMateEntities.User.Add(newUser);
-                Conn.loadMateEntities.SaveChanges();
-
                 var newLogin = new Login
                 {
-                    User_id = newUser.User_id,
-                    Username = txtUsername.Text.Trim(),
-                    Password_hash = HashPassword(txtPassword.Password.Trim()),
+                    User = newUser, 
+                    Username = username,
+                    Password_hash = HashPassword(password),
                     Is_active = true,
                     Failed_attempts = 0
                 };
-
+                Conn.loadMateEntities.User.Add(newUser);
                 Conn.loadMateEntities.Login.Add(newLogin);
                 Conn.loadMateEntities.SaveChanges();
+
+                MessageBox.Show("Пользователь успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Произошла ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

@@ -33,27 +33,27 @@ namespace LoadMate.Pages
 
         private void Orders_Click(object sender, RoutedEventArgs e)
         {
-            //DispatcherFrame.NavigationService.Navigate(new DispatcherOrdersPage(currentUser.User_id));
+            DispatcherFrame.NavigationService.Navigate(new DispatcherOrdersPage(currentUser.User_id));
         }
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
         {
-            //   DispatcherFrame.NavigationService.Navigate(new DispatcherCreateOrderPage(currentUser.User_id));
+               DispatcherFrame.NavigationService.Navigate(new DispatcherCreateOrderPage(currentUser.User_id));
         }
 
         private void Drivers_Click(object sender, RoutedEventArgs e)
         {
-            // DispatcherFrame.NavigationService.Navigate(new DispatcherDriversPage());
+             DispatcherFrame.NavigationService.Navigate(new DispatcherDriversPage());
         }
 
         private void Trucks_Click(object sender, RoutedEventArgs e)
         {
-            // DispatcherFrame.NavigationService.Navigate(new DispatcherTrucksPage());
+             DispatcherFrame.NavigationService.Navigate(new DispatcherTrucksPage());
         }
 
         private void Tariffs_Click(object sender, RoutedEventArgs e)
         {
-            // DispatcherFrame.NavigationService.Navigate(new DispatcherTariffsPage());
+             DispatcherFrame.NavigationService.Navigate(new DispatcherTariffsPage());
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)

@@ -5,77 +5,70 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LoadMate.Windows"
         mc:Ignorable="d"
-       Title="Назначение водителя" 
-        Height="500" Width="700"
+     Title="Назначение водителя" 
+        Height="550" Width="750"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource BackgroundLight}">
-
-    <Border Style="{StaticResource Card}" Padding="25" Margin="20">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0" Text="Назначение водителя на заказ" FontSize="22" FontWeight="SemiBold" 
-                       Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-
-            <Border Grid.Row="1" Style="{StaticResource Card}" Padding="15" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="Информация о заказе" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Номер заказа:" FontWeight="Bold" Margin="0,5"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtOrderNumber" Margin="10,5,0,5"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Клиент:" FontWeight="Bold" Margin="0,5"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtClient" Margin="10,5,0,5"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Груз:" FontWeight="Bold" Margin="0,5"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="txtCargo" Margin="10,5,0,5"/>
-
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Маршрут:" FontWeight="Bold" Margin="0,5"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="txtRoute" Margin="10,5,0,5"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <Grid Grid.Row="2">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Border Style="{StaticResource Card}" Padding="25" Margin="20">
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="Доступные водители" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
-
-                <DataGrid x:Name="DriversGrid" Grid.Row="1" Style="{StaticResource DataGridStyle}" 
-                          AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="DriversGrid_SelectionChanged">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ФИО" Binding="{Binding User.Full_name}" Width="*"/>
-                        <DataGridTextColumn Header="Телефон" Binding="{Binding User.Phone}" Width="120"/>
-                        <DataGridTextColumn Header="Номер лицензии" Binding="{Binding License_number}" Width="120"/>
-                        <DataGridTextColumn Header="Статус" Binding="{Binding DriverStatus.Name}" Width="100"/>
-                        <DataGridTextColumn Header="Опыт (лет)" Binding="{Binding Experience_years}" Width="80"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <TextBlock Grid.Row="0" Text="Назначение водителя на заказ" FontSize="22" FontWeight="SemiBold" 
+                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="15" Margin="0,0,0,20" Background="#F9F9F9">
+                    <StackPanel>
+                        <TextBlock Text="Детали заказа" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="{StaticResource TextPrimary}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Номер заказа:" FontWeight="Bold" Margin="0,5"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtOrderNumber" Margin="10,5,0,5"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Клиент:" FontWeight="Bold" Margin="0,5"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtClient" Margin="10,5,0,5"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Груз:" FontWeight="Bold" Margin="0,5"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="txtCargo" Margin="10,5,0,5"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Маршрут:" FontWeight="Bold" Margin="0,5"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="txtRoute" Margin="10,5,0,5"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="300"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Выберите свободного водителя" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <DataGrid x:Name="DriversGrid" Grid.Row="1" Style="{StaticResource DataGridStyle}" 
+                              AutoGenerateColumns="False" SelectionMode="Single" IsReadOnly="True"
+                              SelectionChanged="DriversGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ФИО" Binding="{Binding DriverName}" Width="*"/>
+                            <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="120"/>
+                            <DataGridTextColumn Header="Лицензия" Binding="{Binding License_number}" Width="110"/>
+                            <DataGridTextColumn Header="Опыт (лет)" Binding="{Binding Experience_years}" Width="90"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding DriverStatus}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <Button Content="Назначить" Style="{StaticResource ActionButton}" Width="130" Height="40" Click="Assign_Click"/>
+                    <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" 
+                            Width="130" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
+                </StackPanel>
             </Grid>
-
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                <Button Content="Назначить" Style="{StaticResource ActionButton}" Width="120" Height="40" Click="Assign_Click"/>
-                <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" Width="120" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
-            </StackPanel>
-        </Grid>
-    </Border>
+        </Border>
+    </ScrollViewer>
 </Window>

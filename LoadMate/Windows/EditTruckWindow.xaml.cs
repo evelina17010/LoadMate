@@ -21,7 +21,6 @@ namespace LoadMate.Windows
     public partial class EditTruckWindow : Window
     {
         private Truck currentTruck;
-
         public EditTruckWindow(Truck truck)
         {
             InitializeComponent();
@@ -30,38 +29,21 @@ namespace LoadMate.Windows
             LoadDrivers();
             LoadTruckData();
         }
-
         private void LoadStatuses()
         {
-            var statuses = Conn.loadMateEntities.TruckStatus.ToList();
-            cmbStatus.ItemsSource = statuses;
+            cmbStatus.ItemsSource = Conn.loadMateEntities.TruckStatus.ToList();
             cmbStatus.DisplayMemberPath = "Name";
             cmbStatus.SelectedValuePath = "TruckStatus_id";
         }
-
         private void LoadDrivers()
         {
-            var drivers = Conn.loadMateEntities.Driver.ToList();
-            var driversWithNames = drivers.Select(d => new
-            {
-                d.Driver_id,
-                DriverName = GetDriverName(d.User_id)
-            }).ToList();
-
-            var driverList = driversWithNames.Select(d => new { d.Driver_id, d.DriverName }).ToList();
+            var driverList = Conn.loadMateEntities.Driver.Select(d => new {d.Driver_id,
+            DriverName = d.User.Full_name}).ToList<object>();
             driverList.Insert(0, new { Driver_id = 0, DriverName = "Не назначен" });
-
             cmbDriver.ItemsSource = driverList;
             cmbDriver.DisplayMemberPath = "DriverName";
             cmbDriver.SelectedValuePath = "Driver_id";
         }
-
-        private string GetDriverName(int userId)
-        {
-            var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == userId);
-            return user != null ? user.Full_name : "Не указан";
-        }
-
         private void LoadTruckData()
         {
             txtModel.Text = currentTruck.Model;
@@ -72,75 +54,62 @@ namespace LoadMate.Windows
             txtYear.Text = currentTruck.Year_manufacture?.ToString() ?? "";
             txtFuelConsumption.Text = currentTruck.Fuel_consumption?.ToString() ?? "";
             cmbStatus.SelectedValue = currentTruck.TruckStatus_id;
-
-            if (currentTruck.Driver_id.HasValue)
-            {
-                cmbDriver.SelectedValue = currentTruck.Driver_id.Value;
-            }
-            else
-            {
-                cmbDriver.SelectedValue = 0;
-            }
+            cmbDriver.SelectedValue = currentTruck.Driver_id ?? 0;
         }
-
+        private bool TryParseDecimal(string input, out decimal result)
+        {
+            if (string.IsNullOrWhiteSpace(input)) { result = 0; return false; }
+            return decimal.TryParse(input.Replace(".", ","), out result);
+        }
+        private bool ValidateData()
+        {
+            if (string.IsNullOrWhiteSpace(txtModel.Text) || string.IsNullOrWhiteSpace(txtRegNumber.Text))
+            {
+                MessageBox.Show("Заполните модель и номер", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (!TryParseDecimal(txtCapacityKg.Text, out decimal kg) || kg <= 0 ||
+                !TryParseDecimal(txtCapacityM3.Text, out decimal m3) || m3 <= 0)
+            {
+                MessageBox.Show("Введите корректные числа для веса и объема", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (cmbStatus.SelectedValue == null)
+            {
+                MessageBox.Show("Выберите статус", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            return true;
+        }
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(txtModel.Text) ||
-                    string.IsNullOrWhiteSpace(txtRegNumber.Text) ||
-                    !decimal.TryParse(txtCapacityKg.Text, out decimal capacityKg) || capacityKg <= 0 ||
-                    !decimal.TryParse(txtCapacityM3.Text, out decimal capacityM3) || capacityM3 <= 0)
-                {
-                    MessageBox.Show("Заполните все обязательные поля корректно", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                int? year = null;
-                if (!string.IsNullOrWhiteSpace(txtYear.Text))
-                {
-                    if (!int.TryParse(txtYear.Text, out int yearValue) || yearValue < 1900 || yearValue > DateTime.Now.Year + 1)
-                    {
-                        MessageBox.Show("Введите корректный год выпуска", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                    year = yearValue;
-                }
-
-                decimal? fuelConsumption = null;
-                if (!string.IsNullOrWhiteSpace(txtFuelConsumption.Text))
-                {
-                    if (!decimal.TryParse(txtFuelConsumption.Text, out decimal fuelValue) || fuelValue <= 0)
-                    {
-                        MessageBox.Show("Введите корректный расход топлива", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                    fuelConsumption = fuelValue;
-                }
-
+                if (!ValidateData()) return;
                 currentTruck.Model = txtModel.Text.Trim();
-                currentTruck.Registration_number = txtRegNumber.Text.Trim();
-                currentTruck.Capacity_kg = capacityKg;
-                currentTruck.Capacity_m3 = capacityM3;
+                currentTruck.Registration_number = txtRegNumber.Text.Trim().ToUpper();
+                TryParseDecimal(txtCapacityKg.Text, out decimal kg);
+                currentTruck.Capacity_kg = kg;
+                TryParseDecimal(txtCapacityM3.Text, out decimal m3);
+                currentTruck.Capacity_m3 = m3;
                 currentTruck.Dimensions = string.IsNullOrWhiteSpace(txtDimensions.Text) ? null : txtDimensions.Text.Trim();
-                currentTruck.Year_manufacture = year;
-                currentTruck.Fuel_consumption = fuelConsumption;
+                if (int.TryParse(txtYear.Text, out int year)) currentTruck.Year_manufacture = year;
+                else currentTruck.Year_manufacture = null;
+                if (TryParseDecimal(txtFuelConsumption.Text, out decimal fuel)) currentTruck.Fuel_consumption = fuel;
+                else currentTruck.Fuel_consumption = null;
                 currentTruck.TruckStatus_id = (int)cmbStatus.SelectedValue;
-
-                int selectedDriverId = (int)cmbDriver.SelectedValue;
-                currentTruck.Driver_id = selectedDriverId == 0 ? null : (int?)selectedDriverId;
-
+                int selectedId = Convert.ToInt32(cmbDriver.SelectedValue);
+                currentTruck.Driver_id = (selectedId == 0) ? null : (int?)selectedId;
                 Conn.loadMateEntities.SaveChanges();
-
+               MessageBox.Show("Сохранено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

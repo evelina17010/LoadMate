@@ -33,22 +33,27 @@ namespace LoadMate.Pages
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
         {
-         //   ClientFrame.NavigationService.Navigate(new ClientCreateOrderPage(currentUser.User_id));
+            ClientFrame.NavigationService.Navigate(new ClientCreateOrderPage(currentUser.User_id));
         }
 
         private void MyOrders_Click(object sender, RoutedEventArgs e)
         {
-           // ClientFrame.NavigationService.Navigate(new ClientOrdersPage(currentUser.User_id));
+            ClientFrame.NavigationService.Navigate(new ClientOrdersPage(currentUser.User_id));
         }
 
         private void Payments_Click(object sender, RoutedEventArgs e)
         {
-           // ClientFrame.NavigationService.Navigate(new ClientPaymentsPage(currentUser.User_id));
+           ClientFrame.NavigationService.Navigate(new ClientPaymentsPage(currentUser.User_id));
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Navigate(new MainPage());
+        }
+
+        private void Cargo_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

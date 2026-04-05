@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
       Title="Управление заказами" 
-      Height="768" Width="1366"
+            d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
     <Grid>

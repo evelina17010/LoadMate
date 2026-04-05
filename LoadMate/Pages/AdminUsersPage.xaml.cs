@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
+using System.Data.Entity;
 
 namespace LoadMate.Pages
 {
@@ -22,46 +23,58 @@ namespace LoadMate.Pages
     /// </summary>
     public partial class AdminUsersPage : Page
     {
+        private List<User> _allUsers;
         private User selectedUser;
 
         public AdminUsersPage()
         {
             InitializeComponent();
+            LoadFilterData();
             LoadUsers();
         }
-
         private void LoadUsers()
         {
-            var users = Conn.loadMateEntities.User.ToList();
+            _allUsers = Conn.loadMateEntities.User.Include(u => u.Role).Include(u => u.UserStatus).ToList();
+            ApplyFilters();
+        }
+        private void LoadFilterData()
+        {
+            var roles = Conn.loadMateEntities.Role.ToList();
+            var allRolesOption = new Role { Role_id = 0, Name = "Все роли" };
+            roles.Insert(0, allRolesOption);
+            cmbRoleFilter.ItemsSource = roles;
+            cmbRoleFilter.SelectedValuePath = "Role_id";
+            cmbRoleFilter.SelectedIndex = 0;
+        }
+        private void ApplyFilters()
+        {
+            if (_allUsers == null) return;
 
-            foreach (var user in users)
+            var filtered = _allUsers.AsEnumerable();
+            string search = txtSearch.Text.Trim().ToLower();
+            if (!string.IsNullOrEmpty(search))
             {
-                if (user.Role_id > 0)
+                filtered = filtered.Where(u =>
+                    (u.Full_name != null && u.Full_name.ToLower().Contains(search)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(search)));
+            }
+            if (cmbRoleFilter.SelectedValue != null)
+            {
+                int selectedRoleId = (int)cmbRoleFilter.SelectedValue;
+                if (selectedRoleId != 0) 
                 {
-                    user.Role = Conn.loadMateEntities.Role.FirstOrDefault(r => r.Role_id == user.Role_id);
-                }
-                if (user.UserStatus_id > 0)
-                {
-                    user.UserStatus = Conn.loadMateEntities.UserStatus.FirstOrDefault(us => us.UserStatus_id == user.UserStatus_id);
+                    filtered = filtered.Where(u => u.Role_id == selectedRoleId);
                 }
             }
 
-            UsersGrid.ItemsSource = users;
+            UsersGrid.ItemsSource = filtered.ToList();
         }
-
-        private void UsersGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            selectedUser = UsersGrid.SelectedItem as User;
-        }
-
         private void AddUser_Click(object sender, RoutedEventArgs e)
         {
-            var addWindow = new AddUserWindow();
-            addWindow.Owner = Application.Current.MainWindow;
-            if (addWindow.ShowDialog() == true)
+            var addWin = new AddUserWindow();
+            if (addWin.ShowDialog() == true)
             {
                 LoadUsers();
-                MessageBox.Show("Пользователь добавлен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -69,86 +82,44 @@ namespace LoadMate.Pages
         {
             if (selectedUser == null)
             {
-                MessageBox.Show("Выберите пользователя", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Выберите пользователя для редактирования");
                 return;
             }
 
-            var editWindow = new EditUserWindow(selectedUser);
-            editWindow.Owner = Application.Current.MainWindow;
-            if (editWindow.ShowDialog() == true)
+            var editWin = new EditUserWindow(selectedUser);
+            if (editWin.ShowDialog() == true)
             {
+                Conn.loadMateEntities.SaveChanges();
                 LoadUsers();
-                MessageBox.Show("Данные обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private void BlockUser_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedUser == null)
+            if (selectedUser == null) return;
+            selectedUser.UserStatus_id = (selectedUser.UserStatus_id == 1) ? 2 : 1;
+            try
             {
-                MessageBox.Show("Выберите пользователя", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                Conn.loadMateEntities.SaveChanges();
+                LoadUsers();
+                MessageBox.Show("Статус пользователя изменен");
             }
-
-            if (selectedUser.UserStatus_id == 2)
+            catch (Exception ex)
             {
-                selectedUser.UserStatus_id = 1;
-                MessageBox.Show("Пользователь разблокирован", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Ошибка при сохранении: " + ex.Message);
             }
-            else
-            {
-                selectedUser.UserStatus_id = 2;
-                MessageBox.Show("Пользователь заблокирован", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-
-            Conn.loadMateEntities.SaveChanges();
-            LoadUsers();
         }
-
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
+            txtSearch.Text = "";
+            cmbRoleFilter.SelectedIndex = 0;
             LoadUsers();
         }
-
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
+        private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
+        private void RoleFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();
+        private void UsersGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ApplyFilters();
-        }
-
-        private void RoleFilter_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            ApplyFilters();
-        }
-
-        private void ApplyFilters()
-        {
-            string search = txtSearch.Text.Trim();
-            var users = Conn.loadMateEntities.User.ToList();
-
-            foreach (var user in users)
-            {
-                if (user.Role_id > 0)
-                {
-                    user.Role = Conn.loadMateEntities.Role.FirstOrDefault(r => r.Role_id == user.Role_id);
-                }
-                if (user.UserStatus_id > 0)
-                {
-                    user.UserStatus = Conn.loadMateEntities.UserStatus.FirstOrDefault(us => us.UserStatus_id == user.UserStatus_id);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                users = users.Where(u => u.Full_name.Contains(search) || u.Email.Contains(search)).ToList();
-            }
-
-            if (cmbRoleFilter.SelectedItem is ComboBoxItem selected && selected.Content.ToString() != "Все роли")
-            {
-                string roleName = selected.Content.ToString();
-                users = users.Where(u => u.Role != null && u.Role.Name == roleName).ToList();
-            }
-
-            UsersGrid.ItemsSource = users;
+            selectedUser = UsersGrid.SelectedItem as User;
         }
     }
 }

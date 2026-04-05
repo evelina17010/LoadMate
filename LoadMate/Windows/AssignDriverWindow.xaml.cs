@@ -20,105 +20,100 @@ namespace LoadMate.Windows
     /// </summary>
     public partial class AssignDriverWindow : Window
     {
-        private Order currentOrder;
-        private Driver selectedDriver;
-
+        private Order _currentOrder;
+        private Driver _selectedDriver;
         public AssignDriverWindow(Order order)
         {
             InitializeComponent();
-            currentOrder = order;
+            _currentOrder = order;
             LoadOrderInfo();
             LoadDrivers();
         }
-
         private void LoadOrderInfo()
         {
-            txtOrderNumber.Text = currentOrder.Order_number;
-
-            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == currentOrder.Cargo_id);
+            txtOrderNumber.Text = _currentOrder.Order_number;
+            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == _currentOrder.Cargo_id);
             if (cargo != null)
             {
                 var client = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == cargo.Client_id);
-                txtClient.Text = client != null ? client.Full_name : "Не указан";
+                txtClient.Text = client?.Full_name ?? "Не указан";
                 txtCargo.Text = cargo.Description;
             }
-
-            var route = Conn.loadMateEntities.Route.FirstOrDefault(r => r.Route_id == currentOrder.Route_id);
+            var route = Conn.loadMateEntities.Route.FirstOrDefault(r => r.Route_id == _currentOrder.Route_id);
             if (route != null)
             {
-                var startAddress = Conn.loadMateEntities.Address.FirstOrDefault(a => a.Address_id == route.Start_address_id);
-                var endAddress = Conn.loadMateEntities.Address.FirstOrDefault(a => a.Address_id == route.End_address_id);
-                txtRoute.Text = $"Маршрут #{route.Route_id}";
+                string startCity = GetCityName(route.Start_address_id);
+                string endCity = GetCityName(route.End_address_id);
+                txtRoute.Text = $"{startCity} -> {endCity}";
             }
         }
-
-        private void LoadDrivers()
+        private string GetCityName(int addressId)
         {
-            var drivers = Conn.loadMateEntities.Driver
-                .Where(d => d.DriverStatus_id == 1)
-                .ToList();
-
-            var driversWithDetails = drivers.Select(d => new
+            var address = Conn.loadMateEntities.Address.FirstOrDefault(a => a.Address_id == addressId);
+            if (address != null)
             {
-                d.Driver_id,
-                d.User_id,
-                d.License_number,
-                d.Experience_years,
-                DriverName = GetDriverName(d.User_id),
-                DriverStatus = GetDriverStatusName(d.DriverStatus_id)
-            }).ToList();
-
-            DriversGrid.ItemsSource = driversWithDetails;
-        }
-
-        private string GetDriverName(int userId)
-        {
-            var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == userId);
-            return user?.Full_name ?? "Не указан";
-        }
-
-        private string GetDriverStatusName(int statusId)
-        {
-            var status = Conn.loadMateEntities.DriverStatus.FirstOrDefault(ds => ds.DriverStatus_id == statusId);
-            return status?.Name ?? "Не указан";
-        }
-
-        private void DriversGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selected = DriversGrid.SelectedItem;
-            if (selected != null)
-            {
-                var property = selected.GetType().GetProperty("Driver_id");
-                if (property != null)
+                var street = Conn.loadMateEntities.Street.FirstOrDefault(s => s.Street_id == address.Street_id);
+                if (street != null)
                 {
-                    int driverId = (int)property.GetValue(selected);
-                    selectedDriver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == driverId);
+                    var city = Conn.loadMateEntities.City.FirstOrDefault(c => c.City_id == street.City_id);
+                    return city?.Name ?? "Неизвестный город";
                 }
             }
+            return "Адрес не найден";
         }
-
+        private void LoadDrivers()
+        {
+            var availableDrivers = Conn.loadMateEntities.Driver.Where(d => d.DriverStatus_id == 1).ToList();
+            var driversWithDetails = availableDrivers.Select(d => {
+                var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == d.User_id);
+                var status = Conn.loadMateEntities.DriverStatus.FirstOrDefault(ds => ds.DriverStatus_id == d.DriverStatus_id);
+                return new
+                {
+                    d.Driver_id,
+                    DriverName = user?.Full_name ?? "Неизвестно",
+                    Phone = user?.Phone ?? "-",
+                    d.License_number,
+                    d.Experience_years,
+                    DriverStatus = status?.Name ?? "Свободен"
+                };
+            }).ToList();
+            DriversGrid.ItemsSource = driversWithDetails;
+        }
+        private void DriversGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DriversGrid.SelectedItem == null) return;
+            dynamic selected = DriversGrid.SelectedItem;
+            int driverId = selected.Driver_id;
+            _selectedDriver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == driverId);
+        }
         private void Assign_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedDriver == null)
+            try
             {
-                MessageBox.Show("Выберите водителя", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                if (_selectedDriver == null)
+                {
+                    MessageBox.Show("Пожалуйста, выберите водителя из списка.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Driver_id == _selectedDriver.Driver_id);
+                if (truck == null)
+                {
+                    MessageBox.Show("За выбранным водителем не закреплен транспорт в системе.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                _currentOrder.Truck_id = truck.Truck_id;
+                _currentOrder.OrderStatus_id = 3; 
+                _selectedDriver.DriverStatus_id = 2; 
+                Conn.loadMateEntities.SaveChanges();
+                MessageBox.Show("Водитель успешно назначен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                DialogResult = true;
+                Close();
             }
-
-            var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Driver_id == selectedDriver.Driver_id);
-
-            if (truck != null)
+            catch (Exception ex)
             {
-                currentOrder.Truck_id = truck.Truck_id;
+                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            currentOrder.OrderStatus_id = 3;
-            selectedDriver.DriverStatus_id = 2;
-
-            DialogResult = true;
-            Close();
         }
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

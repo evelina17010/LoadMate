@@ -6,42 +6,45 @@
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
   Title="Администратор" 
-      Height="768" Width="1366"
+        d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
-        <Border Grid.Column="0" Background="{StaticResource SidebarBg}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0">
-            <StackPanel Margin="0,30,0,0">
-                <TextBlock Text="LoadMate" FontSize="28" FontWeight="Bold" 
-                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,30"/>
-
-                <Border Background="{StaticResource PrimaryLightColor}" CornerRadius="8" Margin="20,0,20,20" Padding="15">
+        <Border Grid.Column="0" Background="{StaticResource BackgroundWhite}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="LoadMate" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}" Margin="0,40,0,30" HorizontalAlignment="Center"/>
+                <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="15">
                     <StackPanel>
-                        <TextBlock Text="{Binding FullName}" FontSize="16" FontWeight="SemiBold" 
-                                   Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Администратор" FontSize="12" 
-                                   Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                        <Grid HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Ellipse Width="45" Height="45" Fill="{StaticResource PrimaryColor}"/>
+                            <TextBlock Text="A" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18"/>
+                        </Grid>
+                        <TextBlock Text="{Binding FullName}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Text="Администратор" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
-
-                <Button x:Name="btnUsers" Content="👥 Пользователи" Style="{StaticResource SidebarButton}" Click="Users_Click" Margin="10,5"/>
-                <Button x:Name="btnOrders" Content="📦 Заказы" Style="{StaticResource SidebarButton}" Click="Orders_Click" Margin="10,5"/>
-                <Button x:Name="btnCargo" Content="📋 Грузы" Style="{StaticResource SidebarButton}" Click="Cargo_Click" Margin="10,5"/>
-                <Button x:Name="btnDrivers" Content="🚚 Водители" Style="{StaticResource SidebarButton}" Click="Drivers_Click" Margin="10,5"/>
-                <Button x:Name="btnTrucks" Content="🚛 Грузовики" Style="{StaticResource SidebarButton}" Click="Trucks_Click" Margin="10,5"/>
-                <Button x:Name="btnTariffs" Content="💰 Тарифы" Style="{StaticResource SidebarButton}" Click="Tariffs_Click" Margin="10,5"/>
-                <Button x:Name="btnPayments" Content="💳 Платежи" Style="{StaticResource SidebarButton}" Click="Payments_Click" Margin="10,5"/>
-
-                <Button Content="🚪 Выход" Style="{StaticResource SidebarButton}" Click="Logout_Click" Margin="10,5" Foreground="{StaticResource ErrorColor}"/>
-            </StackPanel>
+                <StackPanel Grid.Row="2">
+                    <Button x:Name="btnUsers" Content=" Пользователи" Style="{StaticResource SidebarButton}" Click="Users_Click" Margin="10,5"/>
+                    <Button x:Name="btnOrders" Content=" Заказы" Style="{StaticResource SidebarButton}" Click="Orders_Click" Margin="10,5"/>
+                    <Button x:Name="btnCargo" Content=" Грузы" Style="{StaticResource SidebarButton}" Click="Cargo_Click" Margin="10,5"/>
+                    <Button x:Name="btnDrivers" Content=" Водители" Style="{StaticResource SidebarButton}" Click="Drivers_Click" Margin="10,5"/>
+                    <Button x:Name="btnTrucks" Content=" Грузовики" Style="{StaticResource SidebarButton}" Click="Trucks_Click" Margin="10,5"/>
+                    <Button x:Name="btnTariffs" Content=" Тарифы" Style="{StaticResource SidebarButton}" Click="Tariffs_Click" Margin="10,5"/>
+                    <Button x:Name="btnPayments" Content=" Платежи" Style="{StaticResource SidebarButton}" Click="Payments_Click" Margin="10,5"/>
+                    <Button Content=" Выход" Style="{StaticResource SidebarButton}" Click="Logout_Click" Margin="10,5" Foreground="{StaticResource ErrorColor}"/>
+                </StackPanel>
+            </Grid>
         </Border>
-
-        <Grid Grid.Column="1" Margin="30,30,30,30">
+        <Grid Grid.Column="1" Margin="30">
             <Frame x:Name="AdminFrame" NavigationUIVisibility="Hidden"/>
         </Grid>
     </Grid>

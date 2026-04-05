@@ -4,8 +4,8 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d"
-      Title="Вход" 
-      Height="768" Width="1366"
+       Title="Вход" 
+     d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
     <Grid>
@@ -23,10 +23,22 @@
                                Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,0,0,30"/>
 
                     <TextBlock Text="Логин" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="txtUsername" Style="{StaticResource InputField}" Height="45"/>
+                    <TextBox x:Name="txtUsername" 
+         Style="{StaticResource InputField}" 
+         Height="45" 
+         Padding="12,2" 
+         VerticalContentAlignment="Center"
+         Foreground="{StaticResource TextPrimary}" 
+         Background="{StaticResource BackgroundWhite}"/>
 
                     <TextBlock Text="Пароль" Style="{StaticResource FieldLabel}"/>
-                    <PasswordBox x:Name="txtPassword" Style="{StaticResource PasswordField}" Height="45"/>
+                    <PasswordBox x:Name="txtPassword" 
+             Style="{StaticResource PasswordField}" 
+             Height="45" 
+             Padding="12,2" 
+             VerticalContentAlignment="Center"
+             Foreground="{StaticResource TextPrimary}" 
+             Background="{StaticResource BackgroundWhite}"/>
 
                     <Button Content="Войти" Style="{StaticResource ActionButton}" Height="50" FontSize="16" Click="Login_Click" Margin="0,20,0,10"/>
 

@@ -21,8 +21,7 @@ namespace LoadMate.Windows
     public partial class EditCargoWindow : Window
     {
         private Cargo currentCargo;
-
-        public EditCargoWindow(Cargo cargo)
+       public EditCargoWindow(Cargo cargo)
         {
             InitializeComponent();
             currentCargo = cargo;
@@ -30,7 +29,6 @@ namespace LoadMate.Windows
             LoadCargoTypes();
             LoadCargoData();
         }
-
         private void LoadClients()
         {
             var clients = Conn.loadMateEntities.User.Where(u => u.Role_id == 2).ToList();
@@ -38,7 +36,6 @@ namespace LoadMate.Windows
             cmbClient.DisplayMemberPath = "Full_name";
             cmbClient.SelectedValuePath = "User_id";
         }
-
         private void LoadCargoTypes()
         {
             var types = Conn.loadMateEntities.CargoType.ToList();
@@ -46,7 +43,6 @@ namespace LoadMate.Windows
             cmbCargoType.DisplayMemberPath = "Name";
             cmbCargoType.SelectedValuePath = "CargoType_id";
         }
-
         private void LoadCargoData()
         {
             cmbClient.SelectedValue = currentCargo.Client_id;
@@ -57,38 +53,60 @@ namespace LoadMate.Windows
             chkFragile.IsChecked = currentCargo.Is_fragile;
             chkDangerous.IsChecked = currentCargo.Is_dangerous;
         }
-
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(txtDescription.Text) ||
-                    !decimal.TryParse(txtWeight.Text, out decimal weight) || weight <= 0 ||
-                    !decimal.TryParse(txtVolume.Text, out decimal volume) || volume <= 0)
-                {
-                    MessageBox.Show("Заполните все поля корректно", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                if (!ValidateData()) return;
 
                 currentCargo.Client_id = (int)cmbClient.SelectedValue;
                 currentCargo.CargoType_id = (int)cmbCargoType.SelectedValue;
                 currentCargo.Description = txtDescription.Text.Trim();
-                currentCargo.Weight_kg = weight;
-                currentCargo.Volume_m3 = volume;
+                currentCargo.Weight_kg = decimal.Parse(txtWeight.Text.Replace(".", ","));
+                currentCargo.Volume_m3 = decimal.Parse(txtVolume.Text.Replace(".", ","));
                 currentCargo.Is_fragile = chkFragile.IsChecked == true;
                 currentCargo.Is_dangerous = chkDangerous.IsChecked == true;
 
                 Conn.loadMateEntities.SaveChanges();
 
+                MessageBox.Show("Данные груза успешно обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+       private bool ValidateData()
+        {
+            if (cmbClient.SelectedValue == null)
+            {
+                MessageBox.Show("Выберите клиента из списка", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (cmbCargoType.SelectedValue == null)
+            {
+                MessageBox.Show("Выберите тип груза", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtDescription.Text))
+            {
+                MessageBox.Show("Описание груза не может быть пустым", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (!decimal.TryParse(txtWeight.Text.Replace(".", ","), out decimal weight) || weight <= 0)
+            {
+                MessageBox.Show("Введите корректный положительный вес", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (!decimal.TryParse(txtVolume.Text.Replace(".", ","), out decimal volume) || volume <= 0)
+            {
+                MessageBox.Show("Введите корректный положительный объем", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            return true;
+        }
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

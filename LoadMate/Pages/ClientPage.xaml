@@ -5,8 +5,8 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-   Title="Клиент" 
-      Height="768" Width="1366"
+   Title="Личный кабинет клиента" 
+           d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
     <Grid>
@@ -15,30 +15,77 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource SidebarBg}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0">
-            <StackPanel Margin="0,30,0,0">
-                <TextBlock Text="LoadMate" FontSize="28" FontWeight="Bold" 
-                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+        <Border Grid.Column="0" Background="{StaticResource BackgroundWhite}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <Border Background="{StaticResource PrimaryLightColor}" CornerRadius="8" Margin="20,0,20,20" Padding="15">
+                <TextBlock Grid.Row="0" Text="LoadMate" FontSize="26" FontWeight="Bold" 
+                           Foreground="{StaticResource PrimaryColor}" Margin="0,40,0,30" 
+                           HorizontalAlignment="Center" FontFamily="Segoe UI"/>
+
+                <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="15">
                     <StackPanel>
-                        <TextBlock Text="{Binding FullName}" FontSize="16" FontWeight="SemiBold" 
-                                   Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Клиент" FontSize="12" 
-                                   Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                        <Grid HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Ellipse Width="50" Height="50" Fill="{StaticResource PrimaryGradient}"/>
+                            <TextBlock Text="К" Foreground="White" VerticalAlignment="Center" 
+                                       HorizontalAlignment="Center" FontWeight="Bold" FontSize="20"/>
+                        </Grid>
+                        <TextBlock Text="{Binding FullName}" FontSize="15" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" 
+                                   TextAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Клиент" FontSize="11" 
+                                   Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
 
-                <Button x:Name="btnCreateOrder" Content="📝 Создать заказ" Style="{StaticResource SidebarButton}" Click="CreateOrder_Click" Margin="10,5"/>
-                <Button x:Name="btnMyOrders" Content="📋 Мои заказы" Style="{StaticResource SidebarButton}" Click="MyOrders_Click" Margin="10,5"/>
-                <Button x:Name="btnPayments" Content="💳 Платежи" Style="{StaticResource SidebarButton}" Click="Payments_Click" Margin="10,5"/>
+                <StackPanel Grid.Row="2">
+                    <Button x:Name="btnCreateOrder" Content="📝 Создать заказ" 
+                            Style="{StaticResource SidebarButton}" Click="CreateOrder_Click"/>
 
-                <Button Content="🚪 Выход" Style="{StaticResource SidebarButton}" Click="Logout_Click" Margin="10,5" Foreground="{StaticResource ErrorColor}"/>
-            </StackPanel>
+                    <Button x:Name="btnMyOrders" Content="📋 Мои заказы" 
+                            Style="{StaticResource SidebarButton}" Click="MyOrders_Click"/>
+
+                    <Button x:Name="btnMyCargo" Content="📦 Мои грузы" 
+                            Style="{StaticResource SidebarButton}" Click="Cargo_Click"/>
+
+                    <Button x:Name="btnPayments" Content="💳 История платежей" 
+                            Style="{StaticResource SidebarButton}" Click="Payments_Click"/>
+
+                    <Separator Margin="20,15" Background="{StaticResource BorderColor}" Height="1"/>
+                </StackPanel>
+
+                <Button Grid.Row="3" Content=" Выйти из системы" 
+                        Style="{StaticResource SidebarButton}" Click="Logout_Click" 
+                        Foreground="{StaticResource ErrorColor}" Margin="10,0,10,20"/>
+            </Grid>
         </Border>
 
-        <Grid Grid.Column="1" Margin="30,30,30,30">
-            <Frame x:Name="ClientFrame" NavigationUIVisibility="Hidden"/>
+        <Grid Grid.Column="1" Margin="35">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,25">
+                <TextBlock Text="Добро пожаловать в LoadMate!" FontSize="28" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+            </StackPanel>
+
+            <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                <Grid>
+                    <Frame x:Name="ClientFrame" NavigationUIVisibility="Hidden"/>
+
+                    <StackPanel x:Name="WelcomeContent" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                Visibility="{Binding ElementName=ClientFrame, Path=Content, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                        <TextBlock Text="📦" FontSize="60" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                        <TextBlock Text="Выберите действие в меню слева" FontSize="18" FontWeight="Medium" Foreground="{StaticResource TextSecondary}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Page>

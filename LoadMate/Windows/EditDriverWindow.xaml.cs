@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +24,6 @@ namespace LoadMate.Windows
     {
         private Driver currentDriver;
         private User currentUser;
-
         public EditDriverWindow(Driver driver)
         {
             InitializeComponent();
@@ -32,7 +32,6 @@ namespace LoadMate.Windows
             LoadStatuses();
             LoadDriverData();
         }
-
         private void LoadStatuses()
         {
             var statuses = Conn.loadMateEntities.DriverStatus.ToList();
@@ -40,7 +39,6 @@ namespace LoadMate.Windows
             cmbStatus.DisplayMemberPath = "Name";
             cmbStatus.SelectedValuePath = "DriverStatus_id";
         }
-
         private void LoadDriverData()
         {
             if (currentUser != null)
@@ -55,12 +53,10 @@ namespace LoadMate.Windows
                     txtUsername.Text = login.Username;
                 }
             }
-
             txtLicenseNumber.Text = currentDriver.License_number;
             txtExperience.Text = currentDriver.Experience_years?.ToString() ?? "";
             cmbStatus.SelectedValue = currentDriver.DriverStatus_id;
         }
-
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -74,25 +70,48 @@ namespace LoadMate.Windows
                 return builder.ToString();
             }
         }
-
+        private bool IsValidEmail(string email)
+        {
+            string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            return Regex.IsMatch(email, pattern);
+        }
+        private bool ValidateData()
+        {
+            if (string.IsNullOrWhiteSpace(txtFullName.Text))
+            {
+                MessageBox.Show("Введите ФИО водителя", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
+            {
+                MessageBox.Show("Введите корректный Email", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtLicenseNumber.Text))
+            {
+                MessageBox.Show("Введите номер лицензии", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (!string.IsNullOrWhiteSpace(txtExperience.Text))
+            {
+                if (!int.TryParse(txtExperience.Text, out int exp) || exp < 0 || exp > 70)
+                {
+                    MessageBox.Show("Введите корректный стаж (от 0 до 70 лет)", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return false;
+                }
+            }
+            if (cmbStatus.SelectedValue == null)
+            {
+                MessageBox.Show("Выберите статус водителя", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            return true;
+        }
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(txtFullName.Text) ||
-                    string.IsNullOrWhiteSpace(txtEmail.Text) ||
-                    string.IsNullOrWhiteSpace(txtLicenseNumber.Text))
-                {
-                    MessageBox.Show("Заполните все обязательные поля", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (!int.TryParse(txtExperience.Text, out int experience) && !string.IsNullOrWhiteSpace(txtExperience.Text))
-                {
-                    MessageBox.Show("Введите корректный стаж", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
+                if (!ValidateData()) return;
                 if (currentUser != null)
                 {
                     currentUser.Full_name = txtFullName.Text.Trim();
@@ -108,22 +127,22 @@ namespace LoadMate.Windows
                         }
                     }
                 }
-
                 currentDriver.License_number = txtLicenseNumber.Text.Trim();
-                currentDriver.Experience_years = experience;
+                if (int.TryParse(txtExperience.Text, out int experience))
+                    currentDriver.Experience_years = experience;
+                else
+                    currentDriver.Experience_years = null;
                 currentDriver.DriverStatus_id = (int)cmbStatus.SelectedValue;
-
                 Conn.loadMateEntities.SaveChanges();
-
+                MessageBox.Show("Данные водителя успешно сохранены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
