@@ -119,27 +119,58 @@ namespace LoadMate.Pages
         {
             if (selectedDriver == null)
             {
-                MessageBox.Show("Выберите водителя", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Выберите водителя из списка", "Внимание", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var result = MessageBox.Show($"Удалить водителя {GetDriverName(selectedDriver.User_id)}?",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show($"Вы уверены, что хотите удалить водителя {GetDriverName(selectedDriver.User_id)}?\nЭто удалит его учетную запись и историю активности.",
+                "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
-                var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == selectedDriver.User_id);
-                if (user != null)
+                try
                 {
-                    Conn.loadMateEntities.User.Remove(user);
+                    var db = Conn.loadMateEntities;
+                    int currentUserId = selectedDriver.User_id;
+                    int currentDriverId = selectedDriver.Driver_id;
+                    var tiedTrucks = db.Truck.Where(t => t.Driver_id == currentDriverId).ToList();
+                    foreach (var truck in tiedTrucks)
+                    {
+                        truck.Driver_id = null;
+                    }
+                    var activityLogs = db.UserActivityLog.Where(al => al.User_id == currentUserId).ToList();
+                    foreach (var log in activityLogs)
+                    {
+                        db.UserActivityLog.Remove(log);
+                    }
+                    var loginEntry = db.Login.FirstOrDefault(l => l.User_id == currentUserId);
+                    if (loginEntry != null)
+                    {
+                        db.Login.Remove(loginEntry);
+                    }
+                    var driverToDelete = db.Driver.FirstOrDefault(d => d.Driver_id == currentDriverId);
+                    if (driverToDelete != null)
+                    {
+                        db.Driver.Remove(driverToDelete);
+                    }
+                    db.SaveChanges();
+                    var userToDelete = db.User.FirstOrDefault(u => u.User_id == currentUserId);
+                    if (userToDelete != null)
+                    {
+                        db.User.Remove(userToDelete);
+                    }
+                    db.SaveChanges();
+                    selectedDriver = null;
+                    LoadDrivers();
+                    MessageBox.Show("Водитель и все связанные данные успешно удалены.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                Conn.loadMateEntities.Driver.Remove(selectedDriver);
-                Conn.loadMateEntities.SaveChanges();
-                LoadDrivers();
-                MessageBox.Show("Водитель удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                catch (Exception ex)
+                {
+                    string errorMessage = ex.InnerException?.InnerException?.Message ?? ex.Message;
+                    MessageBox.Show($"Ошибка при удалении: {errorMessage}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
-
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             LoadDrivers();

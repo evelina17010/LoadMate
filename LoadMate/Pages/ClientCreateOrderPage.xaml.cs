@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
+using System.Transactions;
 
 namespace LoadMate.Pages
 {
@@ -27,177 +30,157 @@ namespace LoadMate.Pages
         {
             InitializeComponent();
             this.clientId = clientId;
-            LoadComboBoxes();
+            LoadData();
+            dpScheduledPickup.DisplayDateStart = DateTime.Today;
         }
-
-        private void LoadComboBoxes()
+        private void LoadData()
         {
-            cmbCargoType.ItemsSource = Conn.loadMateEntities.CargoType.ToList();
+            var db = Conn.loadMateEntities;
+
+            cmbCargoType.ItemsSource = db.CargoType.ToList();
             cmbCargoType.DisplayMemberPath = "Name";
             cmbCargoType.SelectedValuePath = "CargoType_id";
-            if (cmbCargoType.Items.Count > 0) cmbCargoType.SelectedIndex = 0;
-
-            cmbTariff.ItemsSource = Conn.loadMateEntities.Tariff.Where(t => t.Is_active == true).ToList();
+            cmbTariff.ItemsSource = db.Tariff.Where(t => t.Is_active == true).ToList();
             cmbTariff.DisplayMemberPath = "Name";
             cmbTariff.SelectedValuePath = "Tariff_id";
-            if (cmbTariff.Items.Count > 0) cmbTariff.SelectedIndex = 0;
-
+            var cities = db.City.ToList();
+            cmbStartCity.ItemsSource = cities;
+            cmbStartCity.DisplayMemberPath = "Name";
+            cmbStartCity.SelectedValuePath = "City_id";
+            cmbEndCity.ItemsSource = cities;
+            cmbEndCity.DisplayMemberPath = "Name";
+            cmbEndCity.SelectedValuePath = "City_id";
             dpScheduledPickup.SelectedDate = DateTime.Now.AddDays(1);
         }
-
-        private void Tariff_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void City_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CalculateCost_Click(null, null);
+            var cmb = sender as ComboBox;
+            if (cmb?.SelectedValue == null) return;
+            int cityId = (int)cmb.SelectedValue;
+            var streets = Conn.loadMateEntities.Street.Where(s => s.City_id == cityId).ToList();
+
+            if (cmb == cmbStartCity)
+            {
+                cmbStartStreet.ItemsSource = streets;
+                cmbStartStreet.DisplayMemberPath = "Name";
+                cmbStartStreet.SelectedValuePath = "Street_id";
+            }
+            else
+            {
+                cmbEndStreet.ItemsSource = streets;
+                cmbEndStreet.DisplayMemberPath = "Name";
+                cmbEndStreet.SelectedValuePath = "Street_id";
+            }
         }
-
-        private void CalculateCost_Click(object sender, RoutedEventArgs e)
-        {
-            if (cmbTariff.SelectedItem == null) return;
-
-            if (!decimal.TryParse(txtWeight.Text, out decimal weight) || weight <= 0)
-            {
-                txtCost.Text = "Стоимость: введите вес";
-                return;
-            }
-
-            if (!decimal.TryParse(txtVolume.Text, out decimal volume) || volume <= 0)
-            {
-                txtCost.Text = "Стоимость: введите объем";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtPickupAddress.Text) || string.IsNullOrWhiteSpace(txtDeliveryAddress.Text))
-            {
-                txtCost.Text = "Стоимость: введите адреса";
-                return;
-            }
-
-            var tariff = (Tariff)cmbTariff.SelectedItem;
-
-            decimal distance = 100;
-
-            txtCost.Text = $"Стоимость: {(distance * tariff.Cost_per_km + weight * tariff.Cost_per_kg + volume * tariff.Cost_per_m3 + tariff.Additional_cost):N2} руб.";
-        }
-
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateInput()) return;
+
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    var db = Conn.loadMateEntities;
+                    var startAddr = new Address { Street_id = (int)cmbStartStreet.SelectedValue, House_number = txtStartHouse.Text.Trim() };
+                    var endAddr = new Address { Street_id = (int)cmbEndStreet.SelectedValue, House_number = txtEndHouse.Text.Trim() };
+                    db.Address.Add(startAddr);
+                    db.Address.Add(endAddr);
+                    db.SaveChanges();
+                    var route = new Route { Start_address_id = startAddr.Address_id, End_address_id = endAddr.Address_id, Distance_km = 100, Estimated_time_hours = 4 };
+                    db.Route.Add(route);
+                    db.SaveChanges();
+                   var cargo = new Cargo
+                    {
+                        Client_id = clientId,
+                        CargoType_id = (int)cmbCargoType.SelectedValue,
+                        Description = txtDescription.Text.Trim(),
+                        Weight_kg = decimal.Parse(txtWeight.Text),
+                        Volume_m3 = decimal.Parse(txtVolume.Text),
+                        Created_at = DateTime.Now
+                    };
+                    db.Cargo.Add(cargo);
+                    db.SaveChanges();
+                    var tariff = (Tariff)cmbTariff.SelectedItem;
+                    decimal price = CalculateFinalCost(tariff);
+                    var order = new Order
+                    {
+                        Cargo_id = cargo.Cargo_id,
+                        Tariff_id = tariff.Tariff_id,
+                        Route_id = route.Route_id,
+                        Manager_id = 1,
+                        OrderStatus_id = 1,
+                        Truck_id = 1,
+                        Order_number = $"CL-{DateTime.Now:yyyyMMdd}-{new Random().Next(100, 999)}",
+                        Order_date = DateTime.Now,
+                        Price = price,
+                        Scheduled_pickup = dpScheduledPickup.SelectedDate
+                    };
+                    db.Order.Add(order);
+                    db.SaveChanges();
+                    db.Payment.Add(new Payment { Order_id = order.Order_id, PaymentStatus_id = 1, Amount = price, Transaction_date = DateTime.Now });
+                    db.SaveChanges();
+                    scope.Complete();
+                    SendOrderConfirmationEmail(order, price);
+                    MessageBox.Show($"Заказ №{order.Order_number} успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    NavigationService.GoBack();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}");
+                }
+            }
+        }
+        private void SendOrderConfirmationEmail(Order order, decimal cost)
         {
             try
             {
-                if (!decimal.TryParse(txtWeight.Text, out decimal weight) || weight <= 0)
-                {
-                    MessageBox.Show("Введите корректный вес", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == clientId);
+                if (user == null || string.IsNullOrEmpty(user.Email)) return;
 
-                if (!decimal.TryParse(txtVolume.Text, out decimal volume) || volume <= 0)
-                {
-                    MessageBox.Show("Введите корректный объем", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate: Новый заказ");
+                mail.To.Add(user.Email);
+                mail.Subject = "Ваш заказ №" + order.Order_number + " оформлен";
+                mail.Body = $"Здравствуйте, {user.Full_name}!\n\n" +
+                            $"Ваш заказ успешно создан в системе LoadMate.\n" +
+                            $"--------------------------------------------\n" +
+                            $"Номер заказа: {order.Order_number}\n" +
+                            $"Дата создания: {order.Order_date:dd.MM.yyyy HH:mm}\n" +
+                            $"Сумма к оплате: {cost:N2} руб.\n" +
+                            $"Планируемая дата забора: {order.Scheduled_pickup:dd.MM.yyyy}\n" +
+                            $"--------------------------------------------\n\n" +
+                            $"Вы можете оплатить заказ в личном кабинете приложения.\n" +
+                            $"Спасибо, что выбрали нас!";
 
-                if (string.IsNullOrWhiteSpace(txtDescription.Text) ||
-                    string.IsNullOrWhiteSpace(txtPickupAddress.Text) ||
-                    string.IsNullOrWhiteSpace(txtDeliveryAddress.Text) ||
-                    dpScheduledPickup.SelectedDate == null)
-                {
-                    MessageBox.Show("Заполните все обязательные поля", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var cargo = new Cargo
-                {
-                    Client_id = clientId,
-                    CargoType_id = (int)cmbCargoType.SelectedValue,
-                    Description = txtDescription.Text,
-                    Weight_kg = weight,
-                    Volume_m3 = volume,
-                    Is_fragile = false,
-                    Is_dangerous = false,
-                    Created_at = DateTime.Now
-                };
-
-                Conn.loadMateEntities.Cargo.Add(cargo);
-                Conn.loadMateEntities.SaveChanges();
-
-                var startAddress = new Address
-                {
-                    Street_id = 1,
-                    House_number = txtPickupAddress.Text,
-                    Additional_info = txtPickupAddress.Text
-                };
-                Conn.loadMateEntities.Address.Add(startAddress);
-                Conn.loadMateEntities.SaveChanges();
-
-                var endAddress = new Address
-                {
-                    Street_id = 1,
-                    House_number = txtDeliveryAddress.Text,
-                    Additional_info = txtDeliveryAddress.Text
-                };
-                Conn.loadMateEntities.Address.Add(endAddress);
-                Conn.loadMateEntities.SaveChanges();
-
-                var route = new Route
-                {
-                    Start_address_id = startAddress.Address_id,
-                    End_address_id = endAddress.Address_id,
-                    Distance_km = 100,
-                    Estimated_time_hours = 2
-                };
-
-                Conn.loadMateEntities.Route.Add(route);
-                Conn.loadMateEntities.SaveChanges();
-
-                var dispatcher = Conn.loadMateEntities.User.FirstOrDefault(u => u.Role_id == 4);
-                var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.TruckStatus_id == 1);
-
-                var tariff = (Tariff)cmbTariff.SelectedItem;
-                decimal cost = (100 * tariff.Cost_per_km) +
-                              (weight * tariff.Cost_per_kg) +
-                              (volume * tariff.Cost_per_m3) +
-                              tariff.Additional_cost;
-
-                if (tariff.Min_price.HasValue && cost < tariff.Min_price.Value)
-                    cost = tariff.Min_price.Value;
-
-                var order = new Order
-                {
-                    Manager_id = dispatcher != null ? dispatcher.User_id : 2,
-                    Cargo_id = cargo.Cargo_id,
-                    Tariff_id = tariff.Tariff_id,
-                    Truck_id = truck != null ? truck.Truck_id : 1,
-                    Route_id = route.Route_id,
-                    OrderStatus_id = 1,
-                    Order_number = $"ORD-{DateTime.Now:yyyyMMdd}-{new Random().Next(1000, 9999)}",
-                    Order_date = DateTime.Now,
-                    Price = cost,
-                    Scheduled_pickup = dpScheduledPickup.SelectedDate,
-                    Scheduled_delivery = dpScheduledPickup.SelectedDate.Value.AddDays(2)
-                };
-
-                Conn.loadMateEntities.Order.Add(order);
-                Conn.loadMateEntities.SaveChanges();
-
-                var payment = new Payment
-                {
-                    Order_id = order.Order_id,
-                    PaymentStatus_id = 1,
-                    Amount = cost,
-                    Transaction_date = DateTime.Now
-                };
-
-                Conn.loadMateEntities.Payment.Add(payment);
-                Conn.loadMateEntities.SaveChanges();
-
-                MessageBox.Show($"Заказ успешно создан!\nНомер заказа: {order.Order_number}\nСтоимость: {cost:N2} руб.",
-                    "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                NavigationService.GoBack();
+                SmtpClient client = new SmtpClient("smtp.mail.ru", 587);
+                client.EnableSsl = true;
+                client.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Bmz8qEIDckirBNY5cEmE");
+                client.Send(mail);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при создании заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Ошибка при отправке Email: " + ex.Message, "Уведомление", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+        private decimal CalculateFinalCost(Tariff tariff)
+        {
+            decimal.TryParse(txtWeight.Text, out decimal w);
+            decimal.TryParse(txtVolume.Text, out decimal v);
+            decimal cost = (100 * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
+            return (tariff.Min_price.HasValue && cost < tariff.Min_price.Value) ? tariff.Min_price.Value : cost;
+        }
+        private void CalculateCost_Click(object sender, RoutedEventArgs e) => UpdateCostDisplay();
+        private void Tariff_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateCostDisplay();
+        private void UpdateCostDisplay() { if (cmbTariff.SelectedItem is Tariff t) txtCost.Text = $"Стоимость: {CalculateFinalCost(t):N2} руб."; }
+
+        private bool ValidateInput()
+        {
+            if (cmbStartStreet.SelectedValue == null || cmbEndStreet.SelectedValue == null || string.IsNullOrWhiteSpace(txtWeight.Text))
+            {
+                MessageBox.Show("Заполните адреса и вес!");
+                return false;
+            }
+            return true;
         }
     }
 }

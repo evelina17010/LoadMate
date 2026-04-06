@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
+using System.Data.Entity;
 
 namespace LoadMate.Pages
 {
@@ -29,88 +30,52 @@ namespace LoadMate.Pages
 
         private void LoadDrivers()
         {
-            var drivers = Conn.loadMateEntities.Driver.ToList();
+            var drivers = Conn.loadMateEntities.Driver
+                .Include(d => d.User)
+                .Include(d => d.DriverStatus)
+                .ToList();
 
+            UpdateGrid(drivers);
+        }
+        private void UpdateGrid(List<Driver> drivers)
+        {
             var driversWithDetails = drivers.Select(d => new
             {
                 d.Driver_id,
                 d.License_number,
                 d.Experience_years,
-                DriverName = GetDriverName(d.User_id),
-                Phone = GetDriverPhone(d.User_id),
-                StatusName = GetDriverStatusName(d.DriverStatus_id)
-            }).ToList();
-
-            DriversGrid.ItemsSource = driversWithDetails;
-        }
-
-        private string GetDriverName(int userId)
-        {
-            var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == userId);
-            return user?.Full_name ?? "Не указан";
-        }
-
-        private string GetDriverPhone(int userId)
-        {
-            var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == userId);
-            return user?.Phone ?? "Не указан";
-        }
-
-        private string GetDriverStatusName(int statusId)
-        {
-            var status = Conn.loadMateEntities.DriverStatus.FirstOrDefault(ds => ds.DriverStatus_id == statusId);
-            return status?.Name ?? "Не указан";
-        }
-
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            LoadDrivers();
-        }
-
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ApplyFilters();
-        }
-
-        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            ApplyFilters();
-        }
-
-        private void ApplyFilters()
-        {
-            string search = txtSearch.Text.Trim();
-            var drivers = Conn.loadMateEntities.Driver.ToList();
-
-            var driversWithDetails = drivers.Select(d => new
-            {
-                d.Driver_id,
-                d.License_number,
-                d.Experience_years,
-                DriverName = GetDriverName(d.User_id),
-                Phone = GetDriverPhone(d.User_id),
-                StatusName = GetDriverStatusName(d.DriverStatus_id),
+                DriverName = d.User?.Full_name ?? "Не указан",
+                Phone = d.User?.Phone ?? "Не указан",
+                StatusName = d.DriverStatus?.Name ?? "Не указан",
                 StatusId = d.DriverStatus_id
             }).ToList();
 
+            DriversGrid.ItemsSource = driversWithDetails;
+        }
+        private void Refresh_Click(object sender, RoutedEventArgs e) => LoadDrivers();
+
+        private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
+
+        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();
+
+        private void ApplyFilters()
+        {
+            string search = txtSearch.Text.Trim().ToLower();
+            var query = Conn.loadMateEntities.Driver
+                .Include(d => d.User)
+                .Include(d => d.DriverStatus)
+                .AsQueryable();
             if (!string.IsNullOrEmpty(search))
             {
-                driversWithDetails = driversWithDetails.Where(d =>
-                    d.DriverName.Contains(search) ||
-                    d.Phone.Contains(search)).ToList();
+                query = query.Where(d => d.User.Full_name.ToLower().Contains(search) ||
+                                         d.User.Phone.Contains(search));
             }
-
             if (cmbStatusFilter.SelectedItem is ComboBoxItem selected && selected.Content.ToString() != "Все статусы")
             {
                 string statusName = selected.Content.ToString();
-                var status = Conn.loadMateEntities.DriverStatus.FirstOrDefault(ds => ds.Name == statusName);
-                if (status != null)
-                {
-                    driversWithDetails = driversWithDetails.Where(d => d.StatusId == status.DriverStatus_id).ToList();
-                }
+                query = query.Where(d => d.DriverStatus.Name == statusName);
             }
-
-            DriversGrid.ItemsSource = driversWithDetails;
+            UpdateGrid(query.ToList());
         }
     }
 }

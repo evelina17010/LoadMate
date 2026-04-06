@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
+      Loaded="Page_Loaded"
    Title="Мои платежи" 
            d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">

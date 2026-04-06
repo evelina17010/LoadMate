@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -35,7 +37,6 @@ namespace LoadMate.Pages
         private void LoadOrders()
         {
             var orders = Conn.loadMateEntities.Order.ToList();
-
             var ordersWithDetails = orders.Select(o => new
             {
                 o.Order_id,
@@ -116,6 +117,50 @@ namespace LoadMate.Pages
             return status?.Name ?? "Не указан";
         }
 
+        private void SendEmailToDriver(Order order)
+        {
+            try
+            {
+                var db = Conn.loadMateEntities;
+                var truck = db.Truck.FirstOrDefault(t => t.Truck_id == order.Truck_id);
+                if (truck == null || !truck.Driver_id.HasValue) return;
+
+                var driver = db.Driver.FirstOrDefault(d => d.Driver_id == truck.Driver_id);
+                if (driver == null) return;
+
+                var user = db.User.FirstOrDefault(u => u.User_id == driver.User_id);
+                if (string.IsNullOrEmpty(user?.Email)) return;
+
+                string from = GetRouteAddress(order.Route_id, true);
+                string to = GetRouteAddress(order.Route_id, false);
+
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate: Новый заказ");
+                mail.To.Add(user.Email);
+                mail.Subject = $"Назначен новый заказ №{order.Order_number}";
+                mail.Body = $"Здравствуйте, {user.Full_name}!\n\n" +
+                            $"Вам назначен новый заказ:\n" +
+                            $"Номер: {order.Order_number}\n" +
+                            $"Откуда: {from}\n" +
+                            $"Куда: {to}\n" +
+                            $"Дата забора: {order.Scheduled_pickup:dd.MM.yyyy}\n" +
+                            $"Транспорт: {truck.Model} ({truck.Registration_number})";
+
+                SmtpClient client = new SmtpClient("smtp.mail.ru", 587)
+                {
+                    EnableSsl = true,
+                    Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Bmz8qEIDckirBNY5cEmE"),
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false
+                };
+                client.Send(mail);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         private void OrdersGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = OrdersGrid.SelectedItem;
@@ -130,76 +175,49 @@ namespace LoadMate.Pages
             }
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            LoadOrders();
-        }
+        private void Refresh_Click(object sender, RoutedEventArgs e) => LoadOrders();
 
         private void ChangeStatus_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedOrder == null)
-            {
-                MessageBox.Show("Выберите заказ", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            int currentStatusId = selectedOrder.OrderStatus_id;
-            var statusWindow = new ChangeStatusWindow(currentStatusId);
+            if (selectedOrder == null) return;
+            var statusWindow = new ChangeStatusWindow(selectedOrder.OrderStatus_id);
             statusWindow.Owner = Application.Current.MainWindow;
             if (statusWindow.ShowDialog() == true)
             {
                 selectedOrder.OrderStatus_id = statusWindow.SelectedStatusId;
                 Conn.loadMateEntities.SaveChanges();
                 LoadOrders();
-                MessageBox.Show("Статус изменен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void AssignTruck_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedOrder == null) return;
+            var truckWindow = new AssignTruckWindow(selectedOrder);
+            truckWindow.Owner = Application.Current.MainWindow;
+            if (truckWindow.ShowDialog() == true)
+            {
+                Conn.loadMateEntities.SaveChanges();
+                SendEmailToDriver(selectedOrder);
+                LoadOrders();
+                MessageBox.Show("Транспорт назначен, водителю отправлено уведомление.");
             }
         }
 
         private void AssignDriver_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedOrder == null)
-            {
-                MessageBox.Show("Выберите заказ", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
+            if (selectedOrder == null) return;
             var driverWindow = new AssignDriverWindow(selectedOrder);
             driverWindow.Owner = Application.Current.MainWindow;
             if (driverWindow.ShowDialog() == true)
             {
                 Conn.loadMateEntities.SaveChanges();
                 LoadOrders();
-                MessageBox.Show("Водитель назначен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
-        private void AssignTruck_Click(object sender, RoutedEventArgs e)
-        {
-            if (selectedOrder == null)
-            {
-                MessageBox.Show("Выберите заказ", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            var truckWindow = new AssignTruckWindow(selectedOrder);
-            truckWindow.Owner = Application.Current.MainWindow;
-            if (truckWindow.ShowDialog() == true)
-            {
-                Conn.loadMateEntities.SaveChanges();
-                LoadOrders();
-                MessageBox.Show("Транспорт назначен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ApplyFilters();
-        }
-
-        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            ApplyFilters();
-        }
+        private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
+        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();
 
         private void ApplyFilters()
         {
@@ -207,28 +225,19 @@ namespace LoadMate.Pages
             var orders = Conn.loadMateEntities.Order.ToList();
 
             if (!string.IsNullOrEmpty(search))
-            {
                 orders = orders.Where(o => o.Order_number.Contains(search)).ToList();
-            }
 
             if (cmbStatusFilter.SelectedItem is ComboBoxItem selected && selected.Content.ToString() != "Все")
             {
-                string statusName = selected.Content.ToString();
-                var status = Conn.loadMateEntities.OrderStatus.FirstOrDefault(s => s.Name == statusName);
-                if (status != null)
-                {
-                    orders = orders.Where(o => o.OrderStatus_id == status.OrderStatus_id).ToList();
-                }
+                string name = selected.Content.ToString();
+                orders = orders.Where(o => o.OrderStatus.Name == name).ToList();
             }
 
-            var ordersWithDetails = orders.Select(o => new
-            {
+            var details = orders.Select(o => new {
                 o.Order_id,
                 o.Order_number,
                 o.Price,
                 o.Order_date,
-                o.Scheduled_pickup,
-                o.Scheduled_delivery,
                 ClientName = GetClientName(o.Cargo_id),
                 CargoDescription = GetCargoDescription(o.Cargo_id),
                 RouteFrom = GetRouteAddress(o.Route_id, true),
@@ -237,8 +246,7 @@ namespace LoadMate.Pages
                 TruckModel = GetTruckModel(o.Truck_id),
                 StatusName = GetOrderStatusName(o.OrderStatus_id)
             }).ToList();
-
-            OrdersGrid.ItemsSource = ordersWithDetails;
+            OrdersGrid.ItemsSource = details;
         }
     }
 }
