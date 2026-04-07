@@ -22,22 +22,21 @@ namespace LoadMate.Windows
     /// </summary>
     public partial class EditUserWindow : Window
     {
+        public List<Role> Roles { get; set; }
         private User currentUser;
+
         public EditUserWindow(User user)
         {
             InitializeComponent();
             currentUser = user;
-            LoadRoles();
-            LoadUserData();
+            InitializeWindow();
         }
-        private void LoadRoles()
+
+        private void InitializeWindow()
         {
-            cmbRole.ItemsSource = Conn.loadMateEntities.Role.ToList();
-            cmbRole.DisplayMemberPath = "Name";
-            cmbRole.SelectedValuePath = "Role_id";
-        }
-        private void LoadUserData()
-        {
+            Roles = Conn.loadMateEntities.Role.ToList();
+            DataContext = this;
+
             txtFullName.Text = currentUser.Full_name;
             txtEmail.Text = currentUser.Email;
             txtPhone.Text = currentUser.Phone;
@@ -50,6 +49,7 @@ namespace LoadMate.Windows
 
             cmbRole.SelectedValue = currentUser.Role_id;
         }
+
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -63,43 +63,48 @@ namespace LoadMate.Windows
                 return builder.ToString();
             }
         }
+
         private bool IsValidEmail(string email)
         {
             return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
         }
+
         private bool ValidateData()
         {
             if (string.IsNullOrWhiteSpace(txtFullName.Text))
             {
-                MessageBox.Show("Введите ФИО", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Введите ФИО", "Валидация");
                 return false;
             }
             if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
             {
-                MessageBox.Show("Введите корректный Email", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Введите корректный Email", "Валидация");
                 return false;
             }
-            if (cmbRole.SelectedValue == null)
+            if (cmbRole.SelectedItem == null)
             {
-                MessageBox.Show("Выберите роль", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Выберите роль", "Валидация");
                 return false;
             }
             if (!string.IsNullOrWhiteSpace(txtPassword.Password) && txtPassword.Password.Length < 6)
             {
-                MessageBox.Show("Пароль должен быть не менее 6 символов", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Пароль должен быть не менее 6 символов", "Валидация");
                 return false;
             }
             return true;
         }
+
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (!ValidateData()) return;
+
                 currentUser.Full_name = txtFullName.Text.Trim();
                 currentUser.Email = txtEmail.Text.Trim();
                 currentUser.Phone = txtPhone.Text.Trim();
                 currentUser.Role_id = (int)cmbRole.SelectedValue;
+
                 if (!string.IsNullOrWhiteSpace(txtPassword.Password))
                 {
                     var login = Conn.loadMateEntities.Login.FirstOrDefault(l => l.User_id == currentUser.User_id);
@@ -108,15 +113,17 @@ namespace LoadMate.Windows
                         login.Password_hash = HashPassword(txtPassword.Password.Trim());
                     }
                 }
+
                 Conn.loadMateEntities.SaveChanges();
                 DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
             }
         }
+
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
