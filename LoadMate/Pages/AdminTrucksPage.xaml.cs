@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
+using System.Data.Entity;
 
 namespace LoadMate.Pages
 {
@@ -32,60 +33,81 @@ namespace LoadMate.Pages
 
         private void LoadTrucks()
         {
-            var trucks = Conn.loadMateEntities.Truck.ToList();
-
-            var trucksWithDetails = trucks.Select(t => new
+            try
             {
-                t.Truck_id,
-                t.Model,
-                t.Registration_number,
-                t.Capacity_kg,
-                t.Capacity_m3,
-                t.Dimensions,
-                DriverName = GetDriverName(t.Driver_id),
-                StatusName = GetTruckStatusName(t.TruckStatus_id)
-            }).ToList();
+                string search = txtSearch.Text.Trim().ToLower();
+                var trucks = Conn.loadMateEntities.Truck
+                    .Include(t => t.Driver.User)
+                    .Include(t => t.TruckStatus)
+                    .ToList();
 
-            TrucksGrid.ItemsSource = trucksWithDetails;
-        }
+                var trucksWithDetails = trucks.Select(t => new
+                {
+                    t.Truck_id,
+                    t.Model,
+                    t.Registration_number,
+                    t.Capacity_kg,
+                    t.Capacity_m3,
+                    t.Dimensions,
+                    DriverName = t.Driver?.User?.Full_name ?? "Не назначен",
+                    StatusName = t.TruckStatus?.Name ?? "Не указан"
+                }).ToList();
 
-        private string GetDriverName(int? driverId)
-        {
-            if (!driverId.HasValue) return "Не назначен";
-            var driver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == driverId);
-            if (driver == null) return "Не назначен";
-            var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == driver.User_id);
-            return user != null ? user.Full_name : "Не назначен";
-        }
+                if (!string.IsNullOrEmpty(search))
+                {
+                    trucksWithDetails = trucksWithDetails.Where(t =>
+                        (t.Model != null && t.Model.ToLower().Contains(search)) ||
+                        (t.Registration_number != null && t.Registration_number.ToLower().Contains(search))).ToList();
+                }
 
-        private string GetTruckStatusName(int statusId)
-        {
-            var status = Conn.loadMateEntities.TruckStatus.FirstOrDefault(ts => ts.TruckStatus_id == statusId);
-            return status != null ? status.Name : "Не указан";
+                TrucksGrid.ItemsSource = trucksWithDetails;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке транспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void TrucksGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selected = TrucksGrid.SelectedItem;
-            if (selected != null)
+            try
             {
-                var property = selected.GetType().GetProperty("Truck_id");
-                if (property != null)
+                var selected = TrucksGrid.SelectedItem;
+                if (selected != null)
                 {
-                    int truckId = (int)property.GetValue(selected);
-                    selectedTruck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
+                    var property = selected.GetType().GetProperty("Truck_id");
+                    if (property != null)
+                    {
+                        int truckId = (int)property.GetValue(selected);
+                        selectedTruck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
+                    }
                 }
+                else
+                {
+                    selectedTruck = null;
+                }
+            }
+            catch
+            {
+                selectedTruck = null;
             }
         }
 
         private void AddTruck_Click(object sender, RoutedEventArgs e)
         {
-            var addWindow = new AddTruckWindow();
-            addWindow.Owner = Application.Current.MainWindow;
-            if (addWindow.ShowDialog() == true)
+            try
             {
-                LoadTrucks();
-                MessageBox.Show("Транспорт добавлен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                var addWindow = new AddTruckWindow();
+                addWindow.Owner = Application.Current.MainWindow;
+                if (addWindow.ShowDialog() == true)
+                {
+                    LoadTrucks();
+                    MessageBox.Show("Транспорт добавлен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при добавлении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -97,12 +119,19 @@ namespace LoadMate.Pages
                 return;
             }
 
-            var editWindow = new EditTruckWindow(selectedTruck);
-            editWindow.Owner = Application.Current.MainWindow;
-            if (editWindow.ShowDialog() == true)
+            try
             {
-                LoadTrucks();
-                MessageBox.Show("Данные обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                var editWindow = new EditTruckWindow(selectedTruck);
+                editWindow.Owner = Application.Current.MainWindow;
+                if (editWindow.ShowDialog() == true)
+                {
+                    LoadTrucks();
+                    MessageBox.Show("Данные обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при редактировании: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -119,43 +148,22 @@ namespace LoadMate.Pages
 
             if (result == MessageBoxResult.Yes)
             {
-                Conn.loadMateEntities.Truck.Remove(selectedTruck);
-                Conn.loadMateEntities.SaveChanges();
-                LoadTrucks();
-                MessageBox.Show("Транспорт удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    Conn.loadMateEntities.Truck.Remove(selectedTruck);
+                    Conn.loadMateEntities.SaveChanges();
+                    LoadTrucks();
+                    MessageBox.Show("Транспорт удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Не удалось удалить транспорт. Возможно, он назначен на активный заказ. {ex.Message}", "Ошибка удаления", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            LoadTrucks();
-        }
+        private void Refresh_Click(object sender, RoutedEventArgs e) => LoadTrucks();
 
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string search = txtSearch.Text.Trim();
-            var trucks = Conn.loadMateEntities.Truck.ToList();
-
-            var trucksWithDetails = trucks.Select(t => new
-            {
-                t.Truck_id,
-                t.Model,
-                t.Registration_number,
-                t.Capacity_kg,
-                t.Capacity_m3,
-                t.Dimensions,
-                DriverName = GetDriverName(t.Driver_id),
-                StatusName = GetTruckStatusName(t.TruckStatus_id)
-            }).ToList();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                trucksWithDetails = trucksWithDetails.Where(t =>
-                    t.Model.Contains(search) ||
-                    t.Registration_number.Contains(search)).ToList();
-            }
-
-            TrucksGrid.ItemsSource = trucksWithDetails;
-        }
+        private void Search_TextChanged(object sender, TextChangedEventArgs e) => LoadTrucks();
     }
 }

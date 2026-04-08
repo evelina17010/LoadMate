@@ -35,126 +35,179 @@ namespace LoadMate.Pages
 
         private void LoadOrders()
         {
-            _allOrders = Conn.loadMateEntities.Order
-                .Include(o => o.OrderStatus)
-                .Include(o => o.Cargo)
-                .Include(o => o.Route)
-                .ToList();
-            ApplyFilters();
+            try
+            {
+                _allOrders = Conn.loadMateEntities.Order
+                    .Include(o => o.OrderStatus)
+                    .Include(o => o.Cargo)
+                    .Include(o => o.Route)
+                    .ToList();
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке заказов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LoadFilterData()
         {
-            var statuses = Conn.loadMateEntities.OrderStatus.ToList();
-            statuses.Insert(0, new OrderStatus { OrderStatus_id = 0, Name = "Все статусы" });
+            try
+            {
+                var statuses = Conn.loadMateEntities.OrderStatus.ToList();
+                statuses.Insert(0, new OrderStatus { OrderStatus_id = 0, Name = "Все статусы" });
 
-            cmbStatusFilter.ItemsSource = statuses;
-            cmbStatusFilter.SelectedValuePath = "OrderStatus_id";
-            cmbStatusFilter.SelectedIndex = 0;
+                cmbStatusFilter.ItemsSource = statuses;
+                cmbStatusFilter.SelectedValuePath = "OrderStatus_id";
+                cmbStatusFilter.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке фильтров: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ApplyFilters()
         {
-            if (_allOrders == null) return;
+            try
+            {
+                if (_allOrders == null) return;
 
-            string search = txtSearch.Text.Trim().ToLower();
-            var query = _allOrders.Select(o => new
-            {
-                o.Order_id,
-                o.Order_number,
-                o.Price,
-                o.Order_date,
-                o.OrderStatus_id,
-                ClientName = GetClientName(o.Cargo_id),
-                CargoDescription = o.Cargo?.Description ?? "Не указан",
-                RouteFrom = GetRouteAddress(o.Route_id, true),
-                RouteTo = GetRouteAddress(o.Route_id, false),
-                DriverName = GetDriverName(o.Truck_id),
-                TruckModel = GetTruckModel(o.Truck_id),
-                StatusName = o.OrderStatus?.Name ?? "Не указан"
-            }).AsEnumerable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(o => o.Order_number.ToLower().Contains(search));
-            }
-            if (cmbStatusFilter.SelectedValue != null)
-            {
-                int selectedId = (int)cmbStatusFilter.SelectedValue;
-                if (selectedId != 0)
+                string search = txtSearch.Text.Trim().ToLower();
+                var query = _allOrders.Select(o => new
                 {
-                    query = query.Where(o => o.OrderStatus_id == selectedId);
-                }
-            }
+                    o.Order_id,
+                    o.Order_number,
+                    o.Price,
+                    o.Order_date,
+                    o.OrderStatus_id,
+                    ClientName = GetClientName(o.Cargo_id),
+                    CargoDescription = o.Cargo?.Description ?? "Не указан",
+                    RouteFrom = GetRouteAddress(o.Route_id, true),
+                    RouteTo = GetRouteAddress(o.Route_id, false),
+                    DriverName = GetDriverName(o.Truck_id),
+                    TruckModel = GetTruckModel(o.Truck_id),
+                    StatusName = o.OrderStatus?.Name ?? "Не указан"
+                }).AsEnumerable();
 
-            OrdersGrid.ItemsSource = query.ToList();
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(o => (o.Order_number != null && o.Order_number.ToLower().Contains(search)) ||
+                                             (o.ClientName != null && o.ClientName.ToLower().Contains(search)));
+                }
+
+                if (cmbStatusFilter.SelectedValue != null)
+                {
+                    int selectedId = (int)cmbStatusFilter.SelectedValue;
+                    if (selectedId != 0)
+                    {
+                        query = query.Where(o => o.OrderStatus_id == selectedId);
+                    }
+                }
+
+                OrdersGrid.ItemsSource = query.ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при фильтрации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private string GetClientName(int cargoId)
         {
-            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == cargoId);
-            if (cargo == null) return "Не указан";
-            var client = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == cargo.Client_id);
-            return client != null ? client.Full_name : "Не указан";
+            try
+            {
+                var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == cargoId);
+                if (cargo == null) return "Не указан";
+                var client = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == cargo.Client_id);
+                return client != null ? client.Full_name : "Не указан";
+            }
+            catch { return "Ошибка данных"; }
         }
 
         private string GetRouteAddress(int routeId, bool isStart)
         {
-            var route = Conn.loadMateEntities.Route.FirstOrDefault(r => r.Route_id == routeId);
-            if (route == null) return "Не указан";
+            try
+            {
+                var route = Conn.loadMateEntities.Route.FirstOrDefault(r => r.Route_id == routeId);
+                if (route == null) return "Не указан";
 
-            int addressId = isStart ? route.Start_address_id : route.End_address_id;
-            var address = Conn.loadMateEntities.Address
-                .Include(a => a.Street.City)
-                .FirstOrDefault(a => a.Address_id == addressId);
+                int addressId = isStart ? route.Start_address_id : route.End_address_id;
+                var address = Conn.loadMateEntities.Address
+                    .Include(a => a.Street.City)
+                    .FirstOrDefault(a => a.Address_id == addressId);
 
-            if (address == null) return "Не указан";
-            return $"{address.Street.City.Name}, {address.Street.Name}, {address.House_number}";
+                if (address == null) return "Не указан";
+                return $"{address.Street.City.Name}, {address.Street.Name}, {address.House_number}";
+            }
+            catch { return "Ошибка адреса"; }
         }
 
         private string GetDriverName(int truckId)
         {
-            var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
-            if (truck?.Driver_id == null) return "Не назначен";
+            try
+            {
+                var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
+                if (truck?.Driver_id == null) return "Не назначен";
 
-            var driver = Conn.loadMateEntities.Driver
-                .Include(d => d.User)
-                .FirstOrDefault(d => d.Driver_id == truck.Driver_id);
+                var driver = Conn.loadMateEntities.Driver
+                    .Include(d => d.User)
+                    .FirstOrDefault(d => d.Driver_id == truck.Driver_id);
 
-            return driver?.User?.Full_name ?? "Не назначен";
+                return driver?.User?.Full_name ?? "Не назначен";
+            }
+            catch { return "Ошибка данных"; }
         }
 
         private string GetTruckModel(int truckId)
         {
-            var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
-            return truck?.Model ?? "Не назначен";
+            try
+            {
+                var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
+                return truck?.Model ?? "Не назначен";
+            }
+            catch { return "Ошибка данных"; }
         }
 
         private void AddOrder_Click(object sender, RoutedEventArgs e)
         {
-            var addWin = new AddEditOrderWindow();
-            if (addWin.ShowDialog() == true) LoadOrders();
+            try
+            {
+                var addWin = new AddEditOrderWindow();
+                if (addWin.ShowDialog() == true) LoadOrders();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при открытии окна: {ex.Message}");
+            }
         }
 
         private void EditOrder_Click(object sender, RoutedEventArgs e)
         {
             if (selectedOrder == null)
             {
-                MessageBox.Show("Выберите заказ для редактирования");
+                MessageBox.Show("Выберите заказ для редактирования", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            int id = selectedOrder.Order_id;
-            var orderToEdit = Conn.loadMateEntities.Order.FirstOrDefault(o => o.Order_id == id);
-            var editWin = new AddEditOrderWindow(orderToEdit);
-            if (editWin.ShowDialog() == true) LoadOrders();
+            try
+            {
+                int id = selectedOrder.Order_id;
+                var orderToEdit = Conn.loadMateEntities.Order.FirstOrDefault(o => o.Order_id == id);
+                var editWin = new AddEditOrderWindow(orderToEdit);
+                if (editWin.ShowDialog() == true) LoadOrders();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при редактировании: {ex.Message}");
+            }
         }
 
         private void DeleteOrder_Click(object sender, RoutedEventArgs e)
         {
             if (selectedOrder == null) return;
 
-            if (MessageBox.Show($"Удалить заказ №{selectedOrder.Order_number}?", "Подтверждение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (MessageBox.Show($"Удалить заказ №{selectedOrder.Order_number}?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 try
                 {
@@ -175,16 +228,23 @@ namespace LoadMate.Pages
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Ошибка при удалении: " + ex.Message);
+                    MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            txtSearch.Text = "";
-            cmbStatusFilter.SelectedIndex = 0;
-            LoadOrders();
+            try
+            {
+                txtSearch.Text = "";
+                cmbStatusFilter.SelectedIndex = 0;
+                LoadOrders();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();

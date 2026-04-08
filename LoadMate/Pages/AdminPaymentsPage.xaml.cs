@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
+using System.Data.Entity;
 
 namespace LoadMate.Pages
 {
@@ -21,96 +22,108 @@ namespace LoadMate.Pages
     /// </summary>
     public partial class AdminPaymentsPage : Page
     {
+        private List<Payment> _rawData;
+
         public AdminPaymentsPage()
         {
             InitializeComponent();
+            LoadFilterData();
             LoadPayments();
+        }
+
+        private void LoadFilterData()
+        {
+            try
+            {
+                var statuses = Conn.loadMateEntities.PaymentStatus.ToList();
+                statuses.Insert(0, new PaymentStatus { PaymentStatus_id = 0, Name = "Все статусы" });
+                cmbStatusFilter.ItemsSource = statuses;
+                cmbStatusFilter.SelectedValuePath = "PaymentStatus_id";
+                cmbStatusFilter.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке фильтров: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LoadPayments()
         {
-            var payments = Conn.loadMateEntities.Payment.ToList();
-
-            var paymentsWithDetails = payments.Select(p => new
+            try
             {
-                p.Payment_id,
-                p.Order_id,
-                p.Amount,
-                p.Payment_method,
-                p.Transaction_date,
-                p.Paid_date,
-                p.PaymentStatus_id,
-                OrderNumber = GetOrderNumber(p.Order_id),
-                ClientName = GetClientName(p.Order_id),
-                StatusName = GetPaymentStatusName(p.PaymentStatus_id)
-            }).ToList();
+                _rawData = Conn.loadMateEntities.Payment
+                    .Include(p => p.Order.Cargo.User)
+                    .Include(p => p.PaymentStatus)
+                    .ToList();
 
-            PaymentsGrid.ItemsSource = paymentsWithDetails;
-        }
-
-        private string GetOrderNumber(int orderId)
-        {
-            var order = Conn.loadMateEntities.Order.FirstOrDefault(o => o.Order_id == orderId);
-            return order != null ? order.Order_number : "Не указан";
-        }
-
-        private string GetClientName(int orderId)
-        {
-            var order = Conn.loadMateEntities.Order.FirstOrDefault(o => o.Order_id == orderId);
-            if (order == null) return "Не указан";
-
-            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == order.Cargo_id);
-            if (cargo == null) return "Не указан";
-
-            var client = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == cargo.Client_id);
-            return client != null ? client.Full_name : "Не указан";
-        }
-
-        private string GetPaymentStatusName(int statusId)
-        {
-            var status = Conn.loadMateEntities.PaymentStatus.FirstOrDefault(ps => ps.PaymentStatus_id == statusId);
-            return status != null ? status.Name : "Не указан";
-        }
-
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            LoadPayments();
-        }
-
-        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            ApplyFilters();
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке платежей: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ApplyFilters()
         {
-            var payments = Conn.loadMateEntities.Payment.ToList();
-
-            var paymentsWithDetails = payments.Select(p => new
+            try
             {
-                p.Payment_id,
-                p.Order_id,
-                p.Amount,
-                p.Payment_method,
-                p.Transaction_date,
-                p.Paid_date,
-                p.PaymentStatus_id,
-                OrderNumber = GetOrderNumber(p.Order_id),
-                ClientName = GetClientName(p.Order_id),
-                StatusName = GetPaymentStatusName(p.PaymentStatus_id)
-            }).ToList();
+                if (_rawData == null) return;
 
-            if (cmbStatusFilter.SelectedItem is ComboBoxItem selected && selected.Content.ToString() != "Все статусы")
-            {
-                string statusName = selected.Content.ToString();
-                var status = Conn.loadMateEntities.PaymentStatus.FirstOrDefault(ps => ps.Name == statusName);
-                if (status != null)
+                string search = txtSearch.Text.Trim().ToLower();
+                int selectedStatusId = cmbStatusFilter.SelectedValue != null ? (int)cmbStatusFilter.SelectedValue : 0;
+
+                var filteredData = _rawData.Where(p =>
                 {
-                    paymentsWithDetails = paymentsWithDetails.Where(p => p.PaymentStatus_id == status.PaymentStatus_id).ToList();
-                }
-            }
+                    bool matchesStatus = (selectedStatusId == 0) || (p.PaymentStatus_id == selectedStatusId);
 
-            PaymentsGrid.ItemsSource = paymentsWithDetails;
+                    string orderNum = p.Order?.Order_number?.ToLower() ?? "";
+                    string client = p.Order?.Cargo?.User?.Full_name?.ToLower() ?? "";
+                    string method = p.Payment_method?.ToLower() ?? "";
+
+                    bool matchesSearch = string.IsNullOrEmpty(search) ||
+                                        orderNum.Contains(search) ||
+                                        client.Contains(search) ||
+                                        method.Contains(search);
+
+                    return matchesStatus && matchesSearch;
+                });
+
+                PaymentsGrid.ItemsSource = filteredData.Select(p => new
+                {
+                    p.Payment_id,
+                    OrderNumber = p.Order?.Order_number ?? "—",
+                    ClientName = p.Order?.Cargo?.User?.Full_name ?? "—",
+                    p.Amount,
+                    StatusName = p.PaymentStatus?.Name ?? "—",
+                    p.PaymentStatus_id,
+                    p.Payment_method,
+                    p.Transaction_date,
+                    p.Paid_date
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при фильтрации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                txtSearch.Text = "";
+                cmbStatusFilter.SelectedIndex = 0;
+                LoadPayments();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
+
+        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();
     }
 }

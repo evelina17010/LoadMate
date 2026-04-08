@@ -5,16 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LoadMate.Windows"
         mc:Ignorable="d"
-        Title="Редактирование транспорта" 
-        Height="550" Width="500"
+       Title="Редактирование транспорта" 
+        Height="650" Width="500"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource BackgroundLight}">
-    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Border Style="{StaticResource Card}" Padding="25" Margin="20">
             <StackPanel>
                 <TextBlock Text="Редактирование транспорта" FontSize="22" FontWeight="SemiBold" 
-                       Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,25"/>
 
                 <TextBlock Text="Модель" Style="{StaticResource FieldLabel}"/>
                 <TextBox x:Name="txtModel" Style="{StaticResource InputField}" Height="40"/>
@@ -22,30 +22,43 @@
                 <TextBlock Text="Регистрационный номер" Style="{StaticResource FieldLabel}"/>
                 <TextBox x:Name="txtRegNumber" Style="{StaticResource InputField}" Height="40"/>
 
-                <TextBlock Text="Грузоподъемность (кг)" Style="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="txtCapacityKg" Style="{StaticResource InputField}" Height="40"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Грузоподъемность (кг)" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="txtCapacityKg" Style="{StaticResource InputField}" Height="40"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Объем (м³)" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="txtCapacityM3" Style="{StaticResource InputField}" Height="40"/>
+                    </StackPanel>
+                </Grid>
 
-                <TextBlock Text="Объем (м³)" Style="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="txtCapacityM3" Style="{StaticResource InputField}" Height="40"/>
+                <TextBlock Text="Статус" Style="{StaticResource FieldLabel}" Margin="0,10,0,0"/>
+                <ComboBox x:Name="cmbStatus" Style="{StaticResource ComboBoxField}" Height="40" SelectedValuePath="TruckStatus_id">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
-                <TextBlock Text="Габариты (ДхШхВ)" Style="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="txtDimensions" Style="{StaticResource InputField}" Height="40" />
+                <TextBlock Text="Водитель" Style="{StaticResource FieldLabel}" Margin="0,10,0,0"/>
+                <ComboBox x:Name="cmbDriver" Style="{StaticResource ComboBoxField}" Height="40" SelectedValuePath="Driver_id">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DriverName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
-                <TextBlock Text="Год выпуска" Style="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="txtYear" Style="{StaticResource InputField}" Height="40"/>
-
-                <TextBlock Text="Расход топлива (л/100км)" Style="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="txtFuelConsumption" Style="{StaticResource InputField}" Height="40"/>
-
-                <TextBlock Text="Статус" Style="{StaticResource FieldLabel}"/>
-                <ComboBox x:Name="cmbStatus" Style="{StaticResource ComboBoxField}" Height="40"/>
-
-                <TextBlock Text="Водитель" Style="{StaticResource FieldLabel}"/>
-                <ComboBox x:Name="cmbDriver" Style="{StaticResource ComboBoxField}" Height="40"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,25,0,0">
-                    <Button Content="Сохранить" Style="{StaticResource ActionButton}" Width="100" Height="40" Click="Save_Click"/>
-                    <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" Width="100" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+                    <Button Content="Сохранить" Style="{StaticResource ActionButton}" Width="120" Height="40" Click="Save_Click"/>
+                    <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" Width="120" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
                 </StackPanel>
             </StackPanel>
         </Border>

@@ -6,42 +6,48 @@
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
          d:DesignHeight="768" d:DesignWidth="1366"
-      Title="Управление платежами" 
+ Title="Управление платежами" 
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40"/>
+            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="120" Height="40"/>
 
-            <ComboBox x:Name="cmbStatusFilter" Style="{StaticResource ComboBoxField}" Width="150" Height="40" Margin="10,0,0,0" 
-                      SelectionChanged="StatusFilter_Changed">
-                <ComboBoxItem Content="Все статусы"/>
-                <ComboBoxItem Content="Ожидает оплаты"/>
-                <ComboBoxItem Content="Оплачен"/>
-                <ComboBoxItem Content="Отменен"/>
-                <ComboBoxItem Content="Возврат"/>
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="30,0,5,0" FontWeight="Bold"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="0 6 0 6"
+                     TextChanged="Search_TextChanged" />
+
+            <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="20,0,5,0" FontWeight="Bold"/>
+            <ComboBox x:Name="cmbStatusFilter" 
+                      Style="{StaticResource ComboBoxField}" 
+                      Width="180" Height="40" 
+                      SelectionChanged="StatusFilter_Changed"
+                      SelectedValuePath="PaymentStatus_id">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="PaymentsGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" MinWidth="900">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID платежа" Binding="{Binding Payment_id}" Width="80"/>
-                    <DataGridTextColumn Header="№ заказа" Binding="{Binding OrderNumber}" Width="120"/>
-                    <DataGridTextColumn Header="Клиент" Binding="{Binding ClientName}" Width="150"/>
-                    <DataGridTextColumn Header="Сумма" Binding="{Binding Amount, StringFormat={}{0:N2} руб.}" Width="120"/>
-                    <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="120"/>
-                    <DataGridTextColumn Header="Способ оплаты" Binding="{Binding Payment_method}" Width="130"/>
-                    <DataGridTextColumn Header="Дата транзакции" Binding="{Binding Transaction_date, StringFormat=dd.MM.yyyy HH:mm}" Width="150"/>
-                    <DataGridTextColumn Header="Дата оплаты" Binding="{Binding Paid_date, StringFormat=dd.MM.yyyy HH:mm}" Width="150"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+        <DataGrid x:Name="PaymentsGrid" Grid.Row="1" Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Payment_id}" Width="60"/>
+                <DataGridTextColumn Header="№ Заказа" Binding="{Binding OrderNumber}" Width="120"/>
+                <DataGridTextColumn Header="Клиент" Binding="{Binding ClientName}" Width="*"/>
+                <DataGridTextColumn Header="Сумма" Binding="{Binding Amount, StringFormat={}{0:N2} руб.}" Width="120"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="130"/>
+                <DataGridTextColumn Header="Метод" Binding="{Binding Payment_method}" Width="120"/>
+                <DataGridTextColumn Header="Дата транзакции" Binding="{Binding Transaction_date, StringFormat=dd.MM.yyyy HH:mm}" Width="150"/>
+                <DataGridTextColumn Header="Дата оплаты" Binding="{Binding Paid_date, StringFormat=dd.MM.yyyy HH:mm}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

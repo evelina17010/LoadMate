@@ -8,21 +8,7 @@
   Title="Управление пользователями" 
       d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
-
-    <Page.Resources>
-        <Style TargetType="{x:Type ScrollBar}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ScrollBar}">
-                        <Grid x:Name="Bg" Background="Transparent" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Width" Value="0"/>
-            <Setter Property="MinWidth" Value="0"/>
-        </Style>
-    </Page.Resources>
-
+  
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -36,7 +22,7 @@
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="120" Height="40" Margin="10,0,0,0"/>
 
             <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="30,0,5,0" FontWeight="Bold"/>
-            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" 
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="0 6 0 6"
                      TextChanged="Search_TextChanged" />
 
             <TextBlock Text="Роль:" VerticalAlignment="Center" Margin="20,0,5,0" FontWeight="Bold"/>

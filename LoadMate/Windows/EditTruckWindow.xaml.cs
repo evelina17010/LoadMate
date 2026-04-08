@@ -21,93 +21,67 @@ namespace LoadMate.Windows
     public partial class EditTruckWindow : Window
     {
         private Truck currentTruck;
+
         public EditTruckWindow(Truck truck)
         {
             InitializeComponent();
             currentTruck = truck;
-            LoadStatuses();
-            LoadDrivers();
-            LoadTruckData();
+            LoadData();
         }
-        private void LoadStatuses()
-        {
-            cmbStatus.ItemsSource = Conn.loadMateEntities.TruckStatus.ToList();
-            cmbStatus.DisplayMemberPath = "Name";
-            cmbStatus.SelectedValuePath = "TruckStatus_id";
-        }
-        private void LoadDrivers()
-        {
-            var driverList = Conn.loadMateEntities.Driver.Select(d => new {d.Driver_id,
-            DriverName = d.User.Full_name}).ToList<object>();
-            driverList.Insert(0, new { Driver_id = 0, DriverName = "Не назначен" });
-            cmbDriver.ItemsSource = driverList;
-            cmbDriver.DisplayMemberPath = "DriverName";
-            cmbDriver.SelectedValuePath = "Driver_id";
-        }
-        private void LoadTruckData()
-        {
-            txtModel.Text = currentTruck.Model;
-            txtRegNumber.Text = currentTruck.Registration_number;
-            txtCapacityKg.Text = currentTruck.Capacity_kg.ToString();
-            txtCapacityM3.Text = currentTruck.Capacity_m3.ToString();
-            txtDimensions.Text = currentTruck.Dimensions;
-            txtYear.Text = currentTruck.Year_manufacture?.ToString() ?? "";
-            txtFuelConsumption.Text = currentTruck.Fuel_consumption?.ToString() ?? "";
-            cmbStatus.SelectedValue = currentTruck.TruckStatus_id;
-            cmbDriver.SelectedValue = currentTruck.Driver_id ?? 0;
-        }
-        private bool TryParseDecimal(string input, out decimal result)
-        {
-            if (string.IsNullOrWhiteSpace(input)) { result = 0; return false; }
-            return decimal.TryParse(input.Replace(".", ","), out result);
-        }
-        private bool ValidateData()
-        {
-            if (string.IsNullOrWhiteSpace(txtModel.Text) || string.IsNullOrWhiteSpace(txtRegNumber.Text))
-            {
-                MessageBox.Show("Заполните модель и номер", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-            if (!TryParseDecimal(txtCapacityKg.Text, out decimal kg) || kg <= 0 ||
-                !TryParseDecimal(txtCapacityM3.Text, out decimal m3) || m3 <= 0)
-            {
-                MessageBox.Show("Введите корректные числа для веса и объема", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-            if (cmbStatus.SelectedValue == null)
-            {
-                MessageBox.Show("Выберите статус", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-            return true;
-        }
-        private void Save_Click(object sender, RoutedEventArgs e)
+
+        private void LoadData()
         {
             try
             {
-                if (!ValidateData()) return;
+                cmbStatus.ItemsSource = Conn.loadMateEntities.TruckStatus.ToList();
+                var drivers = Conn.loadMateEntities.Driver.Select(d => new
+                {
+                    d.Driver_id,
+                    DriverName = d.User.Full_name
+                }).ToList();
+                var driverList = new List<object> { new { Driver_id = (int?)null, DriverName = "Не назначен" } };
+                driverList.AddRange(drivers.Cast<object>());
+
+                cmbDriver.ItemsSource = driverList;
+                txtModel.Text = currentTruck.Model;
+                txtRegNumber.Text = currentTruck.Registration_number;
+                txtCapacityKg.Text = currentTruck.Capacity_kg.ToString();
+                txtCapacityM3.Text = currentTruck.Capacity_m3.ToString();
+                cmbStatus.SelectedValue = currentTruck.TruckStatus_id;
+                cmbDriver.SelectedValue = currentTruck.Driver_id;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки данных: " + ex.Message);
+            }
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtModel.Text) || cmbStatus.SelectedValue == null)
+            {
+                MessageBox.Show("Заполните модель и выберите статус!");
+                return;
+            }
+
+            try
+            {
                 currentTruck.Model = txtModel.Text.Trim();
                 currentTruck.Registration_number = txtRegNumber.Text.Trim().ToUpper();
-                TryParseDecimal(txtCapacityKg.Text, out decimal kg);
-                currentTruck.Capacity_kg = kg;
-                TryParseDecimal(txtCapacityM3.Text, out decimal m3);
-                currentTruck.Capacity_m3 = m3;
-                currentTruck.Dimensions = string.IsNullOrWhiteSpace(txtDimensions.Text) ? null : txtDimensions.Text.Trim();
-                if (int.TryParse(txtYear.Text, out int year)) currentTruck.Year_manufacture = year;
-                else currentTruck.Year_manufacture = null;
-                if (TryParseDecimal(txtFuelConsumption.Text, out decimal fuel)) currentTruck.Fuel_consumption = fuel;
-                else currentTruck.Fuel_consumption = null;
+                if (decimal.TryParse(txtCapacityKg.Text.Replace(".", ","), out decimal kg))
+                   currentTruck.Capacity_kg = kg;
+                if (decimal.TryParse(txtCapacityM3.Text.Replace(".", ","), out decimal m3))
+                    currentTruck.Capacity_m3 = m3;
                 currentTruck.TruckStatus_id = (int)cmbStatus.SelectedValue;
-                int selectedId = Convert.ToInt32(cmbDriver.SelectedValue);
-                currentTruck.Driver_id = (selectedId == 0) ? null : (int?)selectedId;
+                var selectedDriverId = cmbDriver.SelectedValue;
+                currentTruck.Driver_id = (selectedDriverId == null) ? null : (int?)selectedDriverId;
                 Conn.loadMateEntities.SaveChanges();
-               MessageBox.Show("Сохранено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}");
             }
         }
         private void Cancel_Click(object sender, RoutedEventArgs e)

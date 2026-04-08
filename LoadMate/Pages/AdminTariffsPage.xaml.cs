@@ -32,23 +32,44 @@ namespace LoadMate.Pages
 
         private void LoadTariffs()
         {
-            var tariffs = Conn.loadMateEntities.Tariff.ToList();
-            TariffsGrid.ItemsSource = tariffs;
+            try
+            {
+                var tariffs = Conn.loadMateEntities.Tariff.ToList();
+                TariffsGrid.ItemsSource = tariffs;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке тарифов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void TariffsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            selectedTariff = TariffsGrid.SelectedItem as Tariff;
+            try
+            {
+                selectedTariff = TariffsGrid.SelectedItem as Tariff;
+            }
+            catch
+            {
+                selectedTariff = null;
+            }
         }
 
         private void AddTariff_Click(object sender, RoutedEventArgs e)
         {
-            var addWindow = new AddTariffWindow();
-            addWindow.Owner = Application.Current.MainWindow;
-            if (addWindow.ShowDialog() == true)
+            try
             {
-                LoadTariffs();
-                MessageBox.Show("Тариф добавлен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                var addWindow = new AddTariffWindow();
+                addWindow.Owner = Application.Current.MainWindow;
+                if (addWindow.ShowDialog() == true)
+                {
+                    LoadTariffs();
+                    MessageBox.Show("Тариф добавлен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при добавлении тарифа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -60,12 +81,19 @@ namespace LoadMate.Pages
                 return;
             }
 
-            var editWindow = new EditTariffWindow(selectedTariff);
-            editWindow.Owner = Application.Current.MainWindow;
-            if (editWindow.ShowDialog() == true)
+            try
             {
-                LoadTariffs();
-                MessageBox.Show("Данные обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                var editWindow = new EditTariffWindow(selectedTariff);
+                editWindow.Owner = Application.Current.MainWindow;
+                if (editWindow.ShowDialog() == true)
+                {
+                    LoadTariffs();
+                    MessageBox.Show("Данные обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при редактировании тарифа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -82,10 +110,17 @@ namespace LoadMate.Pages
 
             if (result == MessageBoxResult.Yes)
             {
-                Conn.loadMateEntities.Tariff.Remove(selectedTariff);
-                Conn.loadMateEntities.SaveChanges();
-                LoadTariffs();
-                MessageBox.Show("Тариф удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    Conn.loadMateEntities.Tariff.Remove(selectedTariff);
+                    Conn.loadMateEntities.SaveChanges();
+                    LoadTariffs();
+                    MessageBox.Show("Тариф удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Не удалось удалить тариф. Возможно, он используется в других записях. {ex.Message}", "Ошибка удаления", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 

@@ -5,11 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-    Title="Управление водителями" 
-       d:DesignHeight="768" d:DesignWidth="1366"
+   Title="Управление водителями" 
+      d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -21,24 +21,29 @@
             <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteDriver_Click" Width="100" Height="40" Margin="10,0,0,0"/>
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40" Margin="10,0,0,0"/>
 
-            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="20,0,0,0" 
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="30,0,5,0" FontWeight="Bold"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="0 6 0 6"
                      TextChanged="Search_TextChanged"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="DriversGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="DriversGrid_SelectionChanged" MinWidth="900">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Driver_id}" Width="50"/>
-                    <DataGridTextColumn Header="ФИО" Binding="{Binding DriverName}" Width="200"/>
-                    <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="120"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
-                    <DataGridTextColumn Header="Номер лицензии" Binding="{Binding License_number}" Width="120"/>
-                    <DataGridTextColumn Header="Стаж (лет)" Binding="{Binding Experience_years}" Width="80"/>
-                    <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
-                    <DataGridTextColumn Header="Дата приема" Binding="{Binding Hire_date, StringFormat=dd.MM.yyyy}" Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+        <DataGrid x:Name="DriversGrid" 
+                  Grid.Row="1" 
+                  Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" 
+                  SelectionMode="Single" 
+                  SelectionChanged="DriversGrid_SelectionChanged"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Driver_id}" Width="50"/>
+                <DataGridTextColumn Header="ФИО" Binding="{Binding DriverName}" Width="200"/>
+                <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="120"/>
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
+                <DataGridTextColumn Header="Номер лицензии" Binding="{Binding License_number}" Width="120"/>
+                <DataGridTextColumn Header="Стаж (лет)" Binding="{Binding Experience_years}" Width="80"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
+                <DataGridTextColumn Header="Дата приема" Binding="{Binding Hire_date, StringFormat=dd.MM.yyyy}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
+using System.Data.Entity;
 
 namespace LoadMate.Pages
 {
@@ -31,46 +33,78 @@ namespace LoadMate.Pages
 
         private void LoadCargo()
         {
-            var cargoList = Conn.loadMateEntities.Cargo.ToList();
-
-            var cargoWithDetails = cargoList.Select(c => new
+            try
             {
-                c.Cargo_id,
-                ClientName = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == c.Client_id)?.Full_name ?? "Не указан",
-                CargoTypeName = Conn.loadMateEntities.CargoType.FirstOrDefault(ct => ct.CargoType_id == c.CargoType_id)?.Name ?? "Не указан",
-                c.Description,
-                c.Weight_kg,
-                c.Volume_m3,
-                c.Is_fragile,
-                c.Is_dangerous,
-                c.Created_at
-            }).ToList();
+                string search = txtSearch.Text.Trim().ToLower();
 
-            CargoGrid.ItemsSource = cargoWithDetails;
+                var cargoList = Conn.loadMateEntities.Cargo
+                    .Include(c => c.User)
+                    .Include(c => c.CargoType)
+                    .ToList();
+
+                var cargoWithDetails = cargoList.Select(c => new
+                {
+                    c.Cargo_id,
+                    ClientName = c.User?.Full_name ?? "Не указан",
+                    CargoTypeName = c.CargoType?.Name ?? "Не указан",
+                    Description = c.Description ?? "Без описания",
+                    c.Weight_kg,
+                    c.Volume_m3,
+                    IsFragileText = c.Is_fragile ? "Да" : "Нет",
+                    IsDangerousText = c.Is_dangerous ? "Да" : "Нет",
+                    c.Created_at,
+                    OriginalObject = c
+                }).ToList();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    cargoWithDetails = cargoWithDetails.Where(c =>
+                        (c.Description != null && c.Description.ToLower().Contains(search)) ||
+                        (c.ClientName != null && c.ClientName.ToLower().Contains(search))).ToList();
+                }
+
+                CargoGrid.ItemsSource = cargoWithDetails;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CargoGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selected = CargoGrid.SelectedItem;
-            if (selected != null)
+            try
             {
-                var property = selected.GetType().GetProperty("Cargo_id");
-                if (property != null)
+                if (CargoGrid.SelectedItem != null)
                 {
-                    int cargoId = (int)property.GetValue(selected);
-                    selectedCargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == cargoId);
+                    dynamic selected = CargoGrid.SelectedItem;
+                    selectedCargo = selected.OriginalObject;
                 }
+                else
+                {
+                    selectedCargo = null;
+                }
+            }
+            catch
+            {
+                selectedCargo = null;
             }
         }
 
         private void AddCargo_Click(object sender, RoutedEventArgs e)
         {
-            var addWindow = new Windows.AddCargoWindow();
-            addWindow.Owner = Application.Current.MainWindow;
-            if (addWindow.ShowDialog() == true)
+            try
             {
-                LoadCargo();
-                MessageBox.Show("Груз добавлен", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                var addWindow = new Windows.AddCargoWindow();
+                addWindow.Owner = Application.Current.MainWindow;
+                if (addWindow.ShowDialog() == true)
+                {
+                    LoadCargo();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при открытии окна добавления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -78,16 +112,22 @@ namespace LoadMate.Pages
         {
             if (selectedCargo == null)
             {
-                MessageBox.Show("Выберите груз", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Выберите груз для редактирования", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var editWindow = new Windows.EditCargoWindow(selectedCargo);
-            editWindow.Owner = Application.Current.MainWindow;
-            if (editWindow.ShowDialog() == true)
+            try
             {
-                LoadCargo();
-                MessageBox.Show("Данные обновлены", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                var editWindow = new Windows.EditCargoWindow(selectedCargo);
+                editWindow.Owner = Application.Current.MainWindow;
+                if (editWindow.ShowDialog() == true)
+                {
+                    LoadCargo();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при редактировании: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -95,53 +135,33 @@ namespace LoadMate.Pages
         {
             if (selectedCargo == null)
             {
-                MessageBox.Show("Выберите груз", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Выберите груз для удаления", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var result = MessageBox.Show($"Удалить груз \"{selectedCargo.Description}\"?",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show($"Вы уверены, что хотите удалить груз \"{selectedCargo.Description}\"?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
-                Conn.loadMateEntities.Cargo.Remove(selectedCargo);
-                Conn.loadMateEntities.SaveChanges();
-                LoadCargo();
-                MessageBox.Show("Груз удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    Conn.loadMateEntities.Cargo.Remove(selectedCargo);
+                    Conn.loadMateEntities.SaveChanges();
+
+                    MessageBox.Show("Груз успешно удален", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadCargo();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Не удалось удалить груз. Возможно, он связан с существующим заказом. {ex.Message}", "Ошибка удаления", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var entry = Conn.loadMateEntities.Entry(selectedCargo);
+                    if (entry.State == EntityState.Deleted) entry.State = EntityState.Unchanged;
+                }
             }
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            LoadCargo();
-        }
+        private void Refresh_Click(object sender, RoutedEventArgs e) => LoadCargo();
 
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string search = txtSearch.Text.Trim();
-            var cargoList = Conn.loadMateEntities.Cargo.ToList();
-
-            var cargoWithDetails = cargoList.Select(c => new
-            {
-                c.Cargo_id,
-                ClientName = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == c.Client_id)?.Full_name ?? "Не указан",
-                CargoTypeName = Conn.loadMateEntities.CargoType.FirstOrDefault(ct => ct.CargoType_id == c.CargoType_id)?.Name ?? "Не указан",
-                c.Description,
-                c.Weight_kg,
-                c.Volume_m3,
-                c.Is_fragile,
-                c.Is_dangerous,
-                c.Created_at
-            }).ToList();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                cargoWithDetails = cargoWithDetails.Where(c =>
-                    c.Description.Contains(search) ||
-                    c.ClientName.Contains(search)).ToList();
-            }
-
-            CargoGrid.ItemsSource = cargoWithDetails;
-        }
+        private void Search_TextChanged(object sender, TextChangedEventArgs e) => LoadCargo();
     }
 }

@@ -5,38 +5,42 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-       Title="Управление тарифами" 
-           d:DesignHeight="768" d:DesignWidth="1366"
+      Title="Управление тарифами" 
+      d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button Content="Добавить" Style="{StaticResource ActionButton}" Click="AddTariff_Click" Width="100" Height="40"/>
-            <Button Content="Редактировать" Style="{StaticResource ActionButton}" Click="EditTariff_Click" Width="100" Height="40" Margin="10,0,0,0"/>
-            <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteTariff_Click" Width="100" Height="40" Margin="10,0,0,0"/>
-            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Добавить" Style="{StaticResource ActionButton}" Click="AddTariff_Click" Width="120" Height="40"/>
+            <Button Content="Редактировать" Style="{StaticResource ActionButton}" Click="EditTariff_Click" Width="140" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteTariff_Click" Width="120" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="120" Height="40" Margin="10,0,0,0"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="TariffsGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="TariffsGrid_SelectionChanged" MinWidth="1000">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Tariff_id}" Width="50"/>
-                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="150"/>
-                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="200"/>
-                    <DataGridTextColumn Header="Цена за км" Binding="{Binding Cost_per_km, StringFormat={}{0:N2} руб.}" Width="100"/>
-                    <DataGridTextColumn Header="Цена за кг" Binding="{Binding Cost_per_kg, StringFormat={}{0:N2} руб.}" Width="100"/>
-                    <DataGridTextColumn Header="Цена за м³" Binding="{Binding Cost_per_m3, StringFormat={}{0:N2} руб.}" Width="100"/>
-                    <DataGridTextColumn Header="Доп. сбор" Binding="{Binding Additional_cost, StringFormat={}{0:N2} руб.}" Width="100"/>
-                    <DataGridTextColumn Header="Мин. цена" Binding="{Binding Min_price, StringFormat={}{0:N2} руб.}" Width="100"/>
-                    <DataGridCheckBoxColumn Header="Активен" Binding="{Binding Is_active}" Width="70"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+        <DataGrid x:Name="TariffsGrid" 
+                  Grid.Row="1" 
+                  Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" 
+                  SelectionMode="Single" 
+                  SelectionChanged="TariffsGrid_SelectionChanged"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Tariff_id}" Width="50"/>
+                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="150"/>
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Цена за км" Binding="{Binding Cost_per_km, StringFormat={}{0:N2} руб.}" Width="110"/>
+                <DataGridTextColumn Header="Цена за кг" Binding="{Binding Cost_per_kg, StringFormat={}{0:N2} руб.}" Width="110"/>
+                <DataGridTextColumn Header="Цена за м³" Binding="{Binding Cost_per_m3, StringFormat={}{0:N2} руб.}" Width="110"/>
+                <DataGridTextColumn Header="Доп. сбор" Binding="{Binding Additional_cost, StringFormat={}{0:N2} руб.}" Width="100"/>
+                <DataGridTextColumn Header="Мин. цена" Binding="{Binding Min_price, StringFormat={}{0:N2} руб.}" Width="100"/>
+                <DataGridCheckBoxColumn Header="Активен" Binding="{Binding Is_active}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

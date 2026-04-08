@@ -436,7 +436,8 @@
         </Style>
         <Style TargetType="{x:Type ScrollBar}">
             <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
-            <Setter Property="Background" Value="#F9F9F9"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Opacity" Value="0.4"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
@@ -458,12 +459,16 @@
             </Setter>
 
             <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+
                 <Trigger Property="Orientation" Value="Horizontal">
-                    <Setter Property="Height" Value="7"/>
+                    <Setter Property="Height" Value="8"/>
                     <Setter Property="Width" Value="Auto"/>
                 </Trigger>
                 <Trigger Property="Orientation" Value="Vertical">
-                    <Setter Property="Width" Value="7"/>
+                    <Setter Property="Width" Value="8"/>
                     <Setter Property="Height" Value="Auto"/>
                 </Trigger>
             </Style.Triggers>

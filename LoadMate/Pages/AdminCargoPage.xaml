@@ -9,37 +9,40 @@
         d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button Content="Добавить" Style="{StaticResource ActionButton}" Click="AddCargo_Click" Width="100" Height="40"/>
-            <Button Content="Редактировать" Style="{StaticResource ActionButton}" Click="EditCargo_Click" Width="100" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Добавить" Style="{StaticResource ActionButton}" Click="AddCargo_Click" Width="120" Height="40"/>
+            <Button Content="Редактировать" Style="{StaticResource ActionButton}" Click="EditCargo_Click" Width="140" Height="40" Margin="10,0,0,0"/>
             <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteCargo_Click" Width="100" Height="40" Margin="10,0,0,0"/>
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40" Margin="10,0,0,0"/>
-
-            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="20,0,0,0" TextChanged="Search_TextChanged"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="250" Height="40"  Margin="20 6 0 6" Tag="Поиск по клиенту или описанию..." TextChanged="Search_TextChanged"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="CargoGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="CargoGrid_SelectionChanged"
-                      MinWidth="1000">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Cargo_id}" Width="50"/>
-                    <DataGridTextColumn Header="Клиент" Binding="{Binding Client.Full_name}" Width="150"/>
-                    <DataGridTextColumn Header="Тип груза" Binding="{Binding CargoType.Name}" Width="100"/>
-                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="200"/>
-                    <DataGridTextColumn Header="Вес (кг)" Binding="{Binding Weight_kg}" Width="80"/>
-                    <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Volume_m3}" Width="80"/>
-                    <DataGridTextColumn Header="Хрупкий" Binding="{Binding Is_fragile}" Width="60"/>
-                    <DataGridTextColumn Header="Опасный" Binding="{Binding Is_dangerous}" Width="60"/>
-                    <DataGridTextColumn Header="Дата создания" Binding="{Binding Created_at, StringFormat=dd.MM.yyyy}" Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+        <DataGrid x:Name="CargoGrid" Grid.Row="1"
+                  Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" 
+                  SelectionMode="Single" 
+                  IsReadOnly="True"
+                  SelectionChanged="CargoGrid_SelectionChanged"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Cargo_id}" Width="50"/>
+                <DataGridTextColumn Header="Клиент" Binding="{Binding ClientName}" Width="180"/>
+                <DataGridTextColumn Header="Тип груза" Binding="{Binding CargoTypeName}" Width="120"/>
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Вес (кг)" Binding="{Binding Weight_kg}" Width="80"/>
+                <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Volume_m3}" Width="80"/>
+                <DataGridTextColumn Header="Хрупкий" Binding="{Binding IsFragileText}" Width="80"/>
+                <DataGridTextColumn Header="Опасный" Binding="{Binding IsDangerousText}" Width="80"/>
+                <DataGridTextColumn Header="Дата" Binding="{Binding Created_at, StringFormat=dd.MM.yyyy}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>
