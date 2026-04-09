@@ -17,7 +17,13 @@
                        Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,25"/>
 
                 <TextBlock Text="Выберите новый статус" Style="{StaticResource FieldLabel}" FontSize="14"/>
-                <ComboBox x:Name="cmbStatus" Style="{StaticResource ComboBoxField}" Height="45" Margin="0,5,0,25"/>
+                <ComboBox x:Name="cmbStatus" Style="{StaticResource ComboBoxField}" Height="45" Margin="0,5,0,25" SelectedValuePath="OrderStatus_id">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button Content="Сохранить" Style="{StaticResource ActionButton}" Width="120" Height="40" Click="Save_Click"/>

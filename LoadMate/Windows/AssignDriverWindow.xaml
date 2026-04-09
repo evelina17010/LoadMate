@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LoadMate.Windows"
         mc:Ignorable="d"
      Title="Назначение водителя" 
-        Height="550" Width="750"
+        Height="735" Width="750"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource BackgroundLight}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

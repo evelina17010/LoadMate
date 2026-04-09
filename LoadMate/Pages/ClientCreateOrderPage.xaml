@@ -5,11 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-  Title="Создание заказа" 
+      Title="Создание заказа" 
       d:DesignHeight="850" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,40" Width="650">
             <Border Style="{StaticResource Card}" Padding="40">
                 <StackPanel>
@@ -17,10 +17,16 @@
                                Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,30"/>
 
                     <TextBlock Text="Описание груза" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="txtDescription" Style="{StaticResource InputField}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" ToolTip="Введите описание груза"/>
+                    <TextBox x:Name="txtDescription" Style="{StaticResource InputField}" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
 
                     <TextBlock Text="Тип груза" Style="{StaticResource FieldLabel}"/>
-                    <ComboBox x:Name="cmbCargoType" Style="{StaticResource ComboBoxField}" Height="45"/>
+                    <ComboBox x:Name="cmbCargoType" Style="{StaticResource ComboBoxField}" Height="45" SelectedValuePath="CargoType_id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <Grid Margin="0,10">
                         <Grid.ColumnDefinitions>
@@ -30,37 +36,73 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Вес (кг)" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="txtWeight" Style="{StaticResource InputField}" Height="45"/>
+                            <TextBox x:Name="txtWeight" Style="{StaticResource InputField}" Height="45" TextChanged="UpdateCost_Event"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Объем (м³)" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="txtVolume" Style="{StaticResource InputField}" Height="45"/>
+                            <TextBox x:Name="txtVolume" Style="{StaticResource InputField}" Height="45" TextChanged="UpdateCost_Event"/>
                         </StackPanel>
                     </Grid>
 
                     <TextBlock Text="Пункт отправления" FontWeight="Bold" Margin="0,15,0,5" Style="{StaticResource FieldLabel}"/>
-                    <ComboBox x:Name="cmbStartCity" Style="{StaticResource ComboBoxField}" Height="45" SelectionChanged="City_SelectionChanged" Tag="Start"/>
-                    <ComboBox x:Name="cmbStartStreet" Style="{StaticResource ComboBoxField}" Height="45" Margin="0,5,0,0" ToolTip="Выберите улицу"/>
-                    <TextBox x:Name="txtStartHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" ToolTip="Номер дома"/>
+                    <ComboBox x:Name="cmbStartCity" Style="{StaticResource ComboBoxField}" Height="45" 
+                              SelectionChanged="City_SelectionChanged" Tag="Start" SelectedValuePath="City_id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <ComboBox x:Name="cmbStartStreet" Style="{StaticResource ComboBoxField}" Height="45" Margin="0,5,0,0" SelectedValuePath="Street_id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox x:Name="txtStartHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" />
 
                     <TextBlock Text="Пункт назначения" FontWeight="Bold" Margin="0,20,0,5" Style="{StaticResource FieldLabel}"/>
-                    <ComboBox x:Name="cmbEndCity" Style="{StaticResource ComboBoxField}" Height="45" SelectionChanged="City_SelectionChanged" Tag="End"/>
-                    <ComboBox x:Name="cmbEndStreet" Style="{StaticResource ComboBoxField}" Height="45" Margin="0,5,0,0" ToolTip="Выберите улицу"/>
-                    <TextBox x:Name="txtEndHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" ToolTip="Номер дома"/>
+                    <ComboBox x:Name="cmbEndCity" Style="{StaticResource ComboBoxField}" Height="45" 
+                              SelectionChanged="City_SelectionChanged" Tag="End" SelectedValuePath="City_id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <ComboBox x:Name="cmbEndStreet" Style="{StaticResource ComboBoxField}" Height="45" Margin="0,5,0,0" SelectedValuePath="Street_id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox x:Name="txtEndHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" />
 
                     <TextBlock Text="Желаемая дата отправки" Style="{StaticResource FieldLabel}" Margin="0,20,0,5"/>
                     <DatePicker x:Name="dpScheduledPickup" Style="{StaticResource DatePickerField}" Height="45"/>
 
                     <TextBlock Text="Тариф" Style="{StaticResource FieldLabel}"/>
-                    <ComboBox x:Name="cmbTariff" Style="{StaticResource ComboBoxField}" Height="45" SelectionChanged="Tariff_SelectionChanged"/>
+                    <ComboBox x:Name="cmbTariff" Style="{StaticResource ComboBoxField}" Height="45" 
+                              SelectionChanged="UpdateCost_Event" SelectedValuePath="Tariff_id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <Border Background="{StaticResource BackgroundLight}" CornerRadius="8" Padding="15" Margin="0,20,0,0">
                         <TextBlock x:Name="txtCost" Text="Предварительная стоимость: 0 руб." FontSize="16" FontWeight="Bold" 
                                    Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center"/>
                     </Border>
 
-                    <Button Content="Рассчитать стоимость" Style="{StaticResource ActionButton}" Height="45" Click="CalculateCost_Click" Margin="0,15,0,10" Background="Transparent" Foreground="{StaticResource PrimaryColor}" BorderBrush="{StaticResource PrimaryColor}" BorderThickness="1"/>
-                    <Button Content="Подтвердить и заказать" Style="{StaticResource ActionButton}" Background="{StaticResource PrimaryColor}" Height="55" FontSize="18" Click="CreateOrder_Click"/>
+                    <Button Content="Подтвердить и заказать" Style="{StaticResource ActionButton}" 
+                            Background="{StaticResource PrimaryColor}" Height="55" FontSize="18" 
+                            Click="CreateOrder_Click" Margin="0,20,0,0"/>
                 </StackPanel>
             </Border>
         </Grid>

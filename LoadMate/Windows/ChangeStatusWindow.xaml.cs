@@ -28,7 +28,6 @@ namespace LoadMate.Windows
 
             var statuses = Conn.loadMateEntities.OrderStatus.ToList();
             cmbStatus.ItemsSource = statuses;
-            cmbStatus.DisplayMemberPath = "Name";
             cmbStatus.SelectedValuePath = "OrderStatus_id";
             cmbStatus.SelectedValue = currentStatusId;
         }

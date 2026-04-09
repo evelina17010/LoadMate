@@ -9,7 +9,7 @@
       d:DesignHeight="900" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Hidden">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,40" Width="700">
             <Border Style="{StaticResource Card}" Padding="40">
                 <StackPanel>

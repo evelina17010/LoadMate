@@ -5,29 +5,31 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-    Title="Управление заказами" 
+     Title="Управление заказами" 
       d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40"/>
             <Button Content="Изменить статус" Style="{StaticResource ActionButton}" Click="ChangeStatus_Click" Width="120" Height="40" Margin="10,0,0,0"/>
             <Button Content="Назначить водителя" Style="{StaticResource ActionButton}" Click="AssignDriver_Click" Width="140" Height="40" Margin="10,0,0,0"/>
             <Button Content="Назначить транспорт" Style="{StaticResource ActionButton}" Click="AssignTruck_Click" Width="140" Height="40" Margin="10,0,0,0"/>
 
             <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="30,0,5,0" FontWeight="Bold"/>
-            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" TextChanged="Search_TextChanged"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="0 6 0 6" TextChanged="Search_TextChanged"/>
 
             <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="20,0,5,0" FontWeight="Bold"/>
             <ComboBox x:Name="cmbStatusFilter" 
-              Style="{StaticResource ComboBoxField}" 
-              Width="180" Height="40" 
-              SelectionChanged="StatusFilter_Changed">
+                      Style="{StaticResource ComboBoxField}"  
+                      Width="180" Height="40"  
+                      SelectionChanged="StatusFilter_Changed"
+                      SelectedValuePath="OrderStatus_id">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" />
@@ -35,40 +37,33 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="OrdersGrid" 
-                      Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" 
-                      SelectionMode="Single" 
-                      SelectionChanged="OrdersGrid_SelectionChanged" 
-                      MinWidth="1200"
-                      VerticalScrollBarVisibility="Hidden" 
-                      HorizontalScrollBarVisibility="Disabled"
-                      ScrollViewer.CanContentScroll="True">
 
-                <DataGrid.Resources>
-                    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource {x:Type ScrollBar}}">
-                        <Style.Triggers>
-                            <Trigger Property="Orientation" Value="Vertical">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.Resources>
+        <DataGrid x:Name="OrdersGrid" 
+                  Grid.Row="1"
+                  Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" 
+                  SelectionMode="Single" 
+                  SelectionChanged="OrdersGrid_SelectionChanged"
+                  ScrollViewer.HorizontalScrollBarVisibility="Visible" 
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.CanContentScroll="True">
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="№ заказа" Binding="{Binding Order_number}" Width="120"/>
-                    <DataGridTextColumn Header="Клиент" Binding="{Binding Cargo.Client.Full_name}" Width="150"/>
-                    <DataGridTextColumn Header="Груз" Binding="{Binding Cargo.Description}" Width="150"/>
-                    <DataGridTextColumn Header="Откуда" Binding="{Binding Route.Start_point}" Width="150"/>
-                    <DataGridTextColumn Header="Куда" Binding="{Binding Route.End_point}" Width="150"/>
-                    <DataGridTextColumn Header="Водитель" Binding="{Binding Truck.Driver.User.Full_name}" Width="120"/>
-                    <DataGridTextColumn Header="Транспорт" Binding="{Binding Truck.Model}" Width="100"/>
-                    <DataGridTextColumn Header="Статус" Binding="{Binding OrderStatus.Name}" Width="100"/>
-                    <DataGridTextColumn Header="Стоимость" Binding="{Binding Price, StringFormat={}{0:N2} руб.}" Width="100"/>
-                    <DataGridTextColumn Header="Дата" Binding="{Binding Order_date, StringFormat=dd.MM.yyyy}" Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+            <DataGrid.Resources>
+                <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource {x:Type ScrollBar}}"/>
+            </DataGrid.Resources>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="№ заказа" Binding="{Binding Order_number}" Width="120"/>
+                <DataGridTextColumn Header="Клиент" Binding="{Binding ClientName}" Width="150"/>
+                <DataGridTextColumn Header="Груз" Binding="{Binding CargoDescription}" Width="150"/>
+                <DataGridTextColumn Header="Откуда" Binding="{Binding RouteFrom}" Width="150"/>
+                <DataGridTextColumn Header="Куда" Binding="{Binding RouteTo}" Width="150"/>
+                <DataGridTextColumn Header="Водитель" Binding="{Binding DriverName}" Width="120"/>
+                <DataGridTextColumn Header="Транспорт" Binding="{Binding TruckModel}" Width="100"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
+                <DataGridTextColumn Header="Стоимость" Binding="{Binding Price, StringFormat={}{0:N2} руб.}" Width="100"/>
+                <DataGridTextColumn Header="Дата" Binding="{Binding Order_date, StringFormat=dd.MM.yyyy}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

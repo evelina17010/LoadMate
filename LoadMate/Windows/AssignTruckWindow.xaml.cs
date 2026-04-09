@@ -23,6 +23,7 @@ namespace LoadMate.Windows
         private Order currentOrder;
         private Truck selectedTruck;
         private Cargo currentCargo;
+
         public AssignTruckWindow(Order order)
         {
             InitializeComponent();
@@ -30,7 +31,8 @@ namespace LoadMate.Windows
             LoadOrderInfo();
             LoadTrucks();
         }
-       private void LoadOrderInfo()
+
+        private void LoadOrderInfo()
         {
             txtOrderNumber.Text = currentOrder.Order_number;
             currentCargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == currentOrder.Cargo_id);
@@ -40,12 +42,14 @@ namespace LoadMate.Windows
                 txtVolume.Text = currentCargo.Volume_m3.ToString() + " м³";
             }
         }
+
         private void LoadTrucks()
         {
             var trucks = Conn.loadMateEntities.Truck.ToList();
             UpdateGrid(trucks);
         }
-        private void UpdateGrid(List<Truck> trucks)
+
+        private void UpdateGrid(System.Collections.Generic.List<Truck> trucks)
         {
             var trucksWithDetails = trucks.Select(t => new
             {
@@ -60,19 +64,22 @@ namespace LoadMate.Windows
 
             TrucksGrid.ItemsSource = trucksWithDetails;
         }
+
         private string GetDriverName(int? driverId)
         {
             if (!driverId.HasValue) return "Не назначен";
             var driver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == driverId);
             if (driver == null) return "Не назначен";
             var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == driver.User_id);
-            return user?.Full_name ?? "Не назначен";
+            return user != null ? user.Full_name : "Не назначен";
         }
+
         private string GetTruckStatusName(int statusId)
         {
             var status = Conn.loadMateEntities.TruckStatus.FirstOrDefault(ts => ts.TruckStatus_id == statusId);
-            return status?.Name ?? "Не указан";
+            return status != null ? status.Name : "Не указан";
         }
+
         private void ApplyFilter_Click(object sender, RoutedEventArgs e)
         {
             var query = Conn.loadMateEntities.Truck.AsQueryable();
@@ -86,6 +93,7 @@ namespace LoadMate.Windows
             }
             UpdateGrid(query.ToList());
         }
+
         private void TrucksGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = TrucksGrid.SelectedItem;
@@ -99,6 +107,7 @@ namespace LoadMate.Windows
                 }
             }
         }
+
         private void Assign_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -108,11 +117,7 @@ namespace LoadMate.Windows
                     MessageBox.Show("Выберите транспортное средство из списка.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                if (selectedTruck.Driver_id == null)
-                {
-                    MessageBox.Show("Выбранный транспорт не имеет назначенного водителя.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+
                 if (currentCargo != null)
                 {
                     if (selectedTruck.Capacity_kg < currentCargo.Weight_kg)
@@ -126,11 +131,13 @@ namespace LoadMate.Windows
                         return;
                     }
                 }
+
                 if (selectedTruck.TruckStatus_id != 1)
                 {
                     var result = MessageBox.Show("Транспорт не имеет статуса 'Доступен'. Продолжить назначение?", "Предупреждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (result == MessageBoxResult.No) return;
                 }
+
                 currentOrder.Truck_id = selectedTruck.Truck_id;
                 selectedTruck.TruckStatus_id = 3;
                 Conn.loadMateEntities.SaveChanges();
@@ -142,6 +149,7 @@ namespace LoadMate.Windows
                 MessageBox.Show($"Ошибка: {ex.Message}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

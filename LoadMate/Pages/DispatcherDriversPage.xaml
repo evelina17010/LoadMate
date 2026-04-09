@@ -6,10 +6,10 @@
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
      Title="Водители" 
-          d:DesignHeight="768" d:DesignWidth="1366"
+      d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -17,28 +17,38 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40"/>
-            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="20,0,0,0" 
-                     TextChanged="Search_TextChanged" />
 
-            <ComboBox x:Name="cmbStatusFilter" Style="{StaticResource ComboBoxField}" Width="150" Height="40" Margin="10,0,0,0" 
-                      SelectionChanged="StatusFilter_Changed">
-                <ComboBoxItem Content="Все статусы"/>
-                <ComboBoxItem Content="Доступен"/>
-                <ComboBoxItem Content="На маршруте"/>
-                <ComboBoxItem Content="Не доступен"/>
-                <ComboBoxItem Content="Отдых"/>
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="20,0,5,0" FontWeight="Bold"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="0,6,0,6" TextChanged="Search_TextChanged"/>
+
+            <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="20,0,5,0" FontWeight="Bold"/>
+            <ComboBox x:Name="cmbStatusFilter" 
+                      Style="{StaticResource ComboBoxField}"  
+                      Width="180" Height="40"  
+                      SelectionChanged="StatusFilter_Changed"
+                      SelectedValuePath="DriverStatus_id">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="DriversGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" MinWidth="800">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <DataGrid x:Name="DriversGrid" 
+                      Style="{StaticResource DataGridStyle}" 
+                      AutoGenerateColumns="False" 
+                      MinWidth="700" 
+                      CanUserAddRows="False"
+                      SelectionMode="Single"
+                      IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ФИО" Binding="{Binding DriverName}" Width="200"/>
-                    <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="120"/>
-                    <DataGridTextColumn Header="Номер лицензии" Binding="{Binding License_number}" Width="120"/>
+                    <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="130"/>
+                    <DataGridTextColumn Header="Номер лицензии" Binding="{Binding License_number}" Width="130"/>
                     <DataGridTextColumn Header="Стаж (лет)" Binding="{Binding Experience_years}" Width="80"/>
-                    <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
+                    <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="120"/>
                 </DataGrid.Columns>
             </DataGrid>
         </ScrollViewer>

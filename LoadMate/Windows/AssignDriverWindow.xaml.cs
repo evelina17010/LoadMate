@@ -95,17 +95,32 @@ namespace LoadMate.Windows
                     MessageBox.Show("Пожалуйста, выберите водителя из списка.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Driver_id == _selectedDriver.Driver_id);
-                if (truck == null)
+                var newTruck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Driver_id == _selectedDriver.Driver_id);
+                if (newTruck == null)
                 {
-                    MessageBox.Show("За выбранным водителем не закреплен транспорт в системе.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("За выбранным водителем не закреплен транспорт.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _currentOrder.Truck_id = truck.Truck_id;
+
+                if (_currentOrder.Truck_id != 0)
+                {
+                    var oldTruck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == _currentOrder.Truck_id);
+                    if (oldTruck != null && oldTruck.Driver_id.HasValue)
+                    {
+                        var oldDriver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == oldTruck.Driver_id);
+                        if (oldDriver != null)
+                        {
+                            oldDriver.DriverStatus_id = 1; 
+                        }
+                    }
+                }
+                _currentOrder.Truck_id = newTruck.Truck_id;
                 _currentOrder.OrderStatus_id = 3; 
                 _selectedDriver.DriverStatus_id = 2; 
                 Conn.loadMateEntities.SaveChanges();
-                MessageBox.Show("Водитель успешно назначен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                MessageBox.Show($"Водитель {_selectedDriver.User.Full_name} успешно назначен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+
                 DialogResult = true;
                 Close();
             }

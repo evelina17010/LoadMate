@@ -12,16 +12,16 @@
             <GradientStop Color="#2E7D32" Offset="1"/>
         </LinearGradientBrush>
 
-            <SolidColorBrush x:Key="PrimaryColor" Color="#4CAF50"/>
-            <SolidColorBrush x:Key="PrimaryDarkColor" Color="#388E3C"/>
-            <SolidColorBrush x:Key="PrimaryLightColor" Color="#E8F5E9"/>
-            <SolidColorBrush x:Key="TextPrimary" Color="#1A202C"/>
-            <SolidColorBrush x:Key="TextSecondary" Color="#718096"/>
-            <SolidColorBrush x:Key="BackgroundLight" Color="#F7FAFC"/>
-            <SolidColorBrush x:Key="BackgroundWhite" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="BorderColor" Color="#E2E8F0"/>
-            <SolidColorBrush x:Key="ErrorColor" Color="#E53E3E"/>
-            <SolidColorBrush x:Key="SidebarBg" Color="#F0F7E8"/>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#4CAF50"/>
+        <SolidColorBrush x:Key="PrimaryDarkColor" Color="#388E3C"/>
+        <SolidColorBrush x:Key="PrimaryLightColor" Color="#E8F5E9"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1A202C"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#718096"/>
+        <SolidColorBrush x:Key="BackgroundLight" Color="#F7FAFC"/>
+        <SolidColorBrush x:Key="BackgroundWhite" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="ErrorColor" Color="#E53E3E"/>
+        <SolidColorBrush x:Key="SidebarBg" Color="#F0F7E8"/>
         <SolidColorBrush x:Key="ScrollThumbBrush" Color="#BCBCBC"/>
         <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#8E8E8E"/>
 
@@ -353,7 +353,7 @@
             </Setter>
         </Style>
 
-       
+
 
         <Style x:Key="DatePickerField" TargetType="DatePicker">
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -364,7 +364,7 @@
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="Margin" Value="0,5,0,15"/>
         </Style>
-       
+
         <Style x:Key="InputFieldWithPlaceholder" TargetType="TextBox" BasedOn="{StaticResource InputField}">
             <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
             <Style.Triggers>
@@ -397,6 +397,9 @@
             <Setter Property="SelectionMode" Value="Single"/>
             <Setter Property="AutoGenerateColumns" Value="False"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
             <Setter Property="ColumnHeaderStyle">
                 <Setter.Value>
                     <Style TargetType="DataGridColumnHeader">
@@ -411,7 +414,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="FieldLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>

@@ -25,18 +25,43 @@ namespace LoadMate.Pages
         public DispatcherDriversPage()
         {
             InitializeComponent();
+            LoadStatusFilter();
             LoadDrivers();
+        }
+
+        private void LoadStatusFilter()
+        {
+            try
+            {
+                var statuses = Conn.loadMateEntities.DriverStatus.ToList();
+                statuses.Insert(0, new DriverStatus { DriverStatus_id = 0, Name = "Все статусы" });
+                cmbStatusFilter.ItemsSource = statuses;
+                cmbStatusFilter.SelectedValuePath = "DriverStatus_id";
+                cmbStatusFilter.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки статусов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LoadDrivers()
         {
-            var drivers = Conn.loadMateEntities.Driver
-                .Include(d => d.User)
-                .Include(d => d.DriverStatus)
-                .ToList();
+            try
+            {
+                var drivers = Conn.loadMateEntities.Driver
+                    .Include(d => d.User)
+                    .Include(d => d.DriverStatus)
+                    .ToList();
 
-            UpdateGrid(drivers);
+                UpdateGrid(drivers);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки водителей: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
         private void UpdateGrid(List<Driver> drivers)
         {
             var driversWithDetails = drivers.Select(d => new
@@ -52,30 +77,49 @@ namespace LoadMate.Pages
 
             DriversGrid.ItemsSource = driversWithDetails;
         }
-        private void Refresh_Click(object sender, RoutedEventArgs e) => LoadDrivers();
 
-        private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            LoadDrivers();
+        }
 
-        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();
+        private void Search_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilters();
+        }
 
         private void ApplyFilters()
         {
-            string search = txtSearch.Text.Trim().ToLower();
-            var query = Conn.loadMateEntities.Driver
-                .Include(d => d.User)
-                .Include(d => d.DriverStatus)
-                .AsQueryable();
-            if (!string.IsNullOrEmpty(search))
+            try
             {
-                query = query.Where(d => d.User.Full_name.ToLower().Contains(search) ||
-                                         d.User.Phone.Contains(search));
+                string search = txtSearch.Text.Trim().ToLower();
+                var query = Conn.loadMateEntities.Driver
+                    .Include(d => d.User)
+                    .Include(d => d.DriverStatus)
+                    .AsQueryable();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(d => d.User.Full_name.ToLower().Contains(search) ||
+                                             d.User.Phone.Contains(search));
+                }
+
+                if (cmbStatusFilter.SelectedItem is DriverStatus selectedStatus && selectedStatus.DriverStatus_id != 0)
+                {
+                    query = query.Where(d => d.DriverStatus_id == selectedStatus.DriverStatus_id);
+                }
+
+                UpdateGrid(query.ToList());
             }
-            if (cmbStatusFilter.SelectedItem is ComboBoxItem selected && selected.Content.ToString() != "Все статусы")
+            catch (Exception ex)
             {
-                string statusName = selected.Content.ToString();
-                query = query.Where(d => d.DriverStatus.Name == statusName);
+                MessageBox.Show($"Ошибка фильтрации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            UpdateGrid(query.ToList());
         }
     }
 }

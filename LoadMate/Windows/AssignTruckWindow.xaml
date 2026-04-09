@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LoadMate.Windows"
         mc:Ignorable="d"
-     Title="Назначение транспорта" 
-        Height="500" Width="800"
+      Title="Назначение транспорта" 
+        Height="825" Width="800"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource BackgroundLight}">
-    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Border Style="{StaticResource Card}" Padding="25" Margin="20">
             <Grid>
                 <Grid.RowDefinitions>
@@ -20,11 +21,11 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="Назначение транспорта на заказ" FontSize="22" FontWeight="SemiBold" 
-                       Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="15" Margin="0,0,0,20">
+                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="15" Margin="0,0,0,20" Background="#F9F9F9">
                     <StackPanel>
-                        <TextBlock Text="Информация о заказе" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Информация о заказе" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="{StaticResource TextPrimary}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -52,34 +53,40 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="300"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15" VerticalAlignment="Center">
                         <CheckBox x:Name="chkOnlyAvailable" Content="Только доступный транспорт" Margin="0,0,20,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Мин. грузоподъемность (кг):" VerticalAlignment="Center"/>
-                        <TextBox x:Name="txtMinCapacity" Style="{StaticResource InputField}" Width="120" Height="35" Margin="10,0,0,0"/>
-                        <Button Content="Применить фильтр" Style="{StaticResource ActionButton}" Height="35" Click="ApplyFilter_Click" Margin="10,0,0,0"/>
+                        <TextBox x:Name="txtMinCapacity" Width="120" Height="30" Margin="10,0" VerticalContentAlignment="Center"/>
+                        <Button Content="Применить фильтр" Style="{StaticResource ActionButton}" Height="30" Click="ApplyFilter_Click" Margin="5,0,0,0" Width="130"/>
                     </StackPanel>
 
                     <TextBlock Grid.Row="1" Text="Доступные транспортные средства" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
-                    <DataGrid x:Name="TrucksGrid" Grid.Row="2" Style="{StaticResource DataGridStyle}" 
-                          AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="TrucksGrid_SelectionChanged">
+                    <DataGrid x:Name="TrucksGrid" 
+                              Grid.Row="2"
+                              Style="{StaticResource DataGridStyle}" 
+                              AutoGenerateColumns="False" 
+                              SelectionMode="Single" 
+                              IsReadOnly="True"
+                              SelectionChanged="TrucksGrid_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Модель" Binding="{Binding Model}" Width="*"/>
-                            <DataGridTextColumn Header="Рег. номер" Binding="{Binding Registration_number}" Width="120"/>
-                            <DataGridTextColumn Header="Грузоподъемность (кг)" Binding="{Binding Capacity_kg}" Width="120"/>
-                            <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Capacity_m3}" Width="100"/>
-                            <DataGridTextColumn Header="Водитель" Binding="{Binding Driver.User.Full_name}" Width="150"/>
-                            <DataGridTextColumn Header="Статус" Binding="{Binding TruckStatus.Name}" Width="100"/>
+                            <DataGridTextColumn Header="Рег. номер" Binding="{Binding Registration_number}" Width="110"/>
+                            <DataGridTextColumn Header="Грузоподъемность (кг)" Binding="{Binding Capacity_kg}" Width="140"/>
+                            <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Capacity_m3}" Width="90"/>
+                            <DataGridTextColumn Header="Водитель" Binding="{Binding DriverName}" Width="130"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
 
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                    <Button Content="Назначить" Style="{StaticResource ActionButton}" Width="120" Height="40" Click="Assign_Click"/>
-                    <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" Width="120" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
+                    <Button Content="Назначить" Style="{StaticResource ActionButton}" Width="130" Height="40" Click="Assign_Click"/>
+                    <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" 
+                            Width="130" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

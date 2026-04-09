@@ -27,17 +27,15 @@
                 <TextBlock Grid.Row="0" Text="LoadMate" FontSize="24" FontWeight="Bold" 
                            Foreground="{StaticResource PrimaryColor}" Margin="0,40,0,30" HorizontalAlignment="Center"/>
 
-                <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="15">
+                <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="10,15">
                     <StackPanel>
                         <Grid HorizontalAlignment="Center" Margin="0,0,0,10">
                             <Ellipse Width="45" Height="45" Fill="{StaticResource PrimaryColor}"/>
-                            <TextBlock Text="Д" Foreground="White" VerticalAlignment="Center" 
-                                       HorizontalAlignment="Center" FontWeight="Bold" FontSize="18"/>
+                            <TextBlock Text="Д" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18"/>
                         </Grid>
-                        <TextBlock Text="{Binding FullName}" FontSize="15" FontWeight="SemiBold" 
-                                   Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Text="Диспетчер" FontSize="11" Foreground="{StaticResource TextSecondary}" 
-                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding FullName}" 
+         FontSize="14"  FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"  HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="5,0"/>
+                        <TextBlock Text="Диспетчер" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
                 <StackPanel Grid.Row="2">

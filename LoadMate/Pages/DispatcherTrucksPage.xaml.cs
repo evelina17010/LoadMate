@@ -24,13 +24,41 @@ namespace LoadMate.Pages
         public DispatcherTrucksPage()
         {
             InitializeComponent();
+            LoadStatusFilter();
             LoadTrucks();
+        }
+
+        private void LoadStatusFilter()
+        {
+            try
+            {
+                var statuses = Conn.loadMateEntities.TruckStatus.ToList();
+                statuses.Insert(0, new TruckStatus { TruckStatus_id = 0, Name = "Все статусы" });
+                cmbStatusFilter.ItemsSource = statuses;
+                cmbStatusFilter.SelectedValuePath = "TruckStatus_id";
+                cmbStatusFilter.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки статусов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LoadTrucks()
         {
-            var trucks = Conn.loadMateEntities.Truck.ToList();
+            try
+            {
+                var trucks = Conn.loadMateEntities.Truck.ToList();
+                UpdateGrid(trucks);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки транспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
+        private void UpdateGrid(List<Truck> trucks)
+        {
             var trucksWithDetails = trucks.Select(t => new
             {
                 t.Truck_id,
@@ -78,39 +106,29 @@ namespace LoadMate.Pages
 
         private void ApplyFilters()
         {
-            string search = txtSearch.Text.Trim();
-            var trucks = Conn.loadMateEntities.Truck.ToList();
-
-            var trucksWithDetails = trucks.Select(t => new
+            try
             {
-                t.Truck_id,
-                t.Model,
-                t.Registration_number,
-                t.Capacity_kg,
-                t.Capacity_m3,
-                t.TruckStatus_id,
-                DriverName = GetDriverName(t.Driver_id),
-                StatusName = GetTruckStatusName(t.TruckStatus_id)
-            }).ToList();
+                string search = txtSearch.Text.Trim();
+                var trucks = Conn.loadMateEntities.Truck.ToList();
 
-            if (!string.IsNullOrEmpty(search))
-            {
-                trucksWithDetails = trucksWithDetails.Where(t =>
-                    t.Model.Contains(search) ||
-                    t.Registration_number.Contains(search)).ToList();
-            }
-
-            if (cmbStatusFilter.SelectedItem is ComboBoxItem selected && selected.Content.ToString() != "Все статусы")
-            {
-                string statusName = selected.Content.ToString();
-                var status = Conn.loadMateEntities.TruckStatus.FirstOrDefault(ts => ts.Name == statusName);
-                if (status != null)
+                if (!string.IsNullOrEmpty(search))
                 {
-                    trucksWithDetails = trucksWithDetails.Where(t => t.TruckStatus_id == status.TruckStatus_id).ToList();
+                    trucks = trucks.Where(t =>
+                        t.Model.Contains(search) ||
+                        t.Registration_number.Contains(search)).ToList();
                 }
-            }
 
-            TrucksGrid.ItemsSource = trucksWithDetails;
+                if (cmbStatusFilter.SelectedItem is TruckStatus selectedStatus && selectedStatus.TruckStatus_id != 0)
+                {
+                    trucks = trucks.Where(t => t.TruckStatus_id == selectedStatus.TruckStatus_id).ToList();
+                }
+
+                UpdateGrid(trucks);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка фильтрации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
