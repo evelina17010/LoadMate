@@ -53,7 +53,7 @@ namespace LoadMate.Pages
 
         private void Cargo_Click(object sender, RoutedEventArgs e)
         {
-
+            NavigationService.Navigate(new ClientCargoPage());
         }
     }
 }

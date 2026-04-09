@@ -93,11 +93,25 @@ namespace LoadMate.Pages
             else
             {
                 cmbEndStreet.ItemsSource = streets;
-                cmbEndStreet.DisplayMemberPath = "Name";
                 cmbEndStreet.SelectedValuePath = "Street_id";
             }
         }
-
+        private void ClearFields()
+        {
+            txtStartHouse.Text = string.Empty;
+            txtEndHouse.Text = string.Empty;
+            txtDescription.Text = string.Empty;
+            txtWeight.Text = string.Empty;
+            txtVolume.Text = string.Empty;
+            txtCost.Text = "Предварительная стоимость: 0.00 руб.";
+            cmbStartCity.SelectedIndex = -1;
+            cmbEndCity.SelectedIndex = -1;
+            cmbStartStreet.ItemsSource = null;
+            cmbEndStreet.ItemsSource = null;
+            cmbCargoType.SelectedIndex = -1;
+            cmbTariff.SelectedIndex = -1;
+            dpScheduledPickup.SelectedDate = DateTime.Now.AddDays(1);
+        }
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateInput()) return;
@@ -173,7 +187,7 @@ namespace LoadMate.Pages
                     SendOrderConfirmationEmail(order, price);
 
                     MessageBox.Show($"Заказ №{order.Order_number} успешно создан!");
-                    NavigationService.GoBack();
+                    ClearFields();
                 }
                 catch (Exception ex)
                 {
