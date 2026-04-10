@@ -1,5 +1,4 @@
-﻿// Pages/RegisterPage.xaml.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -24,6 +23,22 @@ namespace LoadMate.Pages
         public RegisterPage()
         {
             InitializeComponent();
+            LoadGenders();
+        }
+
+        private void LoadGenders()
+        {
+            try
+            {
+                var genders = Conn.loadMateEntities.Gender.ToList();
+                cmbGender.SelectedValuePath = "Gender_id";
+                cmbGender.ItemsSource = genders;
+                if (genders.Count > 0) cmbGender.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки справочников: " + ex.Message);
+            }
         }
 
         private string HashPassword(string password)
@@ -32,86 +47,100 @@ namespace LoadMate.Pages
             {
                 byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
+                foreach (byte b in bytes) builder.Append(b.ToString("x2"));
                 return builder.ToString();
             }
-        } 
+        }
+
         private bool IsDataValid(string fullName, string email, string phone, string username, string password, string confirmPassword)
         {
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                MessageBox.Show("Заполните все обязательные поля (ФИО, Email, Логин, Пароль)", "Ошибка валидации");
+                MessageBox.Show("Все поля, кроме телефона, обязательны для заполнения.", "Валидация");
                 return false;
             }
-            string emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            if (!Regex.IsMatch(email, emailPattern))
+            if (!Regex.IsMatch(fullName, @"^[a-zA-Zа-яА-ЯёЁ\s\-]+$") || fullName.Trim().Split(' ').Length < 2)
             {
-                MessageBox.Show("Введите корректный адрес электронной почты", "Ошибка валидации");
+                MessageBox.Show("Введите корректное ФИО (только буквы, Фамилия Имя).", "Валидация");
                 return false;
             }
-            if (!string.IsNullOrEmpty(phone))
+
+            if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                string cleanPhone = Regex.Replace(phone, @"[^\d]", "");
-                if (cleanPhone.Length < 10)
+                MessageBox.Show("Введите корректный адрес электронной почты.", "Валидация");
+                return false;
+            }
+            if (!string.IsNullOrWhiteSpace(phone))
+            {
+                if (!Regex.IsMatch(phone, @"^(\+7|8)\d{10}$"))
                 {
-                    MessageBox.Show("Номер телефона слишком короткий", "Ошибка валидации");
+                    MessageBox.Show("Телефон должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.", "Валидация");
                     return false;
                 }
             }
-            if (username.Length < 3 || username.Contains(" "))
+            if (cmbGender.SelectedValue == null)
             {
-                MessageBox.Show("Логин должен быть не менее 3 символов и не содержать пробелов", "Ошибка валидации");
+                MessageBox.Show("Выберите пол.", "Валидация");
                 return false;
             }
-            if (password.Length < 6)
+
+            if (password.Length < 6 || !password.Any(char.IsDigit) || !password.Any(char.IsLetter))
             {
-                MessageBox.Show("Пароль должен содержать не менее 6 символов", "Ошибка валидации");
+                MessageBox.Show("Пароль должен быть не менее 6 символов и содержать как буквы, так и цифры.", "Безопасность");
                 return false;
             }
             if (password != confirmPassword)
             {
-                MessageBox.Show("Пароли не совпадают", "Ошибка валидации");
+                MessageBox.Show("Пароли не совпадают.", "Валидация");
                 return false;
             }
+
             return true;
         }
+
         private void Register_Click(object sender, RoutedEventArgs e)
         {
             string fullName = txtFullName.Text.Trim();
             string email = txtEmail.Text.Trim();
             string phone = txtPhone.Text.Trim();
             string username = txtUsername.Text.Trim();
-            string password = txtPassword.Password; 
+            string password = txtPassword.Password;
             string confirmPassword = txtConfirmPassword.Password;
+
             if (!IsDataValid(fullName, email, phone, username, password, confirmPassword))
                 return;
+
             try
             {
-                if (Conn.loadMateEntities.Login.Any(l => l.Username == username))
+                var db = Conn.loadMateEntities;
+
+                if (db.Login.Any(l => l.Username.ToLower() == username.ToLower()))
                 {
-                    MessageBox.Show("Пользователь с таким логином уже существует", "Ошибка");
+                    MessageBox.Show("Этот логин уже занят. Попробуйте другой.", "Ошибка");
                     return;
                 }
-                if (Conn.loadMateEntities.User.Any(u => u.Email == email))
+
+                if (db.User.Any(u => u.Email.ToLower() == email.ToLower()))
                 {
-                    MessageBox.Show("Пользователь с таким Email уже существует", "Ошибка");
+                    MessageBox.Show("Пользователь с таким Email уже зарегистрирован.", "Ошибка");
                     return;
                 }
+
                 var newUser = new User
                 {
                     Full_name = fullName,
                     Email = email,
                     Phone = phone,
-                    Role_id = 2, 
-                    UserStatus_id = 1, 
+                    Role_id = 2,
+                    Gender_id = (int)cmbGender.SelectedValue,
+                    UserStatus_id = 1,
                     Created_at = DateTime.Now
                 };
-                Conn.loadMateEntities.User.Add(newUser);
-                Conn.loadMateEntities.SaveChanges(); 
+
+                db.User.Add(newUser);
+                db.SaveChanges(); 
+
                 var newLogin = new Login
                 {
                     User_id = newUser.User_id,
@@ -120,23 +149,25 @@ namespace LoadMate.Pages
                     Is_active = true,
                     Failed_attempts = 0
                 };
-                Conn.loadMateEntities.Login.Add(newLogin);
-                Conn.loadMateEntities.SaveChanges();
-                MessageBox.Show("Регистрация прошла успешно!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                db.Login.Add(newLogin);
+                db.SaveChanges();
+
+                MessageBox.Show("Регистрация успешно завершена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 NavigationService.Navigate(new LoginPage());
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Критическая ошибка базы данных: {ex.Message}", "Ошибка");
+                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}", "Критическая ошибка");
             }
         }
-        private void Login_Click(object sender, RoutedEventArgs e)
-        {
-            NavigationService.Navigate(new LoginPage());
-        }
+
+        private void Login_Click(object sender, RoutedEventArgs e) => NavigationService.Navigate(new LoginPage());
+
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new MainPage());
+            if (NavigationService.CanGoBack) NavigationService.GoBack();
+            else NavigationService.Navigate(new MainPage());
         }
     }
 }

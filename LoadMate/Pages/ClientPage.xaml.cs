@@ -28,7 +28,6 @@ namespace LoadMate.Pages
             InitializeComponent();
             currentUser = user;
             DataContext = new { FullName = user.Full_name };
-            CreateOrder_Click(null, null);
         }
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
@@ -43,7 +42,7 @@ namespace LoadMate.Pages
 
         private void Payments_Click(object sender, RoutedEventArgs e)
         {
-           ClientFrame.NavigationService.Navigate(new ClientPaymentsPage(currentUser.User_id));
+            ClientFrame.NavigationService.Navigate(new ClientPaymentsPage(currentUser.User_id));
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
@@ -53,7 +52,7 @@ namespace LoadMate.Pages
 
         private void Cargo_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new ClientCargoPage());
+            ClientFrame.NavigationService.Navigate(new ClientCargoPage(currentUser.User_id));
         }
     }
 }

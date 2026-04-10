@@ -6,32 +6,37 @@
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
       Loaded="Page_Loaded"
-   Title="Мои платежи" 
-           d:DesignHeight="768" d:DesignWidth="1366"
+  Title="Мои платежи" 
+      d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40"/>
-            <Button Content="Оплатить" Style="{StaticResource ActionButton}" Click="Pay_Click" Width="100" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="120" Height="40"/>
+            <Button Content="Оплатить" Style="{StaticResource ActionButton}" Click="Pay_Click" Width="120" Height="40" Margin="10,0,0,0"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="PaymentsGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="PaymentsGrid_SelectionChanged" MinWidth="800">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="№ заказа" Binding="{Binding OrderNumber}" Width="100"/>
-                    <DataGridTextColumn Header="Сумма" Binding="{Binding Amount, StringFormat={}{0:N2} руб.}" Width="120"/>
-                    <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="120"/>
-                    <DataGridTextColumn Header="Дата платежа" Binding="{Binding Transaction_date, StringFormat=dd.MM.yyyy}" Width="120"/>
-                    <DataGridTextColumn Header="Способ оплаты" Binding="{Binding Payment_method}" Width="150"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+        <DataGrid x:Name="PaymentsGrid" Grid.Row="1" Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" SelectionMode="Single" SelectionChanged="PaymentsGrid_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="№ заказа" Binding="{Binding OrderNumber}" Width="*"/>
+                <DataGridTextColumn Header="Сумма" Binding="{Binding Amount, StringFormat={}{0:N2} руб.}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="*"/>
+                <DataGridTextColumn Header="Дата платежа" Binding="{Binding Transaction_date, StringFormat=dd.MM.yyyy}" Width="*"/>
+                <DataGridTextColumn Header="Способ оплаты" Binding="{Binding Payment_method}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

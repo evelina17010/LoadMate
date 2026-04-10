@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
+using System.Data.Entity;
 
 namespace LoadMate.Windows
 {
@@ -20,140 +23,124 @@ namespace LoadMate.Windows
     /// </summary>
     public partial class AssignTruckWindow : Window
     {
-        private Order currentOrder;
-        private Truck selectedTruck;
-        private Cargo currentCargo;
+        private Order _currentOrder;
+        private Truck _selectedTruck;
 
         public AssignTruckWindow(Order order)
         {
             InitializeComponent();
-            currentOrder = order;
+            _currentOrder = order;
             LoadOrderInfo();
-            LoadTrucks();
+            LoadAvailableTrucks();
         }
 
         private void LoadOrderInfo()
         {
-            txtOrderNumber.Text = currentOrder.Order_number;
-            currentCargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == currentOrder.Cargo_id);
-            if (currentCargo != null)
+            txtOrderNumber.Text = _currentOrder.Order_number;
+            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == _currentOrder.Cargo_id);
+            if (cargo != null)
             {
-                txtWeight.Text = currentCargo.Weight_kg.ToString() + " кг";
-                txtVolume.Text = currentCargo.Volume_m3.ToString() + " м³";
+                txtWeight.Text = $"{cargo.Weight_kg} кг";
             }
         }
 
-        private void LoadTrucks()
+        private void LoadAvailableTrucks()
         {
-            var trucks = Conn.loadMateEntities.Truck.ToList();
-            UpdateGrid(trucks);
-        }
+            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == _currentOrder.Cargo_id);
+            decimal cargoWeight = cargo?.Weight_kg ?? 0;
 
-        private void UpdateGrid(System.Collections.Generic.List<Truck> trucks)
-        {
-            var trucksWithDetails = trucks.Select(t => new
-            {
+            // Фильтр: статус "Свободен" (1) и грузоподъемность подходит под вес груза
+            var availableTrucks = Conn.loadMateEntities.Truck
+                .Where(t => t.TruckStatus_id == 1 && t.Capacity_kg >= cargoWeight)
+                .ToList();
+
+            TrucksGrid.ItemsSource = availableTrucks.Select(t => new {
                 t.Truck_id,
                 t.Model,
                 t.Registration_number,
                 t.Capacity_kg,
-                t.Capacity_m3,
-                DriverName = GetDriverName(t.Driver_id),
-                StatusName = GetTruckStatusName(t.TruckStatus_id)
+                DriverName = GetDriverName(t.Driver_id)
             }).ToList();
-
-            TrucksGrid.ItemsSource = trucksWithDetails;
         }
 
         private string GetDriverName(int? driverId)
         {
-            if (!driverId.HasValue) return "Не назначен";
+            if (driverId == null) return "Не привязан";
             var driver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == driverId);
-            if (driver == null) return "Не назначен";
             var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == driver.User_id);
-            return user != null ? user.Full_name : "Не назначен";
-        }
-
-        private string GetTruckStatusName(int statusId)
-        {
-            var status = Conn.loadMateEntities.TruckStatus.FirstOrDefault(ts => ts.TruckStatus_id == statusId);
-            return status != null ? status.Name : "Не указан";
-        }
-
-        private void ApplyFilter_Click(object sender, RoutedEventArgs e)
-        {
-            var query = Conn.loadMateEntities.Truck.AsQueryable();
-            if (chkOnlyAvailable.IsChecked == true)
-            {
-                query = query.Where(t => t.TruckStatus_id == 1);
-            }
-            if (decimal.TryParse(txtMinCapacity.Text, out decimal minCapacity) && minCapacity > 0)
-            {
-                query = query.Where(t => t.Capacity_kg >= minCapacity);
-            }
-            UpdateGrid(query.ToList());
-        }
-
-        private void TrucksGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selected = TrucksGrid.SelectedItem;
-            if (selected != null)
-            {
-                var property = selected.GetType().GetProperty("Truck_id");
-                if (property != null)
-                {
-                    int truckId = (int)property.GetValue(selected);
-                    selectedTruck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
-                }
-            }
+            return user?.Full_name ?? "Неизвестно";
         }
 
         private void Assign_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (TrucksGrid.SelectedItem == null) return;
+
+            dynamic selected = TrucksGrid.SelectedItem;
+            int truckId = selected.Truck_id;
+            _selectedTruck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
+
+            if (_selectedTruck != null)
             {
-                if (selectedTruck == null)
-                {
-                    MessageBox.Show("Выберите транспортное средство из списка.", "Валидация", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                var dbOrder = Conn.loadMateEntities.Order.FirstOrDefault(o => o.Order_id == _currentOrder.Order_id);
+                dbOrder.Truck_id = _selectedTruck.Truck_id;
+                dbOrder.OrderStatus_id = 3; // Статус "В процессе/Назначен"
 
-                if (currentCargo != null)
-                {
-                    if (selectedTruck.Capacity_kg < currentCargo.Weight_kg)
-                    {
-                        MessageBox.Show("Грузоподъемность транспорта меньше веса груза!", "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                    if (selectedTruck.Capacity_m3 < currentCargo.Volume_m3)
-                    {
-                        MessageBox.Show("Объем кузова меньше объема груза!", "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                }
-
-                if (selectedTruck.TruckStatus_id != 1)
-                {
-                    var result = MessageBox.Show("Транспорт не имеет статуса 'Доступен'. Продолжить назначение?", "Предупреждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.No) return;
-                }
-
-                currentOrder.Truck_id = selectedTruck.Truck_id;
-                selectedTruck.TruckStatus_id = 3;
                 Conn.loadMateEntities.SaveChanges();
+
+                // После назначения отправляем красивое письмо водителю
+                SendBeautifulEmailToDriver(dbOrder);
+
                 DialogResult = true;
                 Close();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка: {ex.Message}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
+        private void SendBeautifulEmailToDriver(Order order)
         {
-            DialogResult = false;
-            Close();
+            try
+            {
+                var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == order.Truck_id);
+                var driver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == truck.Driver_id);
+                var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == driver.User_id);
+                var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == order.Cargo_id);
+
+                if (string.IsNullOrEmpty(user?.Email)) return;
+
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate Logistics");
+                mail.To.Add(user.Email);
+                mail.Subject = $"Новый рейс №{order.Order_number}";
+                mail.IsBodyHtml = true;
+
+                mail.Body = $@"
+                <div style='font-family: sans-serif; background-color: #f1f5f9; padding: 20px;'>
+                    <div style='max-width: 500px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;'>
+                        <div style='background: #1e293b; padding: 20px; text-align: center; color: #fff;'>
+                            <h2 style='margin:0;'>LOADMATE</h2>
+                        </div>
+                        <div style='padding: 20px;'>
+                            <p><b>Здравствуйте, {user.Full_name}!</b></p>
+                            <p>Вам назначен новый заказ. Детали ниже:</p>
+                            <hr style='border: 0; border-top: 1px solid #eee;' />
+                            <p><b>Номер заказа:</b> {order.Order_number}</p>
+                            <p><b>Груз:</b> {cargo?.Description} ({cargo?.Weight_kg} кг)</p>
+                            <p><b>Автомобиль:</b> {truck.Model} ({truck.Registration_number})</p>
+                            <p><b>Грузоподъемность:</b> {truck.Capacity_kg} кг</p>
+                        </div>
+                        <div style='background: #f8fafc; padding: 15px; text-align: center; font-size: 12px; color: #64748b;'>
+                            © {DateTime.Now.Year} LoadMate System
+                        </div>
+                    </div>
+                </div>";
+
+                using (SmtpClient smtp = new SmtpClient("smtp.mail.ru", 587))
+                {
+                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Bmz8qEIDckirBNY5cEmE");
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Ошибка почты: " + ex.Message); }
         }
     }
 }

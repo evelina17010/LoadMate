@@ -31,26 +31,7 @@ namespace LoadMate.Pages
 
         private void LoadOrders()
         {
-            var orders = Conn.loadMateEntities.Order.ToList();
-            var ordersWithDetails = orders.Select(o => new
-            {
-                o.Order_id,
-                o.Order_number,
-                o.Price,
-                o.Order_date,
-                o.Scheduled_pickup,
-                o.Scheduled_delivery,
-                ClientName = GetClientName(o.Cargo_id),
-                CargoDescription = GetCargoDescription(o.Cargo_id),
-                RouteFrom = GetRouteAddress(o.Route_id, true),
-                RouteTo = GetRouteAddress(o.Route_id, false),
-                DriverName = GetDriverName(o.Truck_id),
-                TruckModel = GetTruckModel(o.Truck_id),
-                StatusName = GetOrderStatusName(o.OrderStatus_id),
-                StatusId = o.OrderStatus_id
-            }).ToList();
-
-            OrdersGrid.ItemsSource = ordersWithDetails;
+            ApplyFilters();
         }
 
         private string GetClientName(int cargoId)
@@ -85,20 +66,24 @@ namespace LoadMate.Pages
             return $"{city.Name}, {street.Name}, {address.House_number}";
         }
 
-        private string GetDriverName(int truckId)
+        private string GetDriverName(int? truckId)
         {
+            if (truckId == null || truckId == 0) return "Не назначен";
             var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
             if (truck == null || !truck.Driver_id.HasValue) return "Не назначен";
+
             var driver = Conn.loadMateEntities.Driver.FirstOrDefault(d => d.Driver_id == truck.Driver_id);
             if (driver == null) return "Не назначен";
+
             var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == driver.User_id);
             return user != null ? user.Full_name : "Не назначен";
         }
 
-        private string GetTruckModel(int truckId)
+        private string GetTruckModel(int? truckId)
         {
+            if (truckId == null || truckId == 0) return "Не назначен";
             var truck = Conn.loadMateEntities.Truck.FirstOrDefault(t => t.Truck_id == truckId);
-            return truck != null ? truck.Model : "Не назначен";
+            return truck != null ? $"{truck.Model} ({truck.Capacity_kg} кг)" : "Не назначен";
         }
 
         private string GetOrderStatusName(int statusId)
@@ -127,7 +112,13 @@ namespace LoadMate.Pages
                 mail.From = new System.Net.Mail.MailAddress("miftakhova_ev@mail.ru", "LoadMate: Новый заказ");
                 mail.To.Add(user.Email);
                 mail.Subject = $"Назначен новый заказ №{order.Order_number}";
-                mail.Body = $"Здравствуйте, {user.Full_name}!\n\nВам назначен новый заказ:\nНомер: {order.Order_number}\nОткуда: {fromAddress}\nКуда: {toAddress}\nДата забора: {order.Scheduled_pickup:dd.MM.yyyy}\nТранспорт: {truck.Model} ({truck.Registration_number})";
+                mail.Body = $"Здравствуйте, {user.Full_name}!\n\n" +
+                            $"Вам назначен новый заказ:\n" +
+                            $"Номер: {order.Order_number}\n" +
+                            $"Откуда: {fromAddress}\n" +
+                            $"Куда: {toAddress}\n" +
+                            $"Дата забора: {order.Scheduled_pickup:dd.MM.yyyy}\n" +
+                            $"Транспорт: {truck.Model} (Г/П: {truck.Capacity_kg} кг, Гос.номер: {truck.Registration_number})";
 
                 System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient("smtp.mail.ru", 587)
                 {
@@ -140,7 +131,7 @@ namespace LoadMate.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                MessageBox.Show("Ошибка при отправке уведомления водителю: " + ex.Message);
             }
         }
 
@@ -165,7 +156,12 @@ namespace LoadMate.Pages
 
         private void ChangeStatus_Click(object sender, RoutedEventArgs e)
         {
-            if (selectedOrder == null) return;
+            if (selectedOrder == null)
+            {
+                MessageBox.Show("Выберите заказ!");
+                return;
+            }
+
             var statusWindow = new ChangeStatusWindow(selectedOrder.OrderStatus_id);
             statusWindow.Owner = Application.Current.MainWindow;
             if (statusWindow.ShowDialog() == true)
@@ -184,7 +180,7 @@ namespace LoadMate.Pages
                 return;
             }
 
-            if (selectedOrder.Truck_id != 0)
+            if (selectedOrder.Truck_id != 0 && selectedOrder.Truck_id != 0)
             {
                 var result = MessageBox.Show(
                     "На этот заказ уже назначен транспорт. Вы хотите переназначить его?",
@@ -203,10 +199,8 @@ namespace LoadMate.Pages
                 Conn.loadMateEntities.SaveChanges();
                 SendEmailToDriver(selectedOrder);
                 LoadOrders();
-
-                MessageBox.Show("Транспорт успешно назначен, водителю отправлено уведомление.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-        } 
+        }
 
         private void AssignDriver_Click(object sender, RoutedEventArgs e)
         {
@@ -215,24 +209,16 @@ namespace LoadMate.Pages
                 MessageBox.Show("Пожалуйста, выберите заказ из списка.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (selectedOrder.Truck_id != 0)
-            {
-                var result = MessageBox.Show(
-                    "На этот заказ уже назначен водитель. Вы уверены, что хотите переназначить его?",
-                    "Подтверждение",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
 
-                if (result == MessageBoxResult.No) return;
-            }
             var driverWindow = new AssignDriverWindow(selectedOrder);
             driverWindow.Owner = Application.Current.MainWindow;
 
             if (driverWindow.ShowDialog() == true)
             {
-                LoadOrders(); 
+                LoadOrders();
             }
         }
+
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
             ApplyFilters();
@@ -251,7 +237,9 @@ namespace LoadMate.Pages
             {
                 selectedStatusId = (int)cmbStatusFilter.SelectedValue;
             }
+
             var ordersQuery = Conn.loadMateEntities.Order.ToList();
+
             var filteredOrders = ordersQuery.Where(o => {
                 bool matchesSearch = string.IsNullOrEmpty(search) ||
                                      o.Order_number.ToLower().Contains(search);
@@ -261,19 +249,23 @@ namespace LoadMate.Pages
 
                 return matchesSearch && matchesStatus;
             }).ToList();
+
             var details = filteredOrders.Select(o => new
             {
                 o.Order_id,
                 o.Order_number,
                 o.Price,
                 o.Order_date,
+                o.Scheduled_pickup,
+                o.Scheduled_delivery,
                 ClientName = GetClientName(o.Cargo_id),
                 CargoDescription = GetCargoDescription(o.Cargo_id),
                 RouteFrom = GetRouteAddress(o.Route_id, true),
                 RouteTo = GetRouteAddress(o.Route_id, false),
                 DriverName = GetDriverName(o.Truck_id),
-                TruckModel = GetTruckModel(o.Truck_id),
-                StatusName = GetOrderStatusName(o.OrderStatus_id)
+                TruckModel = GetTruckModel(o.Truck_id), 
+                StatusName = GetOrderStatusName(o.OrderStatus_id),
+                StatusId = o.OrderStatus_id
             }).ToList();
 
             OrdersGrid.ItemsSource = details;

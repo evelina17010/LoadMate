@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-      Title="Создание заказа" 
+    Title="Создание заказа" 
       d:DesignHeight="850" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
@@ -61,7 +61,7 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBox x:Name="txtStartHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" />
+                    <TextBox x:Name="txtStartHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" Tag="Дом"/>
 
                     <TextBlock Text="Пункт назначения" FontWeight="Bold" Margin="0,20,0,5" Style="{StaticResource FieldLabel}"/>
                     <ComboBox x:Name="cmbEndCity" Style="{StaticResource ComboBoxField}" Height="45" 
@@ -80,7 +80,7 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBox x:Name="txtEndHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" />
+                    <TextBox x:Name="txtEndHouse" Style="{StaticResource InputField}" Height="45" Margin="0,5,0,0" Tag="Дом"/>
 
                     <TextBlock Text="Желаемая дата отправки" Style="{StaticResource FieldLabel}" Margin="0,20,0,5"/>
                     <DatePicker x:Name="dpScheduledPickup" Style="{StaticResource DatePickerField}" Height="45"/>
@@ -101,7 +101,7 @@
                     </Border>
 
                     <Button Content="Подтвердить и заказать" Style="{StaticResource ActionButton}" 
-                            Background="{StaticResource PrimaryColor}" Height="55" FontSize="18" 
+                            Height="55" FontSize="18" 
                             Click="CreateOrder_Click" Margin="0,20,0,0"/>
                 </StackPanel>
             </Border>

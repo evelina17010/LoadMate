@@ -68,6 +68,7 @@ namespace LoadMate.Pages
         {
             LoadPayments();
         }
+
         private void Pay_Click(object sender, RoutedEventArgs e)
         {
             if (selectedPayment == null)
@@ -75,13 +76,16 @@ namespace LoadMate.Pages
                 MessageBox.Show("Выберите платеж для оплаты", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+
             if (selectedPayment.PaymentStatus_id == 2)
             {
                 MessageBox.Show("Этот платеж уже оплачен", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            NavigationService.Navigate(new PayPage(selectedPayment));
+            PayPage payPage = new PayPage(selectedPayment);
+            NavigationService.Navigate(payPage);
         }
     }
-}
+
+    }

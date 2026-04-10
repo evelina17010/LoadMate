@@ -1,0 +1,44 @@
+﻿<Window x:Class="LoadMate.Windows.QuickRegWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LoadMate.Windows"
+        mc:Ignorable="d"
+      Title="Регистрация нового клиента" Height="525" Width="400" 
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource BackgroundLight}">
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="Новый клиент" FontSize="22" FontWeight="Bold" 
+                       Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+            <TextBlock Text="ФИО клиента *" Style="{StaticResource FieldLabel}"/>
+            <TextBox x:Name="txtFullName" Style="{StaticResource InputField}" Height="40" Margin="0,5,0,15"/>
+
+            <TextBlock Text="Номер телефона" Style="{StaticResource FieldLabel}"/>
+            <TextBox x:Name="txtPhone" Style="{StaticResource InputField}" Height="40" Margin="0,5,0,15"/>
+
+            <TextBlock Text="Email *" Style="{StaticResource FieldLabel}"/>
+            <TextBox x:Name="txtEmail" Style="{StaticResource InputField}" Height="40" Margin="0,5,0,15"/>
+
+            <TextBlock Text="Пол" Style="{StaticResource FieldLabel}"/>
+            <ComboBox x:Name="cmbGender" 
+          Style="{StaticResource ComboBoxField}" 
+          Height="40" 
+          Margin="0,5,0,20">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <UniformGrid Columns="2">
+                <Button Content="Отмена" Click="Cancel_Click" Margin="0,0,5,0" Height="45" 
+                        Background="Gray" Style="{StaticResource ActionButton}"/>
+                <Button Content="Сохранить" Click="Save_Click" Margin="5,0,0,0" Height="45" 
+                        Background="{StaticResource PrimaryColor}" Style="{StaticResource ActionButton}"/>
+            </UniformGrid>
+        </StackPanel>
+    </Grid>
+</Window>

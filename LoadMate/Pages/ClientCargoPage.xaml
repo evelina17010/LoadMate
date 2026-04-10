@@ -5,114 +5,40 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-    Title="Мои заказы" 
+  Title="Мои грузы" 
       d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid Margin="30">
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,25">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="История заказов" FontSize="28" FontWeight="Bold" Foreground="{StaticResource PrimaryDark}"/>
-                <TextBlock Text="Управляйте вашими перевозками в реальном времени" FontSize="14" Foreground="Gray" Margin="0,5,0,0"/>
-            </StackPanel>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="120" Height="40"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="250" Height="40" Margin="20,0,0,0" 
+                     VerticalContentAlignment="Center" TextChanged="Search_TextChanged" Tag="Поиск груза..."/>
+        </StackPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                <TextBox x:Name="txtSearch" Tag="Поиск по номеру..." 
-                         Style="{StaticResource InputField}" Width="250" Height="40" 
-                         TextChanged="Search_TextChanged" Margin="0,0,15,0"/>
-
-                <Button Content="Обновить данные" Style="{StaticResource ActionButton}" 
-                        Click="Refresh_Click" Width="160" Height="40"/>
-            </StackPanel>
-        </DockPanel>
-
-        <Border Grid.Row="1" CornerRadius="12" Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
-            <DataGrid x:Name="OrdersGrid" 
-                      Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" 
-                      SelectionMode="Single"
-                      BorderThickness="0"
-                      Background="Transparent">
-
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="№ ЗАКАЗА" Binding="{Binding Order_number}" Width="140" FontWeight="SemiBold"/>
-
-                    <DataGridTextColumn Header="ГРУЗ" Binding="{Binding CargoDescription}" Width="*"/>
-
-                    <DataGridTemplateColumn Header="МАРШРУТ" Width="2.5*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
-                                    <TextBlock Text="{Binding RouteFrom}" FontWeight="Medium"/>
-                                    <TextBlock Text=" → " Foreground="{StaticResource PrimaryGreen}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding RouteTo}" FontWeight="Medium"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTemplateColumn Header="СТАТУС" Width="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="15" Padding="10,4" HorizontalAlignment="Left" Margin="5">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding StatusName}" Value="Новый">
-                                                    <Setter Property="Background" Value="#E3F2FD"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding StatusName}" Value="В пути">
-                                                    <Setter Property="Background" Value="#FFF3E0"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding StatusName}" Value="Доставлен">
-                                                    <Setter Property="Background" Value="#E8F5E9"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding StatusName}" Value="Завершен">
-                                                    <Setter Property="Background" Value="#F5F5F5"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock Text="{Binding StatusName}" FontSize="12" FontWeight="SemiBold">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding StatusName}" Value="Новый">
-                                                        <Setter Property="Foreground" Value="#1976D2"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding StatusName}" Value="В пути">
-                                                        <Setter Property="Foreground" Value="#EF6C00"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding StatusName}" Value="Доставлен">
-                                                        <Setter Property="Foreground" Value="#2E7D32"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn Header="СТОИМОСТЬ" Binding="{Binding Price, StringFormat={}{0:N2} ₽}" Width="130">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="Margin" Value="0,0,15,0"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <DataGridTextColumn Header="ДАТА" Binding="{Binding Order_date, StringFormat=dd.MM.yyyy}" Width="110"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+        <DataGrid x:Name="CargoGrid" Grid.Row="1" Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Cargo_id}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Тип груза" Binding="{Binding CargoTypeName}" Width="150"/>
+                <DataGridTextColumn Header="Вес (кг)" Binding="{Binding Weight_kg}" Width="100"/>
+                <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Volume_m3}" Width="100"/>
+                <DataGridTextColumn Header="Хрупкий" Binding="{Binding Is_fragile}" Width="100"/>
+                <DataGridTextColumn Header="Опасный" Binding="{Binding Is_dangerous}" Width="100"/>
+                <DataGridTextColumn Header="Дата создания" Binding="{Binding Created_at, StringFormat=dd.MM.yyyy}" Width="140"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

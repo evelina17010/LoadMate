@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
 using System.Transactions;
+using LoadMate.Windows;
 
 namespace LoadMate.Pages
 {
@@ -30,9 +31,9 @@ namespace LoadMate.Pages
         {
             InitializeComponent();
             this.clientId = clientId;
-            LoadData();
             dpScheduledPickup.DisplayDateStart = DateTime.Today;
             dpScheduledPickup.SelectedDate = DateTime.Now.AddDays(1);
+            LoadData();
         }
 
         private void LoadData()
@@ -40,121 +41,88 @@ namespace LoadMate.Pages
             try
             {
                 var db = Conn.loadMateEntities;
-
                 cmbCargoType.ItemsSource = db.CargoType.ToList();
-                cmbCargoType.SelectedValuePath = "CargoType_id";
-
                 cmbTariff.ItemsSource = db.Tariff.Where(t => t.Is_active == true).ToList();
-                cmbTariff.SelectedValuePath = "Tariff_id";
                 var cities = db.City.ToList();
                 cmbStartCity.ItemsSource = cities;
-                cmbStartCity.SelectedValuePath = "City_id";
-
                 cmbEndCity.ItemsSource = cities;
-                cmbEndCity.SelectedValuePath = "City_id";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при загрузке: " + ex.Message);
+                CustomMessageBox.Show("Ошибка при загрузке данных: " + ex.Message, "Ошибка");
             }
-        }
-
-        private void UpdateCost_Event(object sender, EventArgs e)
-        {
-            if (cmbTariff.SelectedItem is Tariff t)
-            {
-                txtCost.Text = $"Предварительная стоимость: {CalculateFinalCost(t):N2} руб.";
-            }
-        }
-
-        private decimal CalculateFinalCost(Tariff tariff)
-        {
-            decimal.TryParse(txtWeight.Text, out decimal w);
-            decimal.TryParse(txtVolume.Text, out decimal v);
-
-            decimal cost = (100 * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
-            return (tariff.Min_price.HasValue && cost < tariff.Min_price.Value) ? tariff.Min_price.Value : cost;
         }
 
         private void City_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var cmb = sender as ComboBox;
             if (cmb?.SelectedValue == null) return;
-
-            int cityId = (int)cmb.SelectedValue;
-            var streets = Conn.loadMateEntities.Street.Where(s => s.City_id == cityId).ToList();
-
-            if (cmb == cmbStartCity)
+            try
             {
-                cmbStartStreet.ItemsSource = streets;
-             
-                cmbStartStreet.SelectedValuePath = "Street_id";
+                int cityId = (int)cmb.SelectedValue;
+                var streets = Conn.loadMateEntities.Street.Where(s => s.City_id == cityId).ToList();
+                if (cmb == cmbStartCity) cmbStartStreet.ItemsSource = streets;
+                else cmbEndStreet.ItemsSource = streets;
             }
-            else
-            {
-                cmbEndStreet.ItemsSource = streets;
-                cmbEndStreet.SelectedValuePath = "Street_id";
-            }
+            catch (Exception ex) { CustomMessageBox.Show("Ошибка: " + ex.Message, "Ошибка"); }
         }
-        private void ClearFields()
+
+        private void UpdateCost_Event(object sender, EventArgs e)
         {
-            txtStartHouse.Text = string.Empty;
-            txtEndHouse.Text = string.Empty;
-            txtDescription.Text = string.Empty;
-            txtWeight.Text = string.Empty;
-            txtVolume.Text = string.Empty;
-            txtCost.Text = "Предварительная стоимость: 0.00 руб.";
-            cmbStartCity.SelectedIndex = -1;
-            cmbEndCity.SelectedIndex = -1;
-            cmbStartStreet.ItemsSource = null;
-            cmbEndStreet.ItemsSource = null;
-            cmbCargoType.SelectedIndex = -1;
-            cmbTariff.SelectedIndex = -1;
-            dpScheduledPickup.SelectedDate = DateTime.Now.AddDays(1);
+            if (cmbTariff.SelectedItem is Tariff t)
+                txtCost.Text = $"Предварительная стоимость: {CalculateFinalCost(t):N2} руб.";
         }
+
+        private decimal CalculateFinalCost(Tariff tariff)
+        {
+            decimal.TryParse(txtWeight.Text.Replace(".", ","), out decimal w);
+            decimal.TryParse(txtVolume.Text.Replace(".", ","), out decimal v);
+            decimal cost = (100 * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
+            return (tariff.Min_price.HasValue && cost < tariff.Min_price.Value) ? tariff.Min_price.Value : cost;
+        }
+
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateInput()) return;
+
+            // Переменные для хранения данных вне области транзакции
+            Order savedOrder = null;
+            Cargo savedCargo = null;
+            User clientUser = null;
+            decimal priceToMail = 0;
 
             using (var scope = new TransactionScope())
             {
                 try
                 {
                     var db = Conn.loadMateEntities;
-                    var startAddr = new Address
-                    {
-                        Street_id = (int)cmbStartStreet.SelectedValue,
-                        House_number = txtStartHouse.Text.Trim()
-                    };
-                    var endAddr = new Address
-                    {
-                        Street_id = (int)cmbEndStreet.SelectedValue,
-                        House_number = txtEndHouse.Text.Trim()
-                    };
+
+                    // 1. Сохраняем адреса
+                    var startAddr = new Address { Street_id = (int)cmbStartStreet.SelectedValue, House_number = txtStartHouse.Text.Trim() };
+                    var endAddr = new Address { Street_id = (int)cmbEndStreet.SelectedValue, House_number = txtEndHouse.Text.Trim() };
                     db.Address.Add(startAddr);
                     db.Address.Add(endAddr);
-                    db.SaveChanges(); 
-                    var route = new Route
-                    {
-                        Start_address_id = startAddr.Address_id,
-                        End_address_id = endAddr.Address_id,
-                        Distance_km = 100,
-                        Estimated_time_hours = 4
-                    };
+                    db.SaveChanges();
+
+                    // 2. Создаем маршрут
+                    var route = new Route { Start_address_id = startAddr.Address_id, End_address_id = endAddr.Address_id, Distance_km = 100, Estimated_time_hours = 4 };
                     db.Route.Add(route);
                     db.SaveChanges();
+
+                    // 3. Создаем груз
                     var cargo = new Cargo
                     {
                         Client_id = clientId,
                         CargoType_id = (int)cmbCargoType.SelectedValue,
                         Description = string.IsNullOrWhiteSpace(txtDescription.Text) ? "Нет описания" : txtDescription.Text.Trim(),
-                        Weight_kg = decimal.Parse(txtWeight.Text),
-                        Volume_m3 = decimal.Parse(txtVolume.Text),
+                        Weight_kg = decimal.Parse(txtWeight.Text.Replace(".", ",")),
+                        Volume_m3 = decimal.Parse(txtVolume.Text.Replace(".", ",")),
                         Created_at = DateTime.Now
                     };
                     db.Cargo.Add(cargo);
                     db.SaveChanges();
 
+                    // 4. Оформляем заказ
                     var tariff = (Tariff)cmbTariff.SelectedItem;
                     decimal price = CalculateFinalCost(tariff);
 
@@ -163,9 +131,9 @@ namespace LoadMate.Pages
                         Cargo_id = cargo.Cargo_id,
                         Tariff_id = tariff.Tariff_id,
                         Route_id = route.Route_id,
-                        Manager_id = 1, 
-                        OrderStatus_id = 1, 
-                        Truck_id = 1, 
+                        Manager_id = 1,
+                        OrderStatus_id = 1,
+                        Truck_id = 1,
                         Order_number = $"CL-{DateTime.Now:yyyyMMdd}-{new Random().Next(100, 999)}",
                         Order_date = DateTime.Now,
                         Price = price,
@@ -173,51 +141,128 @@ namespace LoadMate.Pages
                     };
                     db.Order.Add(order);
                     db.SaveChanges();
-                    db.Payment.Add(new Payment
-                    {
-                        Order_id = order.Order_id,
-                        PaymentStatus_id = 1,
-                        Amount = price,
-                        Transaction_date = DateTime.Now
-                    });
+
+                    // 5. Платеж
+                    db.Payment.Add(new Payment { Order_id = order.Order_id, PaymentStatus_id = 1, Amount = price, Transaction_date = DateTime.Now });
                     db.SaveChanges();
 
+                    // Сохраняем данные для почты перед закрытием транзакции
+                    clientUser = db.User.FirstOrDefault(u => u.User_id == clientId);
+                    savedOrder = order;
+                    savedCargo = cargo;
+                    priceToMail = price;
+
                     scope.Complete();
-
-                    SendOrderConfirmationEmail(order, price);
-
-                    MessageBox.Show($"Заказ №{order.Order_number} успешно создан!");
-                    ClearFields();
                 }
                 catch (Exception ex)
                 {
-                    string innerMsg = ex.InnerException?.InnerException?.Message ?? ex.Message;
-                    MessageBox.Show($"Ошибка сохранения: {innerMsg}");
+                    CustomMessageBox.Show("Ошибка БД: " + (ex.InnerException?.Message ?? ex.Message), "Ошибка");
+                    return;
                 }
+            }
+            if (savedOrder != null && clientUser != null)
+            {
+                SendBeautifulEmail(savedOrder, savedCargo, priceToMail, clientUser);
+                CustomMessageBox.Show($"Заказ №{savedOrder.Order_number} успешно создан! Информация отправлена на почту.", "Успех");
+                ClearFields();
             }
         }
 
-        private void SendOrderConfirmationEmail(Order order, decimal cost)
+        private void SendBeautifulEmail(Order order, Cargo cargo, decimal price, User user)
         {
             try
             {
-                var user = Conn.loadMateEntities.User.FirstOrDefault(u => u.User_id == clientId);
-                if (user == null || string.IsNullOrEmpty(user.Email)) return;
+                string targetEmail = user.Email;
+                if (string.IsNullOrEmpty(targetEmail)) return;
+
+                var db = Conn.loadMateEntities;
+                var route = db.Route.Include("Address.Street.City").Include("Address1.Street.City").FirstOrDefault(r => r.Route_id == order.Route_id);
+
+                string fullAddressFrom = route != null
+      ? $"{route.Address.Street.City.Name}, {route.Address.Street.Name}, д. {route.Address.House_number}" : "Не указан";
+
+                string fullAddressTo = route != null
+                    ? $"{route.Address1.Street.City.Name}, {route.Address1.Street.Name}, д. {route.Address1.House_number}": "Не указан";
 
                 MailMessage mail = new MailMessage();
-                mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate");
-                mail.To.Add(user.Email);
-                mail.Subject = "Заказ оформлен";
-                mail.Body = $"Здравствуйте, {user.Full_name}!\nЗаказ №{order.Order_number} на сумму {cost:N2} руб. принят в обработку.";
+                mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate Logistics");
+                mail.To.Add(targetEmail);
+                mail.Subject = $"Заказ №{order.Order_number} оформлен";
+                mail.IsBodyHtml = true;
 
-                SmtpClient client = new SmtpClient("smtp.mail.ru", 587)
+                mail.Body = $@"
+        <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; padding: 20px 10px;'>
+            <div style='max-width: 500px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;'>
+                
+                <div style='background-color: #5cb85c; padding: 25px 20px; text-align: center;'>
+                    <h1 style='margin: 0; font-size: 24px; font-weight: bold; color: #ffffff; letter-spacing: 1px;'>LOADMATE</h1>
+                </div>
+
+                <div style='padding: 25px;'>
+                    <p style='margin: 0 0 20px 0; font-size: 16px; color: #1e293b; font-weight: 600;'>Здравствуйте, {user.Full_name}!</p>
+                    <p style='margin: 0 0 25px 0; color: #475569; font-size: 14px; line-height: 1.5;'>Ваша заявка на перевозку успешно создана. Ниже указаны детали маршрута и параметры груза.</p>
+                    
+                    <div style='margin-bottom: 25px;'>
+                        <div style='margin-bottom: 15px;'>
+                            <div style='font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 4px;'>Пункт отправления</div>
+                            <div style='font-size: 14px; color: #1e293b; line-height: 1.4;'>{fullAddressFrom}</div>
+                        </div>
+                        <div>
+                            <div style='font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 4px;'>Пункт назначения</div>
+                            <div style='font-size: 14px; color: #1e293b; line-height: 1.4;'>{fullAddressTo}</div>
+                        </div>
+                    </div>
+
+                    <div style='border-top: 1px solid #f1f5f9; padding-top: 20px;'>
+                        <table style='width: 100%; font-size: 14px; color: #475569;'>
+                            <tr>
+                                <td style='padding: 5px 0;'>Номер заказа:</td>
+                                <td style='padding: 5px 0; text-align: right; color: #1e293b; font-weight: 600;'>{order.Order_number}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 5px 0;'>Груз:</td>
+                                <td style='padding: 5px 0; text-align: right; color: #1e293b;'>{cargo.Description}</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 15px 0 5px 0; font-size: 16px; color: #1e293b; font-weight: bold;'>Стоимость:</td>
+                                <td style='padding: 15px 0 5px 0; text-align: right; color: #5cb85c; font-size: 20px; font-weight: bold;'>{price:N2} ₽</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div style='background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;'>
+                    <div style='font-size: 12px; color: #94a3b8;'>
+                        © {DateTime.Now.Year} LoadMate System<br>
+                        Служба поддержки: miftakhova_ev@mail.ru
+                    </div>
+                </div>
+            </div>
+        </div>";
+
+                using (SmtpClient smtp = new SmtpClient("smtp.mail.ru", 587))
                 {
-                    EnableSsl = true,
-                    Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Bmz8qEIDckirBNY5cEmE")
-                };
-                client.Send(mail);
+                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "aSC3msYh7oHBrWW0pjxm");
+                    smtp.EnableSsl = true;
+                    smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    smtp.Send(mail);
+                }
             }
-            catch {  }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private void ClearFields()
+        {
+            txtDescription.Clear(); txtWeight.Clear(); txtVolume.Clear();
+            txtStartHouse.Clear(); txtEndHouse.Clear();
+            txtCost.Text = "Предварительная стоимость: 0,00 руб.";
+            cmbCargoType.SelectedIndex = -1; cmbTariff.SelectedIndex = -1;
+            cmbStartCity.SelectedIndex = -1; cmbEndCity.SelectedIndex = -1;
+            cmbStartStreet.ItemsSource = null; cmbEndStreet.ItemsSource = null;
+            dpScheduledPickup.SelectedDate = DateTime.Now.AddDays(1);
         }
 
         private bool ValidateInput()
@@ -226,17 +271,15 @@ namespace LoadMate.Pages
                 cmbStartStreet.SelectedValue == null || cmbEndStreet.SelectedValue == null ||
                 string.IsNullOrWhiteSpace(txtWeight.Text) || string.IsNullOrWhiteSpace(txtVolume.Text))
             {
-                MessageBox.Show("Заполните все обязательные поля!");
+                CustomMessageBox.Show("Заполните все обязательные поля!", "Внимание");
                 return false;
             }
-
-            if (!decimal.TryParse(txtWeight.Text, out _) || !decimal.TryParse(txtVolume.Text, out _))
-            {
-                MessageBox.Show("Вес и объем должны быть числовыми значениями!");
-                return false;
-            }
-
             return true;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationService.CanGoBack) NavigationService.GoBack();
         }
     }
 }

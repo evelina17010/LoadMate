@@ -5,36 +5,40 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-     Title="Мои заказы" 
-           d:DesignHeight="768" d:DesignWidth="1366"
+  Title="Мои заказы" 
+      d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
-    <Grid>
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40"/>
-            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="20,0,0,0" 
-                     TextChanged="Search_TextChanged" />
+            <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="120" Height="40"/>
+            <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="250" Height="40" Margin="20,0,0,0" 
+                     VerticalContentAlignment="Center" TextChanged="Search_TextChanged"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-            <DataGrid x:Name="OrdersGrid" Style="{StaticResource DataGridStyle}" 
-                      AutoGenerateColumns="False" SelectionMode="Single" MinWidth="1000">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="№ заказа" Binding="{Binding Order_number}" Width="120"/>
-                    <DataGridTextColumn Header="Груз" Binding="{Binding CargoDescription}" Width="150"/>
-                    <DataGridTextColumn Header="Откуда" Binding="{Binding RouteFrom}" Width="200"/>
-                    <DataGridTextColumn Header="Куда" Binding="{Binding RouteTo}" Width="200"/>
-                    <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
-                    <DataGridTextColumn Header="Стоимость" Binding="{Binding Price, StringFormat={}{0:N2} руб.}" Width="120"/>
-                    <DataGridTextColumn Header="Дата заказа" Binding="{Binding Order_date, StringFormat=dd.MM.yyyy}" Width="100"/>
-                    <DataGridTextColumn Header="Доставка" Binding="{Binding Scheduled_delivery, StringFormat=dd.MM.yyyy}" Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+        <DataGrid x:Name="OrdersGrid" Grid.Row="1" Style="{StaticResource DataGridStyle}" 
+                  AutoGenerateColumns="False" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="№ заказа" Binding="{Binding Order_number}" Width="120"/>
+                <DataGridTextColumn Header="Груз" Binding="{Binding CargoDescription}" Width="*"/>
+                <DataGridTextColumn Header="Откуда" Binding="{Binding RouteFrom}" Width="1.5*"/>
+                <DataGridTextColumn Header="Куда" Binding="{Binding RouteTo}" Width="1.5*"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="120"/>
+                <DataGridTextColumn Header="Стоимость" Binding="{Binding Price, StringFormat={}{0:N2} руб.}" Width="140">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Дата" Binding="{Binding Order_date, StringFormat=dd.MM.yyyy}" Width="110"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

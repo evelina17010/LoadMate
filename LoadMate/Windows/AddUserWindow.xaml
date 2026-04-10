@@ -24,6 +24,15 @@
                 <TextBox x:Name="txtUsername" Style="{StaticResource InputField}" Height="40"/>
                 <TextBlock Text="Пароль" Style="{StaticResource FieldLabel}"/>
                 <PasswordBox x:Name="txtPassword" Style="{StaticResource PasswordField}" Height="40"/>
+                <TextBlock Text="Пол" Style="{StaticResource FieldLabel}"/>
+                <ComboBox x:Name="cmbGender" Style="{StaticResource ComboBoxField}" Height="40"
+          HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="0,0,0,10">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <TextBlock Text="Роль" Style="{StaticResource FieldLabel}"/>
                 <ComboBox x:Name="cmbRole" Style="{StaticResource ComboBoxField}" Height="40"
                           HorizontalContentAlignment="Left" VerticalContentAlignment="Center">
