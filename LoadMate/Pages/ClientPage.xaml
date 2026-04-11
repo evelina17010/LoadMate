@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-      Title="Личный кабинет клиента" 
+    Title="Личный кабинет клиента" 
       d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
 
@@ -35,8 +35,12 @@
                 <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="10,15">
                     <StackPanel>
                         <Grid HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <Ellipse Width="45" Height="45" Fill="{StaticResource PrimaryColor}"/>
-                            <TextBlock Text="К" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18"/>
+                            <Border Width="50" Height="50" CornerRadius="25" 
+                                    BorderBrush="{StaticResource PrimaryColor}" BorderThickness="1">
+                                <Border.Background>
+                                    <ImageBrush ImageSource="{Binding UserPhoto}" Stretch="UniformToFill"/>
+                                </Border.Background>
+                            </Border>
                         </Grid>
                         <TextBlock Text="{Binding FullName}" 
                                    FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" 

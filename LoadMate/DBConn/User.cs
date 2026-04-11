@@ -34,6 +34,7 @@ namespace LoadMate.DBConn
         public System.DateTime Created_at { get; set; }
         public Nullable<System.DateTime> Updated_at { get; set; }
         public Nullable<System.DateTime> Last_login { get; set; }
+        public byte[] ImagePath { get; set; }
     
         public virtual ICollection<Cargo> Cargo { get; set; }
         public virtual ICollection<Driver> Driver { get; set; }

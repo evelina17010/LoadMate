@@ -12,13 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 using LoadMate.DBConn;
 
 namespace LoadMate.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для ClientPage.xaml
-    /// </summary>
     public partial class ClientPage : Page
     {
         private User currentUser;
@@ -27,7 +25,32 @@ namespace LoadMate.Pages
         {
             InitializeComponent();
             currentUser = user;
-            DataContext = new { FullName = user.Full_name };
+            DataContext = new
+            {
+                FullName = user.Full_name,
+                UserPhoto = GetImage(user.ImagePath)
+            };
+        }
+
+        private BitmapImage GetImage(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0) return null;
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    BitmapImage image = new BitmapImage();
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = ms;
+                    image.EndInit();
+                    return image;
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)

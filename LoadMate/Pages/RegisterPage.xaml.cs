@@ -7,19 +7,18 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.IO;
+using Microsoft.Win32;
 using LoadMate.DBConn;
 
 namespace LoadMate.Pages
 {
     public partial class RegisterPage : Page
     {
+        private byte[] _photoBytes = null;
+
         public RegisterPage()
         {
             InitializeComponent();
@@ -41,6 +40,32 @@ namespace LoadMate.Pages
             }
         }
 
+        private void SelectPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Изображения|*.jpg;*.jpeg;*.png";
+            if (ofd.ShowDialog() == true)
+            {
+                try
+                {
+                    _photoBytes = File.ReadAllBytes(ofd.FileName);
+                    using (MemoryStream ms = new MemoryStream(_photoBytes))
+                    {
+                        BitmapImage bi = new BitmapImage();
+                        bi.BeginInit();
+                        bi.CacheOption = BitmapCacheOption.OnLoad;
+                        bi.StreamSource = ms;
+                        bi.EndInit();
+                        imgAvatar.Source = bi;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка чтения файла: " + ex.Message);
+                }
+            }
+        }
+
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -57,37 +82,32 @@ namespace LoadMate.Pages
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                MessageBox.Show("Все поля, кроме телефона, обязательны для заполнения.", "Валидация");
+                MessageBox.Show("Все поля, кроме телефона, обязательны.", "Валидация");
                 return false;
             }
             if (!Regex.IsMatch(fullName, @"^[a-zA-Zа-яА-ЯёЁ\s\-]+$") || fullName.Trim().Split(' ').Length < 2)
             {
-                MessageBox.Show("Введите корректное ФИО (только буквы, Фамилия Имя).", "Валидация");
+                MessageBox.Show("Введите корректное ФИО (Фамилия Имя).", "Валидация");
                 return false;
             }
-
             if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                MessageBox.Show("Введите корректный адрес электронной почты.", "Валидация");
+                MessageBox.Show("Введите корректный Email.", "Валидация");
                 return false;
             }
-            if (!string.IsNullOrWhiteSpace(phone))
+            if (!string.IsNullOrWhiteSpace(phone) && !Regex.IsMatch(phone, @"^(\+7|8)\d{10}$"))
             {
-                if (!Regex.IsMatch(phone, @"^(\+7|8)\d{10}$"))
-                {
-                    MessageBox.Show("Телефон должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.", "Валидация");
-                    return false;
-                }
+                MessageBox.Show("Формат телефона: +7XXXXXXXXXX.", "Валидация");
+                return false;
             }
             if (cmbGender.SelectedValue == null)
             {
                 MessageBox.Show("Выберите пол.", "Валидация");
                 return false;
             }
-
             if (password.Length < 6 || !password.Any(char.IsDigit) || !password.Any(char.IsLetter))
             {
-                MessageBox.Show("Пароль должен быть не менее 6 символов и содержать как буквы, так и цифры.", "Безопасность");
+                MessageBox.Show("Пароль от 6 символов (буквы и цифры).", "Безопасность");
                 return false;
             }
             if (password != confirmPassword)
@@ -95,7 +115,6 @@ namespace LoadMate.Pages
                 MessageBox.Show("Пароли не совпадают.", "Валидация");
                 return false;
             }
-
             return true;
         }
 
@@ -117,13 +136,7 @@ namespace LoadMate.Pages
 
                 if (db.Login.Any(l => l.Username.ToLower() == username.ToLower()))
                 {
-                    MessageBox.Show("Этот логин уже занят. Попробуйте другой.", "Ошибка");
-                    return;
-                }
-
-                if (db.User.Any(u => u.Email.ToLower() == email.ToLower()))
-                {
-                    MessageBox.Show("Пользователь с таким Email уже зарегистрирован.", "Ошибка");
+                    MessageBox.Show("Логин занят.", "Ошибка");
                     return;
                 }
 
@@ -135,11 +148,12 @@ namespace LoadMate.Pages
                     Role_id = 2,
                     Gender_id = (int)cmbGender.SelectedValue,
                     UserStatus_id = 1,
-                    Created_at = DateTime.Now
+                    Created_at = DateTime.Now,
+                    ImagePath = _photoBytes
                 };
 
                 db.User.Add(newUser);
-                db.SaveChanges(); 
+                db.SaveChanges();
 
                 var newLogin = new Login
                 {
@@ -153,12 +167,12 @@ namespace LoadMate.Pages
                 db.Login.Add(newLogin);
                 db.SaveChanges();
 
-                MessageBox.Show("Регистрация успешно завершена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Регистрация успешна!", "Успех");
                 NavigationService.Navigate(new LoginPage());
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}", "Критическая ошибка");
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
@@ -167,7 +181,7 @@ namespace LoadMate.Pages
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             if (NavigationService.CanGoBack) NavigationService.GoBack();
-            else NavigationService.Navigate(new MainPage());
+            else NavigationService.Navigate(new LoginPage());
         }
     }
 }

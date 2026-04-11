@@ -13,10 +13,10 @@ namespace LoadMate.DBConn
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class LoadMateEntities : DbContext
+    public partial class LoadMateEntities1 : DbContext
     {
-        public LoadMateEntities()
-            : base("name=LoadMateEntities")
+        public LoadMateEntities1()
+            : base("name=LoadMateEntities1")
         {
         }
     

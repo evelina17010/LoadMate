@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="Хранилище LoadMateModel" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="Хранилище LoadMateModel" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Address">
           <Key>
             <PropertyRef Name="Address_id" />
@@ -253,6 +253,7 @@
           <Property Name="Created_at" Type="datetime" Nullable="false" />
           <Property Name="Updated_at" Type="datetime" />
           <Property Name="Last_login" Type="datetime" />
+          <Property Name="ImagePath" Type="image" />
         </EntityType>
         <EntityType Name="UserActivityLog">
           <Key>
@@ -764,7 +765,8 @@
             <End Role="UserActivityLog" EntitySet="UserActivityLog" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="LoadMateModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1063,6 +1065,7 @@
           <Property Name="Created_at" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="Updated_at" Type="DateTime" Precision="3" />
           <Property Name="Last_login" Type="DateTime" Precision="3" />
+          <Property Name="ImagePath" Type="Binary" MaxLength="Max" FixedLength="false" />
           <NavigationProperty Name="Cargo" Relationship="Self.FK_Cargo_User" FromRole="User" ToRole="Cargo" />
           <NavigationProperty Name="Driver" Relationship="Self.FK_Driver_User" FromRole="User" ToRole="Driver" />
           <NavigationProperty Name="Gender" Relationship="Self.FK_User_Gender" FromRole="User" ToRole="Gender" />
@@ -1442,7 +1445,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="LoadMateEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="LoadMateEntities1" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Address" EntityType="Self.Address" />
           <EntitySet Name="Cargo" EntityType="Self.Cargo" />
           <EntitySet Name="CargoType" EntityType="Self.CargoType" />
@@ -1590,7 +1593,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="Хранилище LoadMateModelContainer" CdmEntityContainer="LoadMateEntities">
+        <EntityContainerMapping StorageEntityContainer="Хранилище LoadMateModelContainer" CdmEntityContainer="LoadMateEntities1">
           <EntitySetMapping Name="Address">
             <EntityTypeMapping TypeName="LoadMateModel.Address">
               <MappingFragment StoreEntitySet="Address">
@@ -1860,6 +1863,7 @@
                 <ScalarProperty Name="Created_at" ColumnName="Created_at" />
                 <ScalarProperty Name="Updated_at" ColumnName="Updated_at" />
                 <ScalarProperty Name="Last_login" ColumnName="Last_login" />
+                <ScalarProperty Name="ImagePath" ColumnName="ImagePath" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

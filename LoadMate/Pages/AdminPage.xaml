@@ -25,9 +25,17 @@
                 <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="10,15">
                     <StackPanel>
                         <Grid HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <Ellipse Width="45" Height="45" Fill="{StaticResource PrimaryColor}"/>
-                            <TextBlock Text="A" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="18"/>
+                            <Border Width="50" Height="50" CornerRadius="25" 
+                    BorderBrush="{StaticResource PrimaryColor}" BorderThickness="1">
+                                <Border.Background>
+                                    <ImageBrush x:Name="imgAvatarBrush" 
+                                ImageSource="{Binding UserPhoto}" 
+                                Stretch="UniformToFill"/>
+                                </Border.Background>
+                            </Border>
+
                         </Grid>
+
                         <TextBlock Text="{Binding FullName}" 
                    FontSize="14" 
                    FontWeight="SemiBold" 

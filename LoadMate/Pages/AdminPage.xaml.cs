@@ -12,13 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 using LoadMate.DBConn;
 
 namespace LoadMate.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для AdminPage.xaml
-    /// </summary>
     public partial class AdminPage : Page
     {
         private User currentUser;
@@ -27,8 +25,36 @@ namespace LoadMate.Pages
         {
             InitializeComponent();
             currentUser = user;
-            DataContext = new { FullName = user.Full_name };
+
+            DataContext = new
+            {
+                FullName = user.Full_name,
+                UserPhoto = GetImage(user.ImagePath)
+            };
+
             Users_Click(null, null);
+        }
+
+        private BitmapImage GetImage(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0) return null;
+
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    BitmapImage image = new BitmapImage();
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = ms;
+                    image.EndInit();
+                    return image;
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void Users_Click(object sender, RoutedEventArgs e)
@@ -38,7 +64,7 @@ namespace LoadMate.Pages
 
         private void Orders_Click(object sender, RoutedEventArgs e)
         {
-           AdminFrame.NavigationService.Navigate(new AdminOrdersPage());
+            AdminFrame.NavigationService.Navigate(new AdminOrdersPage());
         }
 
         private void Cargo_Click(object sender, RoutedEventArgs e)
@@ -63,7 +89,7 @@ namespace LoadMate.Pages
 
         private void Payments_Click(object sender, RoutedEventArgs e)
         {
-          AdminFrame.NavigationService.Navigate(new AdminPaymentsPage());
+            AdminFrame.NavigationService.Navigate(new AdminPaymentsPage());
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)

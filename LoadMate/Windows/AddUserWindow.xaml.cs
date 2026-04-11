@@ -4,24 +4,19 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.IO;
+using Microsoft.Win32;
 using LoadMate.DBConn;
 
 namespace LoadMate.Windows
 {
-    /// <summary>
-    /// Логика взаимодействия для AddUserWindow.xaml
-    /// </summary>
     public partial class AddUserWindow : Window
     {
+        private byte[] _photoBytes = null; 
+
         public AddUserWindow()
         {
             InitializeComponent();
@@ -47,6 +42,32 @@ namespace LoadMate.Windows
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при загрузке данных: " + ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SelectPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Изображения|*.jpg;*.jpeg;*.png";
+            if (ofd.ShowDialog() == true)
+            {
+                try
+                {
+                    _photoBytes = File.ReadAllBytes(ofd.FileName);
+                    using (MemoryStream ms = new MemoryStream(_photoBytes))
+                    {
+                        BitmapImage bi = new BitmapImage();
+                        bi.BeginInit();
+                        bi.CacheOption = BitmapCacheOption.OnLoad;
+                        bi.StreamSource = ms;
+                        bi.EndInit();
+                        imgAvatar.Source = bi;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка чтения файла: " + ex.Message);
+                }
             }
         }
 
@@ -115,7 +136,8 @@ namespace LoadMate.Windows
                     Role_id = (int)cmbRole.SelectedValue,
                     Gender_id = (int)cmbGender.SelectedValue,
                     UserStatus_id = 1,
-                    Created_at = DateTime.Now
+                    Created_at = DateTime.Now,
+                    ImagePath = _photoBytes 
                 };
 
                 var newLogin = new Login

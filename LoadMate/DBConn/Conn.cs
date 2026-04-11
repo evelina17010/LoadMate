@@ -8,6 +8,6 @@ namespace LoadMate.DBConn
 {
     public class Conn
     {
-        public static LoadMateEntities loadMateEntities = new LoadMateEntities();
+        public static LoadMateEntities1 loadMateEntities = new LoadMateEntities1();
     }
 }

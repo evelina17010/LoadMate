@@ -7,7 +7,8 @@
       Title="Главная"
       d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
-    <ScrollViewer VerticalScrollBarVisibility="Hidden"  HorizontalScrollBarVisibility="Disabled">
+
+    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="500"/>
@@ -15,19 +16,38 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+
             <Border Grid.Row="0" Background="{StaticResource PrimaryGradient}">
                 <Grid Margin="40,0,40,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="80"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Button Content="Вход" Style="{StaticResource OutlineButton}" Click="Login_Click" Margin="0,0,15,0" FontSize="18"/>
-                        <TextBlock Text="|" FontSize="20" Foreground="White" VerticalAlignment="Center"/>
-                        <Button Content="Регистрация" Style="{StaticResource OutlineButton}" Click="Register_Click" Margin="15,0,0,0" FontSize="18"/>
-                    </StackPanel>
+
+                    <Grid Grid.Row="0">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0">
+                            <Image Source="/Resources/iconslog.png" 
+           Height="40" 
+           Width="40" 
+           Stretch="Uniform" 
+           Margin="0,0,3,0"/>
+
+                            <TextBlock Text="LoadMate" 
+               FontSize="24" 
+               FontWeight="Bold" 
+               Foreground="White" 
+               FontFamily="Segoe UI" 
+               VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Text="👤" FontSize="20"  Foreground="White"  VerticalAlignment="Center" Margin="0,0,10,0"  Opacity="0.9"/>
+                            <Button Content="Вход" Style="{StaticResource OutlineButton}" Click="Login_Click" Margin="0,0,15,0" FontSize="18"/>
+                            <TextBlock Text="|" FontSize="20" Foreground="White" VerticalAlignment="Center"/>
+                            <Button Content="Регистрация" Style="{StaticResource OutlineButton}" Click="Register_Click" Margin="15,0,0,0" FontSize="18"/>
+                        </StackPanel>
+                    </Grid>
+
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock Text="LoadMate" FontSize="72" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
                         <TextBlock Text="Умная логистика для вашего бизнеса" FontSize="22" Foreground="White" HorizontalAlignment="Center" Margin="0,15,0,0"/>
@@ -36,6 +56,7 @@
                     </StackPanel>
                 </Grid>
             </Border>
+
             <Grid Grid.Row="1" Background="{StaticResource BackgroundWhite}" Margin="0,40,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -45,43 +66,38 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="20">
                     <TextBlock Text="🚚" FontSize="40" HorizontalAlignment="Center"/>
                     <TextBlock Text="Грузоперевозки" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,15,0,8"/>
-                    <TextBlock Text="Доставка грузов любой сложности по всей России. От 1 кг до 20 тонн." FontSize="13" TextWrapping="Wrap" Width="250" TextAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                    <TextBlock Text="Доставка грузов любой сложности по всей России." FontSize="13" TextWrapping="Wrap" Width="250" TextAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="20">
                     <TextBlock Text="⚡" FontSize="40" HorizontalAlignment="Center"/>
                     <TextBlock Text="Прямая доставка" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,15,0,8"/>
-                    <TextBlock Text="Перевозка от двери до двери без промежуточных складов и лишних задержек." FontSize="13" TextWrapping="Wrap" Width="250" TextAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                    <TextBlock Text="Перевозка от двери до двери без промежуточных складов." FontSize="13" TextWrapping="Wrap" Width="250" TextAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
                 </StackPanel>
-
                 <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="20">
                     <TextBlock Text="📊" FontSize="40" HorizontalAlignment="Center"/>
                     <TextBlock Text="Управление заказами" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,15,0,8"/>
-                    <TextBlock Text="Автоматизированная система управления заказами и отслеживание статуса." FontSize="13" TextWrapping="Wrap" Width="250" TextAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                    <TextBlock Text="Автоматизированная система управления и отслеживания." FontSize="13" TextWrapping="Wrap" Width="250" TextAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
                 </StackPanel>
             </Grid>
+
             <Border Grid.Row="2" Background="{StaticResource BackgroundLight}" Padding="40,50">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,30,0">
                         <TextBlock Text="О компании" FontSize="28" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}"/>
-                        <TextBlock Text="LoadMate - современная логистическая платформа, объединяющая клиентов, водителей и диспетчеров в единой системе управления перевозками." FontSize="14" TextWrapping="Wrap" Margin="0,15,0,20" Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="LoadMate - современная логистическая платформа для управления перевозками." FontSize="14" TextWrapping="Wrap" Margin="0,15,0,20" Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
-                    <Border Grid.Column="1" Style="{StaticResource Card}" Margin="30,0,0,0">
-                        <StackPanel Margin="25" HorizontalAlignment="Center">
-                            <TextBlock Text="Свяжитесь с нами" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
-                            <TextBlock Text="📞 8 (800) 555-35-35" FontSize="14" Foreground="{StaticResource PrimaryColor}" Margin="0,5"/>
-                            <TextBlock Text="✉ info@loadmate.ru" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="0,5"/>
-                            <TextBlock Text="📍 г. Москва, ул. Логистов, д. 1" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,5,0,15"/>
-                            <TextBlock Text="Режим работы:" FontSize="13" FontWeight="Bold" Margin="0,10,0,0"/>
-                            <TextBlock Text="Пн-Пт: 9:00 - 20:00" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="Сб-Вс: 10:00 - 18:00" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
-                        </StackPanel>
+
+                    <Border Grid.Column="1" CornerRadius="8" Background="White" Padding="10" Style="{StaticResource Card}">
+                        <Image Source="/Resources/AboutImage.png" Stretch="UniformToFill" Height="150"/>
                     </Border>
+
                 </Grid>
             </Border>
+
             <Border Grid.Row="3" Background="{StaticResource PrimaryGradient}" Padding="40,30">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -91,22 +107,19 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="LoadMate" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock Text="Современная логистическая платформа" FontSize="11" Foreground="White" Margin="0,5,0,15" Opacity="0.8"/>
+                        <TextBlock Text="Логистическая платформа" FontSize="11" Foreground="White" Opacity="0.8"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="О компании" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock Text="О нас" FontSize="11" Foreground="White" Margin="0,5" Opacity="0.8"/>
-                        <TextBlock Text="Контакты" FontSize="11" Foreground="White" Margin="0,5" Opacity="0.8"/>
-                        <TextBlock Text="Вакансии" FontSize="11" Foreground="White" Margin="0,5" Opacity="0.8"/>
+                        <TextBlock Text="О нас" FontSize="11" Foreground="White" Opacity="0.8"/>
+                        <TextBlock Text="Контакты" FontSize="11" Foreground="White" Opacity="0.8"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Услуги" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock Text="Грузоперевозки" FontSize="11" Foreground="White" Margin="0,5" Opacity="0.8"/>
-                        <TextBlock Text="Складское хранение" FontSize="11" Foreground="White" Margin="0,5" Opacity="0.8"/>
-                        <TextBlock Text="Таможенное оформление" FontSize="11" Foreground="White" Margin="0,5" Opacity="0.8"/>
+                        <TextBlock Text="Грузоперевозки" FontSize="11" Foreground="White" Opacity="0.8"/>
                     </StackPanel>
                 </Grid>
             </Border>
+
             <Border Grid.Row="4" Background="{StaticResource PrimaryDarkColor}" Padding="15">
                 <TextBlock Text="© 2026 LoadMate. Все права защищены." FontSize="11" Foreground="White" HorizontalAlignment="Center" Opacity="0.7"/>
             </Border>

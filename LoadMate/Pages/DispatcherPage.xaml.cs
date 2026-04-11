@@ -12,13 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 using LoadMate.DBConn;
 
 namespace LoadMate.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для DispatcherPage.xaml
-    /// </summary>
     public partial class DispatcherPage : Page
     {
         private User currentUser;
@@ -27,8 +25,33 @@ namespace LoadMate.Pages
         {
             InitializeComponent();
             currentUser = user;
-            DataContext = new { FullName = user.Full_name };
+            DataContext = new
+            {
+                FullName = user.Full_name,
+                UserPhoto = GetImage(user.ImagePath)
+            };
             Orders_Click(null, null);
+        }
+
+        private BitmapImage GetImage(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0) return null;
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    BitmapImage image = new BitmapImage();
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = ms;
+                    image.EndInit();
+                    return image;
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private void Orders_Click(object sender, RoutedEventArgs e)
@@ -38,22 +61,22 @@ namespace LoadMate.Pages
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
         {
-               DispatcherFrame.NavigationService.Navigate(new DispatcherCreateOrderPage(currentUser.User_id));
+            DispatcherFrame.NavigationService.Navigate(new DispatcherCreateOrderPage(currentUser.User_id));
         }
 
         private void Drivers_Click(object sender, RoutedEventArgs e)
         {
-             DispatcherFrame.NavigationService.Navigate(new DispatcherDriversPage());
+            DispatcherFrame.NavigationService.Navigate(new DispatcherDriversPage());
         }
 
         private void Trucks_Click(object sender, RoutedEventArgs e)
         {
-             DispatcherFrame.NavigationService.Navigate(new DispatcherTrucksPage());
+            DispatcherFrame.NavigationService.Navigate(new DispatcherTrucksPage());
         }
 
         private void Tariffs_Click(object sender, RoutedEventArgs e)
         {
-             DispatcherFrame.NavigationService.Navigate(new DispatcherTariffsPage());
+            DispatcherFrame.NavigationService.Navigate(new DispatcherTariffsPage());
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)

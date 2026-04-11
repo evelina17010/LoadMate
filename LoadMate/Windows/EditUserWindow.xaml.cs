@@ -4,26 +4,19 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Microsoft.Win32;
 using LoadMate.DBConn;
 
 namespace LoadMate.Windows
 {
-    /// <summary>
-    /// Логика взаимодействия для EditUserWindow.xaml
-    /// </summary>
     public partial class EditUserWindow : Window
     {
         public List<Role> Roles { get; set; }
         private User currentUser;
+        private byte[] _newPhotoBytes = null;
 
         public EditUserWindow(User user)
         {
@@ -42,12 +35,44 @@ namespace LoadMate.Windows
             txtPhone.Text = currentUser.Phone;
 
             var login = Conn.loadMateEntities.Login.FirstOrDefault(l => l.User_id == currentUser.User_id);
-            if (login != null)
-            {
-                txtUsername.Text = login.Username;
-            }
+            if (login != null) txtUsername.Text = login.Username;
 
             cmbRole.SelectedValue = currentUser.Role_id;
+            if (currentUser.ImagePath != null)
+            {
+                _newPhotoBytes = currentUser.ImagePath;
+                imgAvatar.Source = BytesToImage(_newPhotoBytes);
+            }
+        }
+
+        private BitmapImage BytesToImage(byte[] bytes)
+        {
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                BitmapImage image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = ms;
+                image.EndInit();
+                return image;
+            }
+        }
+
+        private void SelectPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog { Filter = "Изображения|*.jpg;*.jpeg;*.png" };
+            if (ofd.ShowDialog() == true)
+            {
+                try
+                {
+                    _newPhotoBytes = File.ReadAllBytes(ofd.FileName);
+                    imgAvatar.Source = BytesToImage(_newPhotoBytes);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка чтения файла: " + ex.Message);
+                }
+            }
         }
 
         private string HashPassword(string password)
@@ -56,43 +81,23 @@ namespace LoadMate.Windows
             {
                 byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
+                foreach (byte b in bytes) builder.Append(b.ToString("x2"));
                 return builder.ToString();
             }
         }
 
-        private bool IsValidEmail(string email)
-        {
-            return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-        }
-
         private bool ValidateData()
         {
-            if (string.IsNullOrWhiteSpace(txtFullName.Text))
-            {
-                MessageBox.Show("Введите ФИО", "Валидация");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(txtEmail.Text) || !IsValidEmail(txtEmail.Text))
-            {
-                MessageBox.Show("Введите корректный Email", "Валидация");
-                return false;
-            }
-            if (cmbRole.SelectedItem == null)
-            {
-                MessageBox.Show("Выберите роль", "Валидация");
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(txtFullName.Text)) return ShowError("Введите ФИО");
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || !Regex.IsMatch(txtEmail.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                return ShowError("Введите корректный Email");
+            if (cmbRole.SelectedItem == null) return ShowError("Выберите роль");
             if (!string.IsNullOrWhiteSpace(txtPassword.Password) && txtPassword.Password.Length < 6)
-            {
-                MessageBox.Show("Пароль должен быть не менее 6 символов", "Валидация");
-                return false;
-            }
+                return ShowError("Пароль должен быть не менее 6 символов");
             return true;
         }
+
+        private bool ShowError(string msg) { MessageBox.Show(msg, "Валидация"); return false; }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
@@ -104,14 +109,12 @@ namespace LoadMate.Windows
                 currentUser.Email = txtEmail.Text.Trim();
                 currentUser.Phone = txtPhone.Text.Trim();
                 currentUser.Role_id = (int)cmbRole.SelectedValue;
+                currentUser.ImagePath = _newPhotoBytes; 
 
                 if (!string.IsNullOrWhiteSpace(txtPassword.Password))
                 {
                     var login = Conn.loadMateEntities.Login.FirstOrDefault(l => l.User_id == currentUser.User_id);
-                    if (login != null)
-                    {
-                        login.Password_hash = HashPassword(txtPassword.Password.Trim());
-                    }
+                    if (login != null) login.Password_hash = HashPassword(txtPassword.Password.Trim());
                 }
 
                 Conn.loadMateEntities.SaveChanges();
@@ -124,10 +127,6 @@ namespace LoadMate.Windows
             }
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
-        }
+        private void Cancel_Click(object sender, RoutedEventArgs e) { DialogResult = false; Close(); }
     }
 }
