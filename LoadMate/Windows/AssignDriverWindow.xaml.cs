@@ -32,6 +32,9 @@ namespace LoadMate.Windows
             if (cargo != null)
             {
                 txtCargo.Text = $"{cargo.Description} ({cargo.Weight_kg} кг)";
+
+                var clientUser = db.User.FirstOrDefault(u => u.User_id == cargo.Client_id);
+                txtClient.Text = clientUser?.Full_name ?? "Не указан";
             }
 
             var route = db.Route.Include(r => r.Address.Street.City)
@@ -69,6 +72,7 @@ namespace LoadMate.Windows
                     DriverName = user?.Full_name ?? "Неизвестно",
                     Phone = user?.Phone ?? "-",
                     d.License_number,
+                    d.Experience_years,  
                     CurrentLoad = $"{currentLoad} кг",
                     DriverStatus = d.DriverStatus_id == 1 ? "Свободен" : "В рейсе"
                 };

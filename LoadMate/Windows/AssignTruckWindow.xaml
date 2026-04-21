@@ -9,86 +9,99 @@
         Height="825" Width="800"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource BackgroundLight}">
+    <Border Style="{StaticResource Card}" Padding="25" Margin="20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Border Style="{StaticResource Card}" Padding="25" Margin="20">
-            <Grid>
+            <TextBlock Grid.Row="0" Text="Назначение транспорта на заказ" FontSize="22" FontWeight="SemiBold" 
+                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+            <Border Grid.Row="1" Style="{StaticResource Card}" Padding="20" Margin="0,0,0,25" Background="#F0F4F8" CornerRadius="15">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <TextBlock Text="📋" FontSize="18" Margin="0,0,10,0"/>
+                        <TextBlock Text="Детали заказа" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkColor}"/>
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock Text="Номер заказа" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtOrderNumber" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Клиент" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtClient" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock Text="Вес груза" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtWeight" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Объем груза" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtVolume" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="300"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Назначение транспорта на заказ" FontSize="22" FontWeight="SemiBold" 
-                           Foreground="{StaticResource PrimaryColor}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15" VerticalAlignment="Center">
+                    <CheckBox x:Name="chkOnlyAvailable" Content="Только доступный транспорт" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Мин. грузоподъемность (кг):" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtMinCapacity" Width="120" Height="30" Margin="10,0" VerticalContentAlignment="Center"/>
+                    <Button Content="Применить фильтр" Style="{StaticResource ActionButton}" Height="30" Click="ApplyFilter_Click" Margin="5,0,0,0" Width="130"/>
+                </StackPanel>
 
-                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="15" Margin="0,0,0,20" Background="#F9F9F9">
-                    <StackPanel>
-                        <TextBlock Text="Информация о заказе" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="{StaticResource TextPrimary}"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                <TextBlock Grid.Row="1" Text="Доступные транспортные средства" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Номер заказа:" FontWeight="Bold" Margin="0,5"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtOrderNumber" Margin="10,5,0,5"/>
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Вес груза:" FontWeight="Bold" Margin="0,5"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtWeight" Margin="10,5,0,5"/>
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Объем груза:" FontWeight="Bold" Margin="0,5"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="txtVolume" Margin="10,5,0,5"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <Grid Grid.Row="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="300"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15" VerticalAlignment="Center">
-                        <CheckBox x:Name="chkOnlyAvailable" Content="Только доступный транспорт" Margin="0,0,20,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Мин. грузоподъемность (кг):" VerticalAlignment="Center"/>
-                        <TextBox x:Name="txtMinCapacity" Width="120" Height="30" Margin="10,0" VerticalContentAlignment="Center"/>
-                        <Button Content="Применить фильтр" Style="{StaticResource ActionButton}" Height="30" Click="ApplyFilter_Click" Margin="5,0,0,0" Width="130"/>
-                    </StackPanel>
-
-                    <TextBlock Grid.Row="1" Text="Доступные транспортные средства" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
-
-                    <DataGrid x:Name="TrucksGrid" 
+                <DataGrid x:Name="TrucksGrid" 
                               Grid.Row="2"
                               Style="{StaticResource DataGridStyle}" 
                               AutoGenerateColumns="False" 
                               SelectionMode="Single" 
                               IsReadOnly="True"
                               SelectionChanged="TrucksGrid_SelectionChanged">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Модель" Binding="{Binding Model}" Width="*"/>
-                            <DataGridTextColumn Header="Рег. номер" Binding="{Binding Registration_number}" Width="110"/>
-                            <DataGridTextColumn Header="Грузоподъемность (кг)" Binding="{Binding Capacity_kg}" Width="140"/>
-                            <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Capacity_m3}" Width="90"/>
-                            <DataGridTextColumn Header="Водитель" Binding="{Binding DriverName}" Width="130"/>
-                            <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                    <Button Content="Назначить" Style="{StaticResource ActionButton}" Width="130" Height="40" Click="Assign_Click"/>
-                    <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" 
-                            Width="130" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
-                </StackPanel>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Модель" Binding="{Binding Model}" Width="*"/>
+                        <DataGridTextColumn Header="Рег. номер" Binding="{Binding Registration_number}" Width="110"/>
+                        <DataGridTextColumn Header="Грузоподъемность (кг)" Binding="{Binding Capacity_kg}" Width="140"/>
+                        <DataGridTextColumn Header="Объем (м³)" Binding="{Binding Capacity_m3}" Width="90"/>
+                        <DataGridTextColumn Header="Водитель" Binding="{Binding DriverName}" Width="130"/>
+                        <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
-        </Border>
-    </ScrollViewer>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button Content="Назначить" Style="{StaticResource ActionButton}" Width="130" Height="40" Click="Assign_Click"/>
+                <Button Content="Отмена" Style="{StaticResource ActionButton}" Background="{StaticResource TextSecondary}" 
+                            Width="130" Height="40" Margin="15,0,0,0" Click="Cancel_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

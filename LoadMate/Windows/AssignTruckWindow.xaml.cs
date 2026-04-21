@@ -23,15 +23,24 @@ namespace LoadMate.Windows
 
         private void LoadOrderInfo()
         {
+            var db = Conn.loadMateEntities;
             txtOrderNumber.Text = _currentOrder.Order_number;
-            var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == _currentOrder.Cargo_id);
+
+            var cargo = db.Cargo.FirstOrDefault(c => c.Cargo_id == _currentOrder.Cargo_id);
             if (cargo != null)
             {
                 txtWeight.Text = $"{cargo.Weight_kg} кг";
                 txtVolume.Text = $"{cargo.Volume_m3} м³";
+
+                var clientUser = db.User.FirstOrDefault(u => u.User_id == cargo.Client_id);
+                txtClient.Text = clientUser?.Full_name ?? "Не указан";
+
+                if (string.IsNullOrEmpty(txtMinCapacity.Text))
+                {
+                    txtMinCapacity.Text = cargo.Weight_kg.ToString();
+                }
             }
         }
-
         private void LoadAvailableTrucks()
         {
             var cargo = Conn.loadMateEntities.Cargo.FirstOrDefault(c => c.Cargo_id == _currentOrder.Cargo_id);

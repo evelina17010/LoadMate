@@ -5,62 +5,72 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:LoadMate.Pages"
       mc:Ignorable="d" 
-  Title="Администратор" 
-        d:DesignHeight="768" d:DesignWidth="1366"
+ Title="Администратор" 
+      d:DesignHeight="768" d:DesignWidth="1366"
       Background="{StaticResource BackgroundLight}">
+
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="260"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Border Grid.Column="0" Background="{StaticResource BackgroundWhite}" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="LoadMate" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryColor}" Margin="0,40,0,30" HorizontalAlignment="Center"/>
-                <Border Grid.Row="1" Background="{StaticResource BackgroundLight}" CornerRadius="12" Margin="20,0,20,30" Padding="10,15">
-                    <StackPanel>
-                        <Grid HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <Border Width="50" Height="50" CornerRadius="25" 
-                    BorderBrush="{StaticResource PrimaryColor}" BorderThickness="1">
-                                <Border.Background>
-                                    <ImageBrush x:Name="imgAvatarBrush" 
-                                ImageSource="{Binding UserPhoto}" 
-                                Stretch="UniformToFill"/>
-                                </Border.Background>
-                            </Border>
 
-                        </Grid>
+        <Grid Grid.Column="0">
+            <Border Background="{StaticResource PrimaryColor}" 
+                    CornerRadius="0,40,0,0" 
+                    Margin="0,70,0,0" 
+                    VerticalAlignment="Stretch">
 
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="120"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" VerticalAlignment="Top" Margin="0,45,0,0">
+                        <TextBlock Text="LoadMate" Foreground="White" FontSize="20" FontWeight="Bold" 
+               HorizontalAlignment="Center"/>
                         <TextBlock Text="{Binding FullName}" 
-                   FontSize="14" 
-                   FontWeight="SemiBold" 
-                   Foreground="{StaticResource TextPrimary}" 
-                   HorizontalAlignment="Center" 
-                   TextAlignment="Center"
-                   TextWrapping="Wrap"
-                   Margin="5,0"/>
-                        <TextBlock Text="Администратор" FontSize="11" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+               Foreground="White" FontSize="12" 
+               HorizontalAlignment="Center" Opacity="0.7" Margin="0,5,0,0"
+               TextWrapping="Wrap" TextAlignment="Center"/>
+
+                        <Separator Background="White" Opacity="0.3" Margin="40,20,40,0"/>
                     </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="20,30,20,0">
+                        <Button Content="Пользователи" Style="{StaticResource SidebarButton}" Click="Users_Click"/>
+                        <Button Content="Заказы" Style="{StaticResource SidebarButton}" Click="Orders_Click"/>
+                        <Button Content="Грузы" Style="{StaticResource SidebarButton}" Click="Cargo_Click"/>
+                        <Button Content="Водители" Style="{StaticResource SidebarButton}" Click="Drivers_Click"/>
+                        <Button Content="Транспорт" Style="{StaticResource SidebarButton}" Click="Trucks_Click"/>
+                    </StackPanel>
+
+                    <Button Grid.Row="2" Content="Выход" Style="{StaticResource SidebarButton}" 
+        Click="Logout_Click" Margin="20,0,20,40"/>
+                </Grid>
+            </Border>
+
+            <Border Width="90" Height="90" 
+                    Background="White" 
+                    CornerRadius="45" 
+                    Padding="4"
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Top" 
+                    Margin="0,25,0,0"
+                    Panel.ZIndex="2"
+                    Effect="{StaticResource CardShadow}">
+                <Border CornerRadius="45">
+                    <Border.Background>
+                        <ImageBrush ImageSource="{Binding UserPhoto}" Stretch="UniformToFill"/>
+                    </Border.Background>
                 </Border>
-                <StackPanel Grid.Row="2">
-                    <Button x:Name="btnUsers" Content=" Пользователи" Style="{StaticResource SidebarButton}" Click="Users_Click" Margin="10,5"/>
-                    <Button x:Name="btnOrders" Content=" Заказы" Style="{StaticResource SidebarButton}" Click="Orders_Click" Margin="10,5"/>
-                    <Button x:Name="btnCargo" Content=" Грузы" Style="{StaticResource SidebarButton}" Click="Cargo_Click" Margin="10,5"/>
-                    <Button x:Name="btnDrivers" Content=" Водители" Style="{StaticResource SidebarButton}" Click="Drivers_Click" Margin="10,5"/>
-                    <Button x:Name="btnTrucks" Content=" Грузовики" Style="{StaticResource SidebarButton}" Click="Trucks_Click" Margin="10,5"/>
-                    <Button x:Name="btnTariffs" Content=" Тарифы" Style="{StaticResource SidebarButton}" Click="Tariffs_Click" Margin="10,5"/>
-                    <Button x:Name="btnPayments" Content=" Платежи" Style="{StaticResource SidebarButton}" Click="Payments_Click" Margin="10,5"/>
-                    <Button Content=" Выход" Style="{StaticResource SidebarButton}" Click="Logout_Click" Margin="10,5" Foreground="{StaticResource ErrorColor}"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-        <Grid Grid.Column="1" Margin="30">
-            <Frame x:Name="AdminFrame" NavigationUIVisibility="Hidden"/>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Column="1" Background="Transparent">
+            <Frame x:Name="AdminFrame" NavigationUIVisibility="Hidden" Margin="20"/>
         </Grid>
     </Grid>
 </Page>
