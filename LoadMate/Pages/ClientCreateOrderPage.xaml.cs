@@ -53,6 +53,21 @@ namespace LoadMate.Pages
             }
         }
 
+        private decimal GetDistance(int cityA, int cityB)
+        {
+            if (cityA == cityB) return 15.0m; 
+            try
+            {
+                var db = Conn.loadMateEntities;
+                var distRecord = db.Distance.FirstOrDefault(d =>
+                    (d.City_A_id == cityA && d.City_B_id == cityB) ||
+                    (d.City_A_id == cityB && d.City_B_id == cityA));
+
+                return distRecord != null ? distRecord.Distance_km : 500.0m;
+            }
+            catch { return 500.0m; }
+        }
+
         private void City_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var cmb = sender as ComboBox;
@@ -63,6 +78,7 @@ namespace LoadMate.Pages
                 var streets = Conn.loadMateEntities.Street.Where(s => s.City_id == cityId).ToList();
                 if (cmb == cmbStartCity) cmbStartStreet.ItemsSource = streets;
                 else cmbEndStreet.ItemsSource = streets;
+                UpdateCost_Event(null, null);
             }
             catch (Exception ex) { CustomMessageBox.Show("Ошибка: " + ex.Message, "Ошибка"); }
         }
@@ -75,17 +91,20 @@ namespace LoadMate.Pages
 
         private decimal CalculateFinalCost(Tariff tariff)
         {
+            if (cmbStartCity.SelectedValue == null || cmbEndCity.SelectedValue == null) return 0;
+
+            decimal distance = GetDistance((int)cmbStartCity.SelectedValue, (int)cmbEndCity.SelectedValue);
+
             decimal.TryParse(txtWeight.Text.Replace(".", ","), out decimal w);
             decimal.TryParse(txtVolume.Text.Replace(".", ","), out decimal v);
-            decimal cost = (100 * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
+            decimal cost = (distance * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
+
             return (tariff.Min_price.HasValue && cost < tariff.Min_price.Value) ? tariff.Min_price.Value : cost;
         }
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateInput()) return;
-
-            // Переменные для хранения данных вне области транзакции
             Order savedOrder = null;
             Cargo savedCargo = null;
             User clientUser = null;
@@ -97,19 +116,23 @@ namespace LoadMate.Pages
                 {
                     var db = Conn.loadMateEntities;
 
-                    // 1. Сохраняем адреса
                     var startAddr = new Address { Street_id = (int)cmbStartStreet.SelectedValue, House_number = txtStartHouse.Text.Trim() };
                     var endAddr = new Address { Street_id = (int)cmbEndStreet.SelectedValue, House_number = txtEndHouse.Text.Trim() };
                     db.Address.Add(startAddr);
                     db.Address.Add(endAddr);
                     db.SaveChanges();
+                    decimal actualDistance = GetDistance((int)cmbStartCity.SelectedValue, (int)cmbEndCity.SelectedValue);
 
-                    // 2. Создаем маршрут
-                    var route = new Route { Start_address_id = startAddr.Address_id, End_address_id = endAddr.Address_id, Distance_km = 100, Estimated_time_hours = 4 };
+                    var route = new Route
+                    {
+                        Start_address_id = startAddr.Address_id,
+                        End_address_id = endAddr.Address_id,
+                        Distance_km = actualDistance,
+                        Estimated_time_hours = (int)(actualDistance / 60) + 1
+                    };
                     db.Route.Add(route);
                     db.SaveChanges();
 
-                    // 3. Создаем груз
                     var cargo = new Cargo
                     {
                         Client_id = clientId,
@@ -122,7 +145,6 @@ namespace LoadMate.Pages
                     db.Cargo.Add(cargo);
                     db.SaveChanges();
 
-                    // 4. Оформляем заказ
                     var tariff = (Tariff)cmbTariff.SelectedItem;
                     decimal price = CalculateFinalCost(tariff);
 
@@ -131,9 +153,9 @@ namespace LoadMate.Pages
                         Cargo_id = cargo.Cargo_id,
                         Tariff_id = tariff.Tariff_id,
                         Route_id = route.Route_id,
-                        Manager_id = 1,
+                        Manager_id = null,
                         OrderStatus_id = 1,
-                        Truck_id = 1,
+                        Truck_id = null,
                         Order_number = $"CL-{DateTime.Now:yyyyMMdd}-{new Random().Next(100, 999)}",
                         Order_date = DateTime.Now,
                         Price = price,
@@ -142,11 +164,9 @@ namespace LoadMate.Pages
                     db.Order.Add(order);
                     db.SaveChanges();
 
-                    // 5. Платеж
                     db.Payment.Add(new Payment { Order_id = order.Order_id, PaymentStatus_id = 1, Amount = price, Transaction_date = DateTime.Now });
                     db.SaveChanges();
 
-                    // Сохраняем данные для почты перед закрытием транзакции
                     clientUser = db.User.FirstOrDefault(u => u.User_id == clientId);
                     savedOrder = order;
                     savedCargo = cargo;
@@ -179,10 +199,10 @@ namespace LoadMate.Pages
                 var route = db.Route.Include("Address.Street.City").Include("Address1.Street.City").FirstOrDefault(r => r.Route_id == order.Route_id);
 
                 string fullAddressFrom = route != null
-      ? $"{route.Address.Street.City.Name}, {route.Address.Street.Name}, д. {route.Address.House_number}" : "Не указан";
+                    ? $"{route.Address.Street.City.Name}, {route.Address.Street.Name}, д. {route.Address.House_number}" : "Не указан";
 
                 string fullAddressTo = route != null
-                    ? $"{route.Address1.Street.City.Name}, {route.Address1.Street.Name}, д. {route.Address1.House_number}": "Не указан";
+                    ? $"{route.Address1.Street.City.Name}, {route.Address1.Street.Name}, д. {route.Address1.House_number}" : "Не указан";
 
                 MailMessage mail = new MailMessage();
                 mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate Logistics");
@@ -242,7 +262,7 @@ namespace LoadMate.Pages
 
                 using (SmtpClient smtp = new SmtpClient("smtp.mail.ru", 587))
                 {
-                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "aSC3msYh7oHBrWW0pjxm");
+                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "rGEil7HXFW2suOFKVjvs");
                     smtp.EnableSsl = true;
                     smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                     smtp.Send(mail);

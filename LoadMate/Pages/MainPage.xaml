@@ -29,9 +29,9 @@
                             <TextBlock Text="LoadMate" FontSize="30" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Button Content="Вход" Style="{StaticResource OutlineButton}" FontSize="20"  Foreground="White"  Width="140" Height="40"  Click="Login_Click"/>
-                            <Button Content="Регистрация" Style="{StaticResource OutlineButton}" Background="Transparent" Foreground="White" Width="160" Height="40" FontSize="20" Click="Register_Click"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 10 0">
+                            <Button Content="Вход" Style="{StaticResource OutlineButton}" FontSize="20"  Foreground="White"  Width="100" Height="40"  Click="Login_Click"/>
+                            <Button Content="Регистрация" Style="{StaticResource OutlineButton}" Background="Transparent" Foreground="White" Width="140" Height="40" FontSize="20" Click="Register_Click"/>
                         </StackPanel>
                     </Grid>
 

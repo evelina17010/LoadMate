@@ -21,10 +21,10 @@ namespace LoadMate.DBConn
         }
     
         public int Order_id { get; set; }
-        public int Manager_id { get; set; }
+        public Nullable<int> Manager_id { get; set; }
         public int Cargo_id { get; set; }
         public int Tariff_id { get; set; }
-        public int Truck_id { get; set; }
+        public Nullable<int> Truck_id { get; set; }
         public int Route_id { get; set; }
         public int OrderStatus_id { get; set; }
         public string Order_number { get; set; }

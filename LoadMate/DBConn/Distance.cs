@@ -12,24 +12,14 @@ namespace LoadMate.DBConn
     using System;
     using System.Collections.Generic;
     
-    public partial class Route
+    public partial class Distance
     {
-        public Route()
-        {
-            this.Order = new HashSet<Order>();
-            this.RouteIntermediatePoints = new HashSet<RouteIntermediatePoints>();
-        }
-    
-        public int Route_id { get; set; }
-        public int Start_address_id { get; set; }
-        public int End_address_id { get; set; }
+        public int Distance_id { get; set; }
+        public int City_A_id { get; set; }
+        public int City_B_id { get; set; }
         public decimal Distance_km { get; set; }
-        public decimal Estimated_time_hours { get; set; }
-        public string Waypoints { get; set; }
     
-        public virtual Address Address { get; set; }
-        public virtual Address Address1 { get; set; }
-        public virtual ICollection<Order> Order { get; set; }
-        public virtual ICollection<RouteIntermediatePoints> RouteIntermediatePoints { get; set; }
+        public virtual City City { get; set; }
+        public virtual City City1 { get; set; }
     }
 }

@@ -18,8 +18,8 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40"/>
             <Button Content="Изменить статус" Style="{StaticResource ActionButton}" Click="ChangeStatus_Click" Width="120" Height="40" Margin="10,0,0,0"/>
-            <Button Content="Назначить водителя" Style="{StaticResource ActionButton}" Click="AssignDriver_Click" Width="140" Height="40" Margin="10,0,0,0"/>
-            <Button Content="Назначить транспорт" Style="{StaticResource ActionButton}" Click="AssignTruck_Click" Width="140" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Назначить водителя" Style="{StaticResource ActionButton}" Click="AssignDriver_Click" Width="150" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Назначить транспорт" Style="{StaticResource ActionButton}" Click="AssignTruck_Click" Width="155" Height="40" Margin="10,0,0,0"/>
 
             <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="30,0,5,0" FontWeight="Bold"/>
             <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="200" Height="40" Margin="0 6 0 6" TextChanged="Search_TextChanged"/>

@@ -16,6 +16,9 @@ namespace LoadMate.DBConn
     {
         public City()
         {
+            this.RouteIntermediatePoints = new HashSet<RouteIntermediatePoints>();
+            this.Distance = new HashSet<Distance>();
+            this.Distance1 = new HashSet<Distance>();
             this.Street = new HashSet<Street>();
         }
     
@@ -24,7 +27,10 @@ namespace LoadMate.DBConn
         public string Name { get; set; }
         public string PostalCode { get; set; }
     
+        public virtual ICollection<RouteIntermediatePoints> RouteIntermediatePoints { get; set; }
         public virtual Region Region { get; set; }
+        public virtual ICollection<Distance> Distance { get; set; }
+        public virtual ICollection<Distance> Distance1 { get; set; }
         public virtual ICollection<Street> Street { get; set; }
     }
 }

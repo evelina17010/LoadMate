@@ -89,6 +89,9 @@
     <Compile Include="DBConn\Country.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="DBConn\Distance.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="DBConn\Driver.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -101,6 +104,7 @@
     <Compile Include="DBConn\Login.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="DBConn\LogisticsExtensions.cs" />
     <Compile Include="DBConn\Model1.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -138,6 +142,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="DBConn\Route.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DBConn\RouteIntermediatePoints.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="DBConn\Street.cs">
@@ -185,6 +192,9 @@
     <Compile Include="Pages\AdminUsersPage.xaml.cs">
       <DependentUpon>AdminUsersPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\AssignTransportWindow.xaml.cs">
+      <DependentUpon>AssignTransportWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\ClientCargoPage.xaml.cs">
       <DependentUpon>ClientCargoPage.xaml</DependentUpon>
     </Compile>
@@ -212,6 +222,7 @@
     <Compile Include="Pages\PayPage.xaml.cs">
       <DependentUpon>PayPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Services\SmartLogisticsService.cs" />
     <Compile Include="Windows\AddCargoWindow.xaml.cs">
       <DependentUpon>AddCargoWindow.xaml</DependentUpon>
     </Compile>
@@ -232,9 +243,6 @@
     </Compile>
     <Compile Include="Windows\AssignDriverWindow.xaml.cs">
       <DependentUpon>AssignDriverWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\AssignTruckWindow.xaml.cs">
-      <DependentUpon>AssignTruckWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\ChangeStatusWindow.xaml.cs">
       <DependentUpon>ChangeStatusWindow.xaml</DependentUpon>
@@ -299,6 +307,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\AdminUsersPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\AssignTransportWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -391,10 +403,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\AssignDriverWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Windows\AssignTruckWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

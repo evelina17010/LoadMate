@@ -180,24 +180,11 @@ namespace LoadMate.Pages
                 return;
             }
 
-            if (selectedOrder.Truck_id != 0 && selectedOrder.Truck_id != 0)
-            {
-                var result = MessageBox.Show(
-                    "На этот заказ уже назначен транспорт. Вы хотите переназначить его?",
-                    "Заказ уже укомплектован",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.No) return;
-            }
-
-            var truckWindow = new AssignTruckWindow(selectedOrder);
+            var truckWindow = new AssignTransportWindow(selectedOrder, this.dispatcherId);
             truckWindow.Owner = Application.Current.MainWindow;
 
             if (truckWindow.ShowDialog() == true)
             {
-                Conn.loadMateEntities.SaveChanges();
-                SendEmailToDriver(selectedOrder);
                 LoadOrders();
             }
         }

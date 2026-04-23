@@ -29,27 +29,34 @@ namespace LoadMate.Pages
             InitializeComponent();
             this.managerId = managerId;
             LoadData();
-            dpScheduledPickup.SelectedDate = DateTime.Today;
+            dpScheduledPickup.SelectedDate = DateTime.Today.AddDays(1);
             dpScheduledPickup.DisplayDateStart = DateTime.Today;
         }
 
         private void LoadData()
         {
-            var db = Conn.loadMateEntities;
-            LoadClients();
+            try
+            {
+                var db = Conn.loadMateEntities;
+                LoadClients();
 
-            cmbCargoType.ItemsSource = db.CargoType.ToList();
-            cmbCargoType.SelectedValuePath = "CargoType_id";
+                cmbCargoType.ItemsSource = db.CargoType.ToList();
+                cmbCargoType.SelectedValuePath = "CargoType_id";
 
-            cmbTariff.ItemsSource = db.Tariff.Where(t => t.Is_active == true).ToList();
-            cmbTariff.SelectedValuePath = "Tariff_id";
+                cmbTariff.ItemsSource = db.Tariff.Where(t => t.Is_active == true).ToList();
+                cmbTariff.SelectedValuePath = "Tariff_id";
 
-            var cities = db.City.ToList();
-            cmbStartCity.ItemsSource = cities;
-            cmbStartCity.SelectedValuePath = "City_id";
+                var cities = db.City.ToList();
+                cmbStartCity.ItemsSource = cities;
+                cmbStartCity.SelectedValuePath = "City_id";
 
-            cmbEndCity.ItemsSource = cities;
-            cmbEndCity.SelectedValuePath = "City_id";
+                cmbEndCity.ItemsSource = cities;
+                cmbEndCity.SelectedValuePath = "City_id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки данных: " + ex.Message);
+            }
         }
 
         private void LoadClients()
@@ -59,6 +66,21 @@ namespace LoadMate.Pages
                 .OrderByDescending(u => u.Created_at)
                 .ToList();
             cmbClient.SelectedValuePath = "User_id";
+        }
+
+        private decimal GetDistance(int cityA, int cityB)
+        {
+            if (cityA == cityB) return 15.0m;
+            try
+            {
+                var db = Conn.loadMateEntities;
+                var distRecord = db.Distance.FirstOrDefault(d =>
+                    (d.City_A_id == cityA && d.City_B_id == cityB) ||
+                    (d.City_A_id == cityB && d.City_B_id == cityA));
+
+                return distRecord != null ? distRecord.Distance_km : 500.0m;
+            }
+            catch { return 500.0m; }
         }
 
         private void AddNewClient_Click(object sender, RoutedEventArgs e)
@@ -90,6 +112,8 @@ namespace LoadMate.Pages
                 cmbEndStreet.ItemsSource = streets;
                 cmbEndStreet.SelectedValuePath = "Street_id";
             }
+
+            UpdateCost_Event(null, null);
         }
 
         private void CreateOrder_Click(object sender, RoutedEventArgs e)
@@ -112,7 +136,15 @@ namespace LoadMate.Pages
                     db.Address.Add(endAddr);
                     db.SaveChanges();
 
-                    var route = new Route { Start_address_id = startAddr.Address_id, End_address_id = endAddr.Address_id, Distance_km = 100, Estimated_time_hours = 4 };
+                    decimal actualDistance = GetDistance((int)cmbStartCity.SelectedValue, (int)cmbEndCity.SelectedValue);
+
+                    var route = new Route
+                    {
+                        Start_address_id = startAddr.Address_id,
+                        End_address_id = endAddr.Address_id,
+                        Distance_km = actualDistance,
+                        Estimated_time_hours = (int)(actualDistance / 60) + 1
+                    };
                     db.Route.Add(route);
                     db.SaveChanges();
 
@@ -121,8 +153,8 @@ namespace LoadMate.Pages
                         Client_id = (int)cmbClient.SelectedValue,
                         CargoType_id = (int)cmbCargoType.SelectedValue,
                         Description = txtDescription.Text.Trim(),
-                        Weight_kg = decimal.Parse(txtWeight.Text),
-                        Volume_m3 = decimal.Parse(txtVolume.Text),
+                        Weight_kg = decimal.Parse(txtWeight.Text.Replace(".", ",")),
+                        Volume_m3 = decimal.Parse(txtVolume.Text.Replace(".", ",")),
                         Created_at = DateTime.Now
                     };
                     db.Cargo.Add(newCargo);
@@ -136,9 +168,9 @@ namespace LoadMate.Pages
                         Cargo_id = newCargo.Cargo_id,
                         Tariff_id = tariff.Tariff_id,
                         Route_id = route.Route_id,
-                        Manager_id = managerId,
-                        Truck_id = 1,
-                        OrderStatus_id = 1, 
+                        Manager_id = this.managerId, 
+                        Truck_id = null,
+                        OrderStatus_id = 1,
                         Order_number = $"ORD-{DateTime.Now:yyyyMMdd}-{new Random().Next(1000, 9999)}",
                         Order_date = DateTime.Now,
                         Price = finalPrice,
@@ -210,7 +242,7 @@ namespace LoadMate.Pages
 
                 using (SmtpClient smtp = new SmtpClient("smtp.mail.ru", 587))
                 {
-                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "aSC3msYh7oHBrWW0pjxm");
+                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "rGEil7HXFW2suOFKVjvs");
                     smtp.EnableSsl = true;
                     smtp.Send(mail);
                 }
@@ -220,15 +252,21 @@ namespace LoadMate.Pages
 
         private decimal CalculateFinalCost(Tariff tariff)
         {
-            decimal.TryParse(txtWeight.Text, out decimal w);
-            decimal.TryParse(txtVolume.Text, out decimal v);
-            decimal cost = (100 * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
+            if (cmbStartCity.SelectedValue == null || cmbEndCity.SelectedValue == null) return 0;
+
+            decimal distance = GetDistance((int)cmbStartCity.SelectedValue, (int)cmbEndCity.SelectedValue);
+
+            decimal.TryParse(txtWeight.Text.Replace(".", ","), out decimal w);
+            decimal.TryParse(txtVolume.Text.Replace(".", ","), out decimal v);
+
+            decimal cost = (distance * tariff.Cost_per_km) + (w * tariff.Cost_per_kg) + (v * tariff.Cost_per_m3) + tariff.Additional_cost;
             return (tariff.Min_price.HasValue && cost < tariff.Min_price.Value) ? tariff.Min_price.Value : cost;
         }
 
         private void UpdateCost_Event(object sender, EventArgs e)
         {
-            if (cmbTariff.SelectedItem is Tariff t) txtCost.Text = $"Итоговая стоимость: {CalculateFinalCost(t):N2} руб.";
+            if (cmbTariff.SelectedItem is Tariff t)
+                txtCost.Text = $"Итоговая стоимость: {CalculateFinalCost(t):N2} руб.";
         }
 
         private bool ValidateInput()

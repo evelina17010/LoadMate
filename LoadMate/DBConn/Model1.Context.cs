@@ -13,10 +13,10 @@ namespace LoadMate.DBConn
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class LoadMateEntities1 : DbContext
+    public partial class LoadMateEntities : DbContext
     {
-        public LoadMateEntities1()
-            : base("name=LoadMateEntities1")
+        public LoadMateEntities()
+            : base("name=LoadMateEntities")
         {
         }
     
@@ -30,6 +30,7 @@ namespace LoadMate.DBConn
         public DbSet<CargoType> CargoType { get; set; }
         public DbSet<City> City { get; set; }
         public DbSet<Country> Country { get; set; }
+        public DbSet<Distance> Distance { get; set; }
         public DbSet<Driver> Driver { get; set; }
         public DbSet<DriverStatus> DriverStatus { get; set; }
         public DbSet<Gender> Gender { get; set; }
@@ -42,6 +43,7 @@ namespace LoadMate.DBConn
         public DbSet<Region> Region { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<Route> Route { get; set; }
+        public DbSet<RouteIntermediatePoints> RouteIntermediatePoints { get; set; }
         public DbSet<Street> Street { get; set; }
         public DbSet<sysdiagrams> sysdiagrams { get; set; }
         public DbSet<Tariff> Tariff { get; set; }

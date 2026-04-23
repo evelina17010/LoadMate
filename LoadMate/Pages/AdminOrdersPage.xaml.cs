@@ -85,8 +85,8 @@ namespace LoadMate.Pages
                     CargoDescription = o.Cargo?.Description ?? "Не указан",
                     RouteFrom = GetRouteAddress(o.Route_id, true),
                     RouteTo = GetRouteAddress(o.Route_id, false),
-                    DriverName = GetDriverName(o.Truck_id),
-                    TruckModel = GetTruckModel(o.Truck_id),
+                    DriverName = GetDriverName(o.Truck_id) ,
+                    TruckModel = GetTruckModel(o.Truck_id) ,
                     StatusName = o.OrderStatus?.Name ?? "Не указан"
                 }).AsEnumerable();
 
@@ -143,7 +143,7 @@ namespace LoadMate.Pages
             catch { return "Ошибка адреса"; }
         }
 
-        private string GetDriverName(int truckId)
+        private string GetDriverName(int? truckId)
         {
             try
             {
@@ -159,7 +159,7 @@ namespace LoadMate.Pages
             catch { return "Ошибка данных"; }
         }
 
-        private string GetTruckModel(int truckId)
+        private string GetTruckModel(int? truckId)
         {
             try
             {

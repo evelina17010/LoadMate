@@ -55,6 +55,15 @@
           <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Code" Type="nvarchar" MaxLength="3" />
         </EntityType>
+        <EntityType Name="Distance">
+          <Key>
+            <PropertyRef Name="Distance_id" />
+          </Key>
+          <Property Name="Distance_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="City_A_id" Type="int" Nullable="false" />
+          <Property Name="City_B_id" Type="int" Nullable="false" />
+          <Property Name="Distance_km" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+        </EntityType>
         <EntityType Name="Driver">
           <Key>
             <PropertyRef Name="Driver_id" />
@@ -100,10 +109,10 @@
             <PropertyRef Name="Order_id" />
           </Key>
           <Property Name="Order_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Manager_id" Type="int" Nullable="false" />
+          <Property Name="Manager_id" Type="int" />
           <Property Name="Cargo_id" Type="int" Nullable="false" />
           <Property Name="Tariff_id" Type="int" Nullable="false" />
-          <Property Name="Truck_id" Type="int" Nullable="false" />
+          <Property Name="Truck_id" Type="int" />
           <Property Name="Route_id" Type="int" Nullable="false" />
           <Property Name="OrderStatus_id" Type="int" Nullable="false" />
           <Property Name="Order_number" Type="nvarchar" MaxLength="50" Nullable="false" />
@@ -182,6 +191,15 @@
           <Property Name="Distance_km" Type="decimal" Precision="10" Scale="2" Nullable="false" />
           <Property Name="Estimated_time_hours" Type="decimal" Precision="10" Scale="2" Nullable="false" />
           <Property Name="Waypoints" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="RouteIntermediatePoints">
+          <Key>
+            <PropertyRef Name="Point_id" />
+          </Key>
+          <Property Name="Point_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Route_id" Type="int" Nullable="false" />
+          <Property Name="City_id" Type="int" Nullable="false" />
+          <Property Name="Sequence_number" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Street">
           <Key>
@@ -310,6 +328,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_City">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="RouteIntermediatePoints" Type="Self.RouteIntermediatePoints" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="RouteIntermediatePoints">
+              <PropertyRef Name="City_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_City_Region">
           <End Role="Region" Type="Self.Region" Multiplicity="1" />
           <End Role="City" Type="Self.City" Multiplicity="*" />
@@ -319,6 +349,30 @@
             </Principal>
             <Dependent Role="City">
               <PropertyRef Name="Region_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CityA">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="Distance" Type="Self.Distance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="Distance">
+              <PropertyRef Name="City_A_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CityB">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="Distance" Type="Self.Distance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="Distance">
+              <PropertyRef Name="City_B_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -371,7 +425,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Order_Manager">
-          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="User" Type="Self.User" Multiplicity="0..1" />
           <End Role="Order" Type="Self.Order" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="User">
@@ -419,7 +473,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Order_Truck">
-          <End Role="Truck" Type="Self.Truck" Multiplicity="1" />
+          <End Role="Truck" Type="Self.Truck" Multiplicity="0..1" />
           <End Role="Order" Type="Self.Order" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Truck">
@@ -511,6 +565,18 @@
             </Principal>
             <Dependent Role="Region">
               <PropertyRef Name="Country_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Route">
+          <End Role="Route" Type="Self.Route" Multiplicity="1" />
+          <End Role="RouteIntermediatePoints" Type="Self.RouteIntermediatePoints" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Route">
+              <PropertyRef Name="Route_id" />
+            </Principal>
+            <Dependent Role="RouteIntermediatePoints">
+              <PropertyRef Name="Route_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -628,6 +694,7 @@
           <EntitySet Name="CargoType" EntityType="Self.CargoType" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="City" EntityType="Self.City" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Country" EntityType="Self.Country" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Distance" EntityType="Self.Distance" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Driver" EntityType="Self.Driver" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DriverStatus" EntityType="Self.DriverStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Gender" EntityType="Self.Gender" Schema="dbo" store:Type="Tables" />
@@ -640,6 +707,7 @@
           <EntitySet Name="Region" EntityType="Self.Region" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Role" EntityType="Self.Role" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Route" EntityType="Self.Route" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RouteIntermediatePoints" EntityType="Self.RouteIntermediatePoints" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Street" EntityType="Self.Street" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tariff" EntityType="Self.Tariff" Schema="dbo" store:Type="Tables" />
@@ -660,9 +728,21 @@
             <End Role="User" EntitySet="User" />
             <End Role="Cargo" EntitySet="Cargo" />
           </AssociationSet>
+          <AssociationSet Name="FK_City" Association="Self.FK_City">
+            <End Role="City" EntitySet="City" />
+            <End Role="RouteIntermediatePoints" EntitySet="RouteIntermediatePoints" />
+          </AssociationSet>
           <AssociationSet Name="FK_City_Region" Association="Self.FK_City_Region">
             <End Role="Region" EntitySet="Region" />
             <End Role="City" EntitySet="City" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CityA" Association="Self.FK_CityA">
+            <End Role="City" EntitySet="City" />
+            <End Role="Distance" EntitySet="Distance" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CityB" Association="Self.FK_CityB">
+            <End Role="City" EntitySet="City" />
+            <End Role="Distance" EntitySet="Distance" />
           </AssociationSet>
           <AssociationSet Name="FK_Driver_DriverStatus" Association="Self.FK_Driver_DriverStatus">
             <End Role="DriverStatus" EntitySet="DriverStatus" />
@@ -727,6 +807,10 @@
           <AssociationSet Name="FK_Region_Country" Association="Self.FK_Region_Country">
             <End Role="Country" EntitySet="Country" />
             <End Role="Region" EntitySet="Region" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Route" Association="Self.FK_Route">
+            <End Role="Route" EntitySet="Route" />
+            <End Role="RouteIntermediatePoints" EntitySet="RouteIntermediatePoints" />
           </AssociationSet>
           <AssociationSet Name="FK_Route_EndAddress" Association="Self.FK_Route_EndAddress">
             <End Role="Address" EntitySet="Address" />
@@ -818,7 +902,10 @@
           <Property Name="Region_id" Type="Int32" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="PostalCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RouteIntermediatePoints" Relationship="Self.FK_City" FromRole="City" ToRole="RouteIntermediatePoints" />
           <NavigationProperty Name="Region" Relationship="Self.FK_City_Region" FromRole="City" ToRole="Region" />
+          <NavigationProperty Name="Distance" Relationship="Self.FK_CityA" FromRole="City" ToRole="Distance" />
+          <NavigationProperty Name="Distance1" Relationship="Self.FK_CityB" FromRole="City" ToRole="Distance" />
           <NavigationProperty Name="Street" Relationship="Self.FK_Street_City" FromRole="City" ToRole="Street" />
         </EntityType>
         <EntityType Name="Country">
@@ -829,6 +916,17 @@
           <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="Code" Type="String" MaxLength="3" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Region" Relationship="Self.FK_Region_Country" FromRole="Country" ToRole="Region" />
+        </EntityType>
+        <EntityType Name="Distance">
+          <Key>
+            <PropertyRef Name="Distance_id" />
+          </Key>
+          <Property Name="Distance_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="City_A_id" Type="Int32" Nullable="false" />
+          <Property Name="City_B_id" Type="Int32" Nullable="false" />
+          <Property Name="Distance_km" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <NavigationProperty Name="City" Relationship="Self.FK_CityA" FromRole="Distance" ToRole="City" />
+          <NavigationProperty Name="City1" Relationship="Self.FK_CityB" FromRole="Distance" ToRole="City" />
         </EntityType>
         <EntityType Name="Driver">
           <Key>
@@ -881,10 +979,10 @@
             <PropertyRef Name="Order_id" />
           </Key>
           <Property Name="Order_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Manager_id" Type="Int32" Nullable="false" />
+          <Property Name="Manager_id" Type="Int32" />
           <Property Name="Cargo_id" Type="Int32" Nullable="false" />
           <Property Name="Tariff_id" Type="Int32" Nullable="false" />
-          <Property Name="Truck_id" Type="Int32" Nullable="false" />
+          <Property Name="Truck_id" Type="Int32" />
           <Property Name="Route_id" Type="Int32" Nullable="false" />
           <Property Name="OrderStatus_id" Type="Int32" Nullable="false" />
           <Property Name="Order_number" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
@@ -987,6 +1085,18 @@
           <NavigationProperty Name="Address" Relationship="Self.FK_Route_EndAddress" FromRole="Route" ToRole="Address" />
           <NavigationProperty Name="Address1" Relationship="Self.FK_Route_StartAddress" FromRole="Route" ToRole="Address" />
           <NavigationProperty Name="Order" Relationship="Self.FK_Order_Route" FromRole="Route" ToRole="Order" />
+          <NavigationProperty Name="RouteIntermediatePoints" Relationship="Self.FK_Route" FromRole="Route" ToRole="RouteIntermediatePoints" />
+        </EntityType>
+        <EntityType Name="RouteIntermediatePoints">
+          <Key>
+            <PropertyRef Name="Point_id" />
+          </Key>
+          <Property Name="Point_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Route_id" Type="Int32" Nullable="false" />
+          <Property Name="City_id" Type="Int32" Nullable="false" />
+          <Property Name="Sequence_number" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="City" Relationship="Self.FK_City" FromRole="RouteIntermediatePoints" ToRole="City" />
+          <NavigationProperty Name="Route" Relationship="Self.FK_Route" FromRole="RouteIntermediatePoints" ToRole="Route" />
         </EntityType>
         <EntityType Name="Street">
           <Key>
@@ -1169,6 +1279,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_City">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="RouteIntermediatePoints" Type="Self.RouteIntermediatePoints" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="RouteIntermediatePoints">
+              <PropertyRef Name="City_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_City_Region">
           <End Role="Region" Type="Self.Region" Multiplicity="1" />
           <End Role="City" Type="Self.City" Multiplicity="*" />
@@ -1178,6 +1300,30 @@
             </Principal>
             <Dependent Role="City">
               <PropertyRef Name="Region_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CityA">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="Distance" Type="Self.Distance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="Distance">
+              <PropertyRef Name="City_A_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CityB">
+          <End Role="City" Type="Self.City" Multiplicity="1" />
+          <End Role="Distance" Type="Self.Distance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="City">
+              <PropertyRef Name="City_id" />
+            </Principal>
+            <Dependent Role="Distance">
+              <PropertyRef Name="City_B_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1266,7 +1412,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Order_Manager">
-          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="User" Type="Self.User" Multiplicity="0..1" />
           <End Role="Order" Type="Self.Order" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="User">
@@ -1314,7 +1460,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Order_Truck">
-          <End Role="Truck" Type="Self.Truck" Multiplicity="1" />
+          <End Role="Truck" Type="Self.Truck" Multiplicity="0..1" />
           <End Role="Order" Type="Self.Order" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Truck">
@@ -1409,6 +1555,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Route">
+          <End Role="Route" Type="Self.Route" Multiplicity="1" />
+          <End Role="RouteIntermediatePoints" Type="Self.RouteIntermediatePoints" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Route">
+              <PropertyRef Name="Route_id" />
+            </Principal>
+            <Dependent Role="RouteIntermediatePoints">
+              <PropertyRef Name="Route_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Truck_TruckStatus">
           <End Role="TruckStatus" Type="Self.TruckStatus" Multiplicity="1" />
           <End Role="Truck" Type="Self.Truck" Multiplicity="*" />
@@ -1445,12 +1603,13 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="LoadMateEntities1" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="LoadMateEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Address" EntityType="Self.Address" />
           <EntitySet Name="Cargo" EntityType="Self.Cargo" />
           <EntitySet Name="CargoType" EntityType="Self.CargoType" />
           <EntitySet Name="City" EntityType="Self.City" />
           <EntitySet Name="Country" EntityType="Self.Country" />
+          <EntitySet Name="Distance" EntityType="Self.Distance" />
           <EntitySet Name="Driver" EntityType="Self.Driver" />
           <EntitySet Name="DriverStatus" EntityType="Self.DriverStatus" />
           <EntitySet Name="Gender" EntityType="Self.Gender" />
@@ -1463,6 +1622,7 @@
           <EntitySet Name="Region" EntityType="Self.Region" />
           <EntitySet Name="Role" EntityType="Self.Role" />
           <EntitySet Name="Route" EntityType="Self.Route" />
+          <EntitySet Name="RouteIntermediatePoints" EntityType="Self.RouteIntermediatePoints" />
           <EntitySet Name="Street" EntityType="Self.Street" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" />
           <EntitySet Name="Tariff" EntityType="Self.Tariff" />
@@ -1495,9 +1655,21 @@
             <End Role="Cargo" EntitySet="Cargo" />
             <End Role="Order" EntitySet="Order" />
           </AssociationSet>
+          <AssociationSet Name="FK_City" Association="Self.FK_City">
+            <End Role="City" EntitySet="City" />
+            <End Role="RouteIntermediatePoints" EntitySet="RouteIntermediatePoints" />
+          </AssociationSet>
           <AssociationSet Name="FK_City_Region" Association="Self.FK_City_Region">
             <End Role="Region" EntitySet="Region" />
             <End Role="City" EntitySet="City" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CityA" Association="Self.FK_CityA">
+            <End Role="City" EntitySet="City" />
+            <End Role="Distance" EntitySet="Distance" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CityB" Association="Self.FK_CityB">
+            <End Role="City" EntitySet="City" />
+            <End Role="Distance" EntitySet="Distance" />
           </AssociationSet>
           <AssociationSet Name="FK_Street_City" Association="Self.FK_Street_City">
             <End Role="City" EntitySet="City" />
@@ -1575,6 +1747,10 @@
             <End Role="Role" EntitySet="Role" />
             <End Role="User" EntitySet="User" />
           </AssociationSet>
+          <AssociationSet Name="FK_Route" Association="Self.FK_Route">
+            <End Role="Route" EntitySet="Route" />
+            <End Role="RouteIntermediatePoints" EntitySet="RouteIntermediatePoints" />
+          </AssociationSet>
           <AssociationSet Name="FK_Truck_TruckStatus" Association="Self.FK_Truck_TruckStatus">
             <End Role="TruckStatus" EntitySet="TruckStatus" />
             <End Role="Truck" EntitySet="Truck" />
@@ -1593,7 +1769,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="Хранилище LoadMateModelContainer" CdmEntityContainer="LoadMateEntities1">
+        <EntityContainerMapping StorageEntityContainer="Хранилище LoadMateModelContainer" CdmEntityContainer="LoadMateEntities">
           <EntitySetMapping Name="Address">
             <EntityTypeMapping TypeName="LoadMateModel.Address">
               <MappingFragment StoreEntitySet="Address">
@@ -1646,6 +1822,16 @@
                 <ScalarProperty Name="Country_id" ColumnName="Country_id" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Distance">
+            <EntityTypeMapping TypeName="LoadMateModel.Distance">
+              <MappingFragment StoreEntitySet="Distance">
+                <ScalarProperty Name="Distance_id" ColumnName="Distance_id" />
+                <ScalarProperty Name="City_A_id" ColumnName="City_A_id" />
+                <ScalarProperty Name="City_B_id" ColumnName="City_B_id" />
+                <ScalarProperty Name="Distance_km" ColumnName="Distance_km" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1786,6 +1972,16 @@
                 <ScalarProperty Name="Distance_km" ColumnName="Distance_km" />
                 <ScalarProperty Name="Estimated_time_hours" ColumnName="Estimated_time_hours" />
                 <ScalarProperty Name="Waypoints" ColumnName="Waypoints" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RouteIntermediatePoints">
+            <EntityTypeMapping TypeName="LoadMateModel.RouteIntermediatePoints">
+              <MappingFragment StoreEntitySet="RouteIntermediatePoints">
+                <ScalarProperty Name="Point_id" ColumnName="Point_id" />
+                <ScalarProperty Name="Route_id" ColumnName="Route_id" />
+                <ScalarProperty Name="City_id" ColumnName="City_id" />
+                <ScalarProperty Name="Sequence_number" ColumnName="Sequence_number" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
