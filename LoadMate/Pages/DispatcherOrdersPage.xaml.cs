@@ -197,7 +197,7 @@ namespace LoadMate.Pages
                 return;
             }
 
-            var driverWindow = new AssignDriverWindow(selectedOrder);
+            var driverWindow = new AssignDriverWindow(selectedOrder, this.dispatcherId);
             driverWindow.Owner = Application.Current.MainWindow;
 
             if (driverWindow.ShowDialog() == true)

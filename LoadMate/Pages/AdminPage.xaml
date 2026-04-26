@@ -45,6 +45,9 @@
                         <Button Content="Грузы" Style="{StaticResource SidebarButton}" Click="Cargo_Click"/>
                         <Button Content="Водители" Style="{StaticResource SidebarButton}" Click="Drivers_Click"/>
                         <Button Content="Транспорт" Style="{StaticResource SidebarButton}" Click="Trucks_Click"/>
+                        <Button Content="Платежи" Style="{StaticResource SidebarButton}" Click="Payments_Click"/>
+                        <Button Content="Тарифы" Style="{StaticResource SidebarButton}" Click="Tariffs_Click"/>
+                        <Button Content="Статистика" Style="{StaticResource SidebarButton}" Click="Statistic_Click"/>
                     </StackPanel>
 
                     <Button Grid.Row="2" Content="Выход" Style="{StaticResource SidebarButton}" 

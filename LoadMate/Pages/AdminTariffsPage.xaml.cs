@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -123,7 +124,50 @@ namespace LoadMate.Pages
                 }
             }
         }
+        private void ExportTariffs_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var items = TariffsGrid.ItemsSource as List<Tariff>;
+                if (items == null || !items.Any())
+                {
+                    MessageBox.Show("Нет данных для экспорта", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
+                var sfd = new Microsoft.Win32.SaveFileDialog()
+                {
+                    Filter = "CSV файл (*.csv)|*.csv",
+                    FileName = $"Tariffs_Report_{DateTime.Now:dd_MM_yyyy}"
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var csv = new StringBuilder();
+                    csv.AppendLine("ID;Название;Цена за км;Цена за кг;Цена за м³;Доп. сбор;Мин. цена;Статус");
+
+                    foreach (var t in items)
+                    {
+                        string status = t.Is_active ? "Активен" : "Неактивен";
+                        csv.AppendLine($"{t.Tariff_id};" +
+                                       $"{t.Name};" +
+                                       $"{t.Cost_per_km:F2};" +
+                                       $"{t.Cost_per_kg:F2};" +
+                                       $"{t.Cost_per_m3:F2};" +
+                                       $"{t.Additional_cost:F2};" +
+                                       $"{t.Min_price:F2};" +
+                                       $"{status}");
+                    }
+
+                    File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+                    MessageBox.Show("Прайс-лист успешно экспортирован", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             LoadTariffs();

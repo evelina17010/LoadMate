@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
 using System.Data.Entity;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -178,7 +179,47 @@ namespace LoadMate.Pages
                 MessageBox.Show(ex.Message);
             }
         }
+        private void ExportUsers_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var items = UsersGrid.ItemsSource as List<User>;
+                if (items == null || !items.Any())
+                {
+                    MessageBox.Show("Нет данных для экспорта", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
+                var sfd = new Microsoft.Win32.SaveFileDialog()
+                {
+                    Filter = "CSV файл (*.csv)|*.csv",
+                    FileName = $"Users_Export_{DateTime.Now:dd_MM_yyyy}"
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var csv = new StringBuilder();
+                    csv.AppendLine("ID;ФИО;Email;Телефон;Роль;Статус");
+
+                    foreach (var u in items)
+                    {
+                        csv.AppendLine($"{u.User_id};" +
+                                       $"{u.Full_name};" +
+                                       $"{u.Email};" +
+                                       $"{u.Phone};" +
+                                       $"{u.Role?.Name ?? "—"};" +
+                                       $"{u.UserStatus?.Name ?? "—"}");
+                    }
+
+                    File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+                    MessageBox.Show("Список пользователей успешно экспортирован", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
 
         private void RoleFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();

@@ -20,6 +20,15 @@
             <Button Content="Редактировать" Style="{StaticResource ActionButton}" Click="EditCargo_Click" Width="140" Height="40" Margin="10,0,0,0"/>
             <Button Content="Удалить" Style="{StaticResource DangerButton}" Click="DeleteCargo_Click" Width="100" Height="40" Margin="10,0,0,0"/>
             <Button Content="Обновить" Style="{StaticResource ActionButton}" Click="Refresh_Click" Width="100" Height="40" Margin="10,0,0,0"/>
+            <Button Content="Отчет" Click="ExportCargo_Click" Width="120" Height="40" Margin="10,0,0,0" 
+            Background="#2E7D32" Foreground="White" BorderThickness="0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="30,0,5,0" FontWeight="Bold"/>
             <TextBox x:Name="txtSearch" Style="{StaticResource InputField}" Width="250" Height="40"  Margin="20 6 0 6" Tag="Поиск по клиенту или описанию..." TextChanged="Search_TextChanged"/>
         </StackPanel>
 

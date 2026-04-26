@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
 using System.Data.Entity;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -159,7 +160,51 @@ namespace LoadMate.Pages
                 }
             }
         }
+        private void ExportCargo_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var items = CargoGrid.ItemsSource as IEnumerable<dynamic>;
+                if (items == null || !items.Any())
+                {
+                    MessageBox.Show("Нет данных для экспорта", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
+                var sfd = new Microsoft.Win32.SaveFileDialog()
+                {
+                    Filter = "CSV файл (*.csv)|*.csv",
+                    FileName = $"Отчет_Грузы_{DateTime.Now:dd_MM_yyyy}"
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var csv = new StringBuilder();
+
+                    csv.AppendLine("ID;Клиент;Тип груза;Описание;Вес (кг);Объем (м3);Хрупкий;Опасный;Дата создания");
+                    foreach (var item in items)
+                    {
+                        csv.AppendLine($"{item.Cargo_id};" +
+                                       $"{item.ClientName};" +
+                                       $"{item.CargoTypeName};" +
+                                       $"{item.Description};" +
+                                       $"{item.Weight_kg};" +
+                                       $"{item.Volume_m3};" +
+                                       $"{item.IsFragileText};" +
+                                       $"{item.IsDangerousText};" +
+                                       $"{item.Created_at:dd.MM.yyyy}");
+                    }
+
+                    File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+
+                    MessageBox.Show("Отчет успешно выгружен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при создании отчета: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void Refresh_Click(object sender, RoutedEventArgs e) => LoadCargo();
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e) => LoadCargo();

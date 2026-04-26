@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LoadMate.DBConn;
 using System.Data.Entity;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -121,7 +122,49 @@ namespace LoadMate.Pages
                 MessageBox.Show(ex.Message);
             }
         }
+        private void ExportPayments_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var items = PaymentsGrid.ItemsSource as IEnumerable<dynamic>;
+                if (items == null || !items.Any())
+                {
+                    MessageBox.Show("Нет данных для экспорта", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
+                var sfd = new Microsoft.Win32.SaveFileDialog()
+                {
+                    Filter = "CSV файл (*.csv)|*.csv",
+                    FileName = $"Payments_Report_{DateTime.Now:dd_MM_yyyy}"
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var csv = new StringBuilder();
+                    csv.AppendLine("ID;№ Заказа;Клиент;Сумма;Статус;Метод оплаты;Дата транзакции;Дата оплаты");
+
+                    foreach (var p in items)
+                    {
+                        csv.AppendLine($"{p.Payment_id};" +
+                                       $"{p.OrderNumber};" +
+                                       $"{p.ClientName};" +
+                                       $"{p.Amount:F2};" +
+                                       $"{p.StatusName};" +
+                                       $"{p.Payment_method};" +
+                                       $"{p.Transaction_date:dd.MM.yyyy HH:mm};" +
+                                       $"{p.Paid_date:dd.MM.yyyy HH:mm}");
+                    }
+
+                    File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+                    MessageBox.Show("Отчет по платежам успешно сформирован", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
 
         private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();

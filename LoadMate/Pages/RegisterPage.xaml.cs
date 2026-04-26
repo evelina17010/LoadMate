@@ -183,5 +183,10 @@ namespace LoadMate.Pages
             if (NavigationService.CanGoBack) NavigationService.GoBack();
             else NavigationService.Navigate(new LoginPage());
         }
+
+        private void txtFullName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

@@ -91,10 +91,16 @@ namespace LoadMate.Pages
         {
             AdminFrame.NavigationService.Navigate(new AdminPaymentsPage());
         }
-
+      
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Navigate(new MainPage());
+        }
+
+
+        private void Statistic_Click(object sender, RoutedEventArgs e)
+        {
+            AdminFrame.NavigationService.Navigate(new AdminStatisticsPage());
         }
     }
 }

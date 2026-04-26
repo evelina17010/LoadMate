@@ -183,6 +183,9 @@
     <Compile Include="Pages\AdminPaymentsPage.xaml.cs">
       <DependentUpon>AdminPaymentsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\AdminStatisticsPage.xaml.cs">
+      <DependentUpon>AdminStatisticsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\AdminTariffsPage.xaml.cs">
       <DependentUpon>AdminTariffsPage.xaml</DependentUpon>
     </Compile>
@@ -295,6 +298,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\AdminPaymentsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\AdminStatisticsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

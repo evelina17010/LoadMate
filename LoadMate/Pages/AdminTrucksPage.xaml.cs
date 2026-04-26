@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
 using System.Data.Entity;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -161,7 +162,49 @@ namespace LoadMate.Pages
                 }
             }
         }
+        private void ExportTrucks_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var items = TrucksGrid.ItemsSource as IEnumerable<dynamic>;
+                if (items == null || !items.Any())
+                {
+                    MessageBox.Show("Нет данных для экспорта", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
+                var sfd = new Microsoft.Win32.SaveFileDialog()
+                {
+                    Filter = "CSV файл (*.csv)|*.csv",
+                    FileName = $"Trucks_Inventory_{DateTime.Now:dd_MM_yyyy}"
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var csv = new StringBuilder();
+                    csv.AppendLine("ID;Модель;Рег. номер;Водитель;Грузоподъемность (кг);Объем (м³);Габариты;Статус");
+
+                    foreach (var t in items)
+                    {
+                        csv.AppendLine($"{t.Truck_id};" +
+                                       $"{t.Model};" +
+                                       $"{t.Registration_number};" +
+                                       $"{t.DriverName};" +
+                                       $"{t.Capacity_kg};" +
+                                       $"{t.Capacity_m3};" +
+                                       $"{t.Dimensions};" +
+                                       $"{t.StatusName}");
+                    }
+
+                    File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+                    MessageBox.Show("Данные по автопарку успешно экспортированы", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void Refresh_Click(object sender, RoutedEventArgs e) => LoadTrucks();
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e) => LoadTrucks();

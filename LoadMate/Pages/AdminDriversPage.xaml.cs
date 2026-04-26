@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
 using System.Data.Entity;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -189,6 +190,49 @@ namespace LoadMate.Pages
                     string errorMessage = ex.InnerException?.InnerException?.Message ?? ex.Message;
                     MessageBox.Show($"Критическая ошибка: {errorMessage}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+        private void ExportDrivers_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var items = DriversGrid.ItemsSource as IEnumerable<dynamic>;
+                if (items == null || !items.Any())
+                {
+                    MessageBox.Show("Нет данных для экспорта", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var sfd = new Microsoft.Win32.SaveFileDialog()
+                {
+                    Filter = "CSV файл (*.csv)|*.csv",
+                    FileName = $"Список_водителей_{DateTime.Now:dd_MM_yyyy}"
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var csv = new StringBuilder();
+                    csv.AppendLine("ID;ФИО;Телефон;Email;Номер лицензии;Стаж (лет);Статус;Дата приема");
+
+                    foreach (var d in items)
+                    {
+                        csv.AppendLine($"{d.Driver_id};" +
+                                       $"{d.DriverName};" +
+                                       $"{d.Phone};" +
+                                       $"{d.Email};" +
+                                       $"{d.License_number};" +
+                                       $"{d.Experience_years};" +
+                                       $"{d.StatusName};" +
+                                       $"{d.Hire_date:dd.MM.yyyy}");
+                    }
+                    File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+
+                    MessageBox.Show("Список водителей успешно экспортирован!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void Refresh_Click(object sender, RoutedEventArgs e) => LoadDrivers();

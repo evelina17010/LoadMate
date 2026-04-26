@@ -62,7 +62,7 @@
                         <Image x:Name="imgAvatar" Visibility="Collapsed"/>
 
                         <TextBlock Text="ФИО" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="txtFullName" Style="{StaticResource InputField}" Height="45"/>
+                        <TextBox x:Name="txtFullName" Style="{StaticResource InputField}" Height="45" TextChanged="txtFullName_TextChanged"/>
 
                         <TextBlock Text="Email" Style="{StaticResource FieldLabel}"/>
                         <TextBox x:Name="txtEmail" Style="{StaticResource InputField}" Height="45"/>

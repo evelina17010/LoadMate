@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using LoadMate.DBConn;
 using LoadMate.Windows;
 using System.Data.Entity;
+using System.IO;
 
 namespace LoadMate.Pages
 {
@@ -247,7 +248,52 @@ namespace LoadMate.Pages
             }
         }
 
-        private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
+private void ExportOrders_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var items = OrdersGrid.ItemsSource as IEnumerable<dynamic>;
+            if (items == null || !items.Any())
+            {
+                MessageBox.Show("Нет данных для экспорта", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var sfd = new Microsoft.Win32.SaveFileDialog()
+            {
+                Filter = "CSV файл (*.csv)|*.csv",
+                FileName = $"Orders_Report_{DateTime.Now:dd_MM_yyyy}"
+            };
+
+            if (sfd.ShowDialog() == true)
+            {
+                var csv = new StringBuilder();
+                    csv.AppendLine("№ Заказа;Клиент;Груз;Откуда;Куда;Водитель;Транспорт;Статус;Цена;Дата");
+
+                    foreach (var o in items)
+                {
+                    csv.AppendLine($"{o.Order_number};" +
+                                   $"{o.ClientName};" +
+                                   $"{o.CargoDescription};" +
+                                   $"{o.RouteFrom};" +
+                                   $"{o.RouteTo};" +
+                                   $"{o.DriverName};" +
+                                   $"{o.TruckModel};" +
+                                   $"{o.StatusName};" +
+                                   $"{o.Price:F2};" +
+                                   $"{o.Order_date:dd.MM.yyyy}");
+                }
+
+                File.WriteAllText(sfd.FileName, csv.ToString(), Encoding.UTF8);
+                MessageBox.Show("Данные успешно экспортированы", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    private void Search_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
 
         private void StatusFilter_Changed(object sender, SelectionChangedEventArgs e) => ApplyFilters();
 

@@ -11,7 +11,7 @@
             <GradientStop Color="#4CAF50" Offset="0.5"/>
             <GradientStop Color="#2E7D32" Offset="1"/>
         </LinearGradientBrush>
-
+        <SolidColorBrush x:Key="PrimaryBlue" Color="#2196F3"/>
         <SolidColorBrush x:Key="PrimaryColor" Color="#4CAF50"/>
         <SolidColorBrush x:Key="PrimaryDarkColor" Color="#388E3C"/>
         <SolidColorBrush x:Key="PrimaryLightColor" Color="#E8F5E9"/>
