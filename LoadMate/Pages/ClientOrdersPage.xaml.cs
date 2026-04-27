@@ -25,7 +25,7 @@ namespace LoadMate.Pages
                 .ToList();
 
             var orders = Conn.loadMateEntities.Order
-                .Where(o => cargoIds.Contains(o.Cargo_id))
+                .Where(o => cargoIds.Contains(o.Cargo_id)).OrderByDescending(o => o.Order_date)
                 .ToList();
 
             var ordersWithDetails = orders.Select(o => new
@@ -89,14 +89,15 @@ namespace LoadMate.Pages
                 .Select(c => c.Cargo_id)
                 .ToList();
 
-            var orders = Conn.loadMateEntities.Order
-                .Where(o => cargoIds.Contains(o.Cargo_id))
-                .ToList();
+            var query = Conn.loadMateEntities.Order
+                .Where(o => cargoIds.Contains(o.Cargo_id));
 
             if (!string.IsNullOrEmpty(search))
             {
-                orders = orders.Where(o => o.Order_number.Contains(search)).ToList();
+                query = query.Where(o => o.Order_number.Contains(search));
             }
+
+            var orders = query.OrderByDescending(o => o.Order_date).ToList();
 
             var ordersWithDetails = orders.Select(o => new
             {

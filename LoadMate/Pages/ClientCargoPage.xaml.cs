@@ -34,6 +34,7 @@ namespace LoadMate.Pages
         {
             var cargoList = Conn.loadMateEntities.Cargo
                 .Where(c => c.Client_id == clientId)
+                .OrderByDescending(c => c.Created_at)
                 .ToList();
 
             var cargoWithDetails = cargoList.Select(c => new
@@ -42,15 +43,14 @@ namespace LoadMate.Pages
                 c.Description,
                 c.Weight_kg,
                 c.Volume_m3,
-                c.Is_fragile,
-                c.Is_dangerous,
+                Is_fragile = c.Is_fragile ? "Да" : "Нет",
+                Is_dangerous = c.Is_dangerous ? "Да" : "Нет",
                 c.Created_at,
                 CargoTypeName = GetCargoTypeName(c.CargoType_id)
             }).ToList();
 
             CargoGrid.ItemsSource = cargoWithDetails;
         }
-
         private string GetCargoTypeName(int cargoTypeId)
         {
             var cargoType = Conn.loadMateEntities.CargoType.FirstOrDefault(ct => ct.CargoType_id == cargoTypeId);
@@ -64,17 +64,17 @@ namespace LoadMate.Pages
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string search = txtSearch.Text.Trim();
+            string search = txtSearch.Text.Trim().ToLower();
 
-            var cargoList = Conn.loadMateEntities.Cargo
-                .Where(c => c.Client_id == clientId)
-                .ToList();
+            var query = Conn.loadMateEntities.Cargo
+                .Where(c => c.Client_id == clientId);
 
             if (!string.IsNullOrEmpty(search))
             {
-                cargoList = cargoList.Where(c => c.Description.Contains(search) ||
-                                                  c.Cargo_id.ToString().Contains(search)).ToList();
+                query = query.Where(c => c.Description.ToLower().Contains(search) || c.Cargo_id.ToString().Contains(search));
             }
+
+            var cargoList = query.OrderByDescending(c => c.Created_at).ToList();
 
             var cargoWithDetails = cargoList.Select(c => new
             {
@@ -82,8 +82,8 @@ namespace LoadMate.Pages
                 c.Description,
                 c.Weight_kg,
                 c.Volume_m3,
-                c.Is_fragile,
-                c.Is_dangerous,
+                Is_fragile = c.Is_fragile ? "Да" : "Нет",
+                Is_dangerous = c.Is_dangerous ? "Да" : "Нет",
                 c.Created_at,
                 CargoTypeName = GetCargoTypeName(c.CargoType_id)
             }).ToList();

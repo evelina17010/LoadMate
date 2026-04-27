@@ -29,13 +29,13 @@ namespace LoadMate.Pages
                 .Where(c => c.Client_id == clientId)
                 .Select(c => c.Cargo_id)
                 .ToList();
-
             var orderIds = db.Order
                 .Where(o => cargoIds.Contains(o.Cargo_id))
                 .Select(o => o.Order_id)
                 .ToList();
             var payments = db.Payment
                 .Where(p => orderIds.Contains(p.Order_id))
+                .OrderByDescending(p => p.Transaction_date) 
                 .ToList();
             var paymentsWithDetails = payments.Select(p => new
             {
@@ -80,6 +80,14 @@ namespace LoadMate.Pages
             if (selectedPayment.PaymentStatus_id == 2)
             {
                 MessageBox.Show("Этот платеж уже оплачен", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var parentOrder = Conn.loadMateEntities.Order.FirstOrDefault(o => o.Order_id == selectedPayment.Order_id);
+            if (parentOrder != null && parentOrder.OrderStatus_id == 1)
+            {
+                MessageBox.Show("Заказ еще не обработан диспетчером. Оплата будет доступна после назначения транспорта и подтверждения цены.",
+                                "Ожидание подтверждения", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
