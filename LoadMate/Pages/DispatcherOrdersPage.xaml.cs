@@ -158,17 +158,23 @@ namespace LoadMate.Pages
         {
             if (selectedOrder == null)
             {
-                MessageBox.Show("Выберите заказ!");
+                MessageBox.Show("Выберите заказ!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var statusWindow = new ChangeStatusWindow(selectedOrder.OrderStatus_id);
+            var oldStatusName = GetOrderStatusName(selectedOrder.OrderStatus_id);
+            var statusWindow = new ChangeStatusWindow(selectedOrder.OrderStatus_id, selectedOrder);
             statusWindow.Owner = Application.Current.MainWindow;
-            if (statusWindow.ShowDialog() == true)
+
+            if (statusWindow.ShowDialog() == true && statusWindow.SelectedStatusId != selectedOrder.OrderStatus_id)
             {
+                var newStatusName = GetOrderStatusName(statusWindow.SelectedStatusId);
                 selectedOrder.OrderStatus_id = statusWindow.SelectedStatusId;
                 Conn.loadMateEntities.SaveChanges();
                 LoadOrders();
+
+                MessageBox.Show($"Статус заказа №{selectedOrder.Order_number} успешно изменен с \"{oldStatusName}\" на \"{newStatusName}\"! Уведомление отправлено клиенту на почту.",
+                    "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

@@ -5,12 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LoadMate"
         mc:Ignorable="d"
-        Title="LoadMate - Логистическая система" 
+         Title="LoadMate - Логистическая система" 
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
+        Icon="/Resources/iconslog.ico"
         ResizeMode="CanResizeWithGrip"
         Background="#F0F9F0">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
@@ -19,9 +21,13 @@
 
         <Border Grid.Row="0" Background="{StaticResource PrimaryColor}" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
-                <TextBlock Text="LoadMate - Логистическая система" Foreground="White"  VerticalAlignment="Center"   Margin="10,0,0,0" FontSize="14"/>
-                <Button Content="✕"  HorizontalAlignment="Right"  VerticalAlignment="Center" Width="35" Height="35" Background="Transparent" Foreground="White"
-                   BorderThickness="0" FontSize="16" Click="CloseButton_Click"  Cursor="Hand"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                    <Image Source="/Resources/iconslog.ico" Width="20" Height="20" Margin="0,0,10,0"/>
+                    <TextBlock Text="LoadMate - Логистическая система" Foreground="White" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+                <Button Content="✕" HorizontalAlignment="Right" VerticalAlignment="Center" Width="35" Height="35" 
+                        Background="Transparent" Foreground="White" BorderThickness="0" FontSize="16" 
+                        Click="CloseButton_Click" Cursor="Hand"/>
             </Grid>
         </Border>
         <Frame Grid.Row="1" Name="frame" NavigationUIVisibility="Hidden"/>
