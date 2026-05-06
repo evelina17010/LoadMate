@@ -262,7 +262,7 @@ namespace LoadMate.Pages
 
                 using (SmtpClient smtp = new SmtpClient("smtp.mail.ru", 587))
                 {
-                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "rGEil7HXFW2suOFKVjvs");
+                    smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Lx4Le30IKCEbP0FjD7lM");
                     smtp.EnableSsl = true;
                     smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                     smtp.Send(mail);

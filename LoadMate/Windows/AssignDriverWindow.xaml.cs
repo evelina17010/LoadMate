@@ -15,12 +15,31 @@ namespace LoadMate.Windows
         private Order _currentOrder;
         private Driver _selectedDriver;
         private int _managerId;
+        private int? _oldDriverId;
+        private int? _oldTruckId;
 
         public AssignDriverWindow(Order order, int managerId)
         {
             InitializeComponent();
             _currentOrder = order;
             _managerId = managerId;
+
+
+            var db = Conn.loadMateEntities;
+            var oldOrder = db.Order.FirstOrDefault(o => o.Order_id == _currentOrder.Order_id);
+            if (oldOrder != null)
+            {
+                _oldTruckId = oldOrder.Truck_id;
+                if (oldOrder.Truck_id != null)
+                {
+                    var oldTruck = db.Truck.FirstOrDefault(t => t.Truck_id == oldOrder.Truck_id);
+                    if (oldTruck?.Driver_id != null)
+                    {
+                        _oldDriverId = oldTruck.Driver_id;
+                    }
+                }
+            }
+
             LoadOrderInfo();
             LoadDrivers();
         }
@@ -101,18 +120,33 @@ namespace LoadMate.Windows
 
                 if (dbOrder != null && truck != null)
                 {
-                    dbOrder.Truck_id = truck.Truck_id; 
-                    dbOrder.Manager_id = _managerId;    
-                    dbOrder.OrderStatus_id = 3;       
+                    bool isReassign = _oldTruckId.HasValue && _oldTruckId.Value != truck.Truck_id;
+                    int? oldDriverIdForRemoval = isReassign ? _oldDriverId : null;
+                    int newDriverId = _selectedDriver.Driver_id;
+
+                    dbOrder.Truck_id = truck.Truck_id;
+                    dbOrder.Manager_id = _managerId;
+                    dbOrder.OrderStatus_id = 3;
                     db.SaveChanges();
 
-                    int driverId = _selectedDriver.Driver_id;
                     int orderId = dbOrder.Order_id;
 
-                    System.Threading.Tasks.Task.Run(() => SendEmailToDriver(driverId));
-                    System.Threading.Tasks.Task.Run(() => SendEmailToClient(orderId));
+                    if (isReassign)
+                    {
+                        if (oldDriverIdForRemoval.HasValue && oldDriverIdForRemoval.Value != newDriverId)
+                        {
+                            System.Threading.Tasks.Task.Run(() => SendUpdatedRouteListToOldDriver(oldDriverIdForRemoval.Value));
+                        }
+                        System.Threading.Tasks.Task.Run(() => SendEmailToNewDriver(newDriverId, orderId, true));
+                        System.Threading.Tasks.Task.Run(() => SendEmailToClientAboutReassign(orderId));
+                    }
+                    else
+                    {
+                        System.Threading.Tasks.Task.Run(() => SendEmailToNewDriver(newDriverId, orderId, false));
+                        System.Threading.Tasks.Task.Run(() => SendEmailToClient(orderId));
+                    }
 
-                    MessageBox.Show("Водитель успешно назначен!");
+                    MessageBox.Show(isReassign ? "Водитель переназначен!" : "Водитель успешно назначен!");
                     this.DialogResult = true;
                     this.Close();
                 }
@@ -120,7 +154,73 @@ namespace LoadMate.Windows
             catch (Exception ex) { MessageBox.Show("Ошибка: " + ex.Message); }
         }
 
-        private void SendEmailToDriver(int driverId)
+        private void SendUpdatedRouteListToOldDriver(int oldDriverId)
+        {
+            try
+            {
+                using (var db = new LoadMateEntities())
+                {
+                    var driver = db.Driver.Include(d => d.User).FirstOrDefault(d => d.Driver_id == oldDriverId);
+                    if (driver?.User == null || string.IsNullOrEmpty(driver.User.Email)) return;
+
+                    var activeOrders = db.Order
+                        .Include(o => o.Cargo)
+                        .Include(o => o.Truck)
+                        .Include(o => o.Route.Address.Street.City)
+                        .Include(o => o.Route.Address1.Street.City)
+                        .Where(o => o.Truck.Driver_id == oldDriverId && o.OrderStatus_id == 3)
+                        .ToList();
+
+                    string ordersHtml = "";
+                    if (activeOrders.Any())
+                    {
+                        foreach (var o in activeOrders)
+                        {
+                            ordersHtml += $@"
+                                <div style='border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 8px;'>
+                                    <p><b>Заказ №{o.Order_number}</b></p>
+                                    <p style='font-size: 14px;'><b>Откуда:</b> {FormatAddress(o.Route?.Address)}</p>
+                                    <p style='font-size: 14px;'><b>Куда:</b> {FormatAddress(o.Route?.Address1)}</p>
+                                    <p style='font-size: 14px;'><b>Груз:</b> {o.Cargo?.Description} ({o.Cargo?.Weight_kg} кг)</p>
+                                    <p style='font-size: 14px;'><b>Авто:</b> {o.Truck?.Model} ({o.Truck?.Registration_number})</p>
+                                </div>";
+                        }
+                    }
+                    else
+                    {
+                        ordersHtml = "<p style='color: #64748b;'>У вас нет активных заказов на данный момент.</p>";
+                    }
+
+                    MailMessage mail = new MailMessage();
+                    mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate Logistics");
+                    mail.To.Add(driver.User.Email);
+                    mail.Subject = "Заказ снят с вашего маршрута";
+                    mail.IsBodyHtml = true;
+                    mail.Body = $@"
+                        <div style='font-family: sans-serif; color: #334155; padding: 20px; background-color: #f8fafc;'>
+                            <div style='max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;'>
+                                <div style='background: #d9534f; padding: 20px; text-align: center; color: #fff;'>
+                                    <h2 style='margin:0;'>LOADMATE</h2>
+                                    <p style='margin:0; opacity: 0.8;'>Изменение маршрута</p>
+                                </div>
+                                <div style='padding: 25px;'>
+                                    <p>Здравствуйте, <b>{driver.User.Full_name}</b>!</p>
+                                    <p>Один из заказов был переназначен другому водителю. Ниже представлен ваш актуальный список рейсов:</p>
+                                    {ordersHtml}
+                                </div>
+                                <div style='background: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #64748b;'>
+                                    © {DateTime.Now.Year} LoadMate System
+                                </div>
+                            </div>
+                        </div>";
+
+                    ExecuteSmtpSend(mail);
+                }
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+        }
+
+        private void SendEmailToNewDriver(int driverId, int orderId, bool isReassign)
         {
             try
             {
@@ -128,7 +228,15 @@ namespace LoadMate.Windows
                 {
                     var driver = db.Driver.Include(d => d.User).FirstOrDefault(d => d.Driver_id == driverId);
                     if (driver?.User == null || string.IsNullOrEmpty(driver.User.Email)) return;
-                    var activeOrders = db.Order
+
+                    var newOrder = db.Order
+                        .Include(o => o.Cargo)
+                        .Include(o => o.Truck)
+                        .Include(o => o.Route.Address.Street.City)
+                        .Include(o => o.Route.Address1.Street.City)
+                        .FirstOrDefault(o => o.Order_id == orderId);
+
+                    var allActiveOrders = db.Order
                         .Include(o => o.Cargo)
                         .Include(o => o.Truck)
                         .Include(o => o.Route.Address.Street.City)
@@ -137,7 +245,7 @@ namespace LoadMate.Windows
                         .ToList();
 
                     string ordersHtml = "";
-                    foreach (var o in activeOrders)
+                    foreach (var o in allActiveOrders)
                     {
                         ordersHtml += $@"
                             <div style='border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 8px;'>
@@ -149,20 +257,25 @@ namespace LoadMate.Windows
                             </div>";
                     }
 
+                    string subject = isReassign ? $"Вам добавлен новый заказ (переназначение)" : $"Вам назначен новый заказ №{newOrder?.Order_number}";
+                    string bodyText = isReassign ? "Вам был переназначен заказ от другого водителя." : "Вам назначен новый заказ.";
+
                     MailMessage mail = new MailMessage();
                     mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate Logistics");
                     mail.To.Add(driver.User.Email);
-                    mail.Subject = "Обновленный список ваших рейсов";
+                    mail.Subject = subject;
                     mail.IsBodyHtml = true;
                     mail.Body = $@"
                         <div style='font-family: sans-serif; color: #334155; padding: 20px; background-color: #f8fafc;'>
                             <div style='max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;'>
                                 <div style='background: #4CAF50; padding: 20px; text-align: center; color: #fff;'>
                                     <h2 style='margin:0;'>LOADMATE</h2>
+                                    <p style='margin:0; opacity: 0.8;'>Новое назначение</p>
                                 </div>
                                 <div style='padding: 25px;'>
                                     <p>Здравствуйте, <b>{driver.User.Full_name}</b>!</p>
-                                    <p>Вам назначен новый рейс. Текущий список задач:</p>
+                                    <p>{bodyText}</p>
+                                    <p>Актуальный список ваших рейсов:</p>
                                     {ordersHtml}
                                 </div>
                                 <div style='background: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #64748b;'>
@@ -214,6 +327,45 @@ namespace LoadMate.Windows
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
         }
 
+        private void SendEmailToClientAboutReassign(int orderId)
+        {
+            try
+            {
+                using (var db = new LoadMateEntities())
+                {
+                    var order = db.Order.Include(o => o.Cargo.User).Include(o => o.Truck.Driver.User).FirstOrDefault(o => o.Order_id == orderId);
+                    var client = order?.Cargo?.User;
+                    if (client == null || string.IsNullOrEmpty(client.Email)) return;
+
+                    MailMessage mail = new MailMessage();
+                    mail.From = new MailAddress("miftakhova_ev@mail.ru", "LoadMate Logistics");
+                    mail.To.Add(client.Email);
+                    mail.Subject = $"Изменение по заказу №{order.Order_number}";
+                    mail.IsBodyHtml = true;
+                    mail.Body = $@"
+                        <div style='font-family: sans-serif; background-color: #f1f5f9; padding: 20px;'>
+                            <div style='max-width: 500px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;'>
+                                <div style='background: #f0ad4e; padding: 20px; text-align: center; color: #fff;'>
+                                    <h2 style='margin:0;'>LOADMATE</h2>
+                                </div>
+                                <div style='padding: 20px;'>
+                                    <p><b>Здравствуйте, {client.Full_name}!</b></p>
+                                    <p>По вашему заказу №{order.Order_number} был назначен новый водитель.</p>
+                                    <p>Новый водитель: <b>{order.Truck?.Driver?.User?.Full_name ?? "уточняется"}</b></p>
+                                    <p>Транспорт: <b>{order.Truck?.Model} ({order.Truck?.Registration_number})</b></p>
+                                    <p>Вы можете отслеживать статус заказа в личном кабинете.</p>
+                                </div>
+                                <div style='background: #f8fafc; padding: 15px; text-align: center; font-size: 12px; color: #64748b;'>
+                                    © {DateTime.Now.Year} LoadMate System
+                                </div>
+                            </div>
+                        </div>";
+                    ExecuteSmtpSend(mail);
+                }
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+        }
+
         private string FormatAddress(Address addr)
         {
             if (addr == null) return "Не указан";
@@ -225,7 +377,7 @@ namespace LoadMate.Windows
             using (SmtpClient smtp = new SmtpClient("smtp.mail.ru", 587))
             {
                 smtp.EnableSsl = true;
-                smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "rGEil7HXFW2suOFKVjvs");
+                smtp.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Lx4Le30IKCEbP0FjD7lM");
                 smtp.Send(mail);
             }
         }

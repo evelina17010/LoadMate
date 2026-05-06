@@ -222,7 +222,7 @@ namespace LoadMate.Pages
                     client.EnableSsl = true;
                     client.DeliveryMethod = SmtpDeliveryMethod.Network;
                     client.UseDefaultCredentials = false;
-                    client.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "rGEil7HXFW2suOFKVjvs");
+                    client.Credentials = new NetworkCredential("miftakhova_ev@mail.ru", "Lx4Le30IKCEbP0FjD7lM");
                     client.Send(mail);
                 }
             }
