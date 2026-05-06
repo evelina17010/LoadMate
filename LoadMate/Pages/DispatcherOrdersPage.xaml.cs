@@ -206,6 +206,7 @@ namespace LoadMate.Pages
             }
         }
 
+
         private void AssignTruck_Click(object sender, RoutedEventArgs e)
         {
             if (selectedOrder == null)
