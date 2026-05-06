@@ -178,23 +178,6 @@ namespace LoadMate.Pages
             }
         }
 
-        private void AssignTruck_Click(object sender, RoutedEventArgs e)
-        {
-            if (selectedOrder == null)
-            {
-                MessageBox.Show("Пожалуйста, выберите заказ из списка.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var truckWindow = new AssignTransportWindow(selectedOrder, this.dispatcherId);
-            truckWindow.Owner = Application.Current.MainWindow;
-
-            if (truckWindow.ShowDialog() == true)
-            {
-                LoadOrders();
-            }
-        }
-
         private void AssignDriver_Click(object sender, RoutedEventArgs e)
         {
             if (selectedOrder == null)
@@ -203,12 +186,51 @@ namespace LoadMate.Pages
                 return;
             }
 
+            if (selectedOrder.Truck_id.HasValue && selectedOrder.Truck_id != 0)
+            {
+                var currentDriverName = GetDriverName(selectedOrder.Truck_id);
+                var result = MessageBox.Show($"На этот заказ уже назначен водитель: {currentDriverName}\n\nЗаменить водителя?",
+                    "Подтверждение замены", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+
             var driverWindow = new AssignDriverWindow(selectedOrder, this.dispatcherId);
             driverWindow.Owner = Application.Current.MainWindow;
 
             if (driverWindow.ShowDialog() == true)
             {
                 LoadOrders();
+                MessageBox.Show("Водитель успешно назначен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void AssignTruck_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedOrder == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите заказ из списка.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (selectedOrder.Truck_id.HasValue && selectedOrder.Truck_id != 0)
+            {
+                var currentTruckModel = GetTruckModel(selectedOrder.Truck_id);
+                var result = MessageBox.Show($"На этот заказ уже назначен транспорт: {currentTruckModel}\n\nЗаменить транспорт?",
+                    "Подтверждение замены", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+
+            var truckWindow = new AssignTransportWindow(selectedOrder, this.dispatcherId);
+            truckWindow.Owner = Application.Current.MainWindow;
+
+            if (truckWindow.ShowDialog() == true)
+            {
+                LoadOrders();
+                MessageBox.Show("Транспорт успешно назначен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
