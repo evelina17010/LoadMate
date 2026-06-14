@@ -22,8 +22,7 @@ namespace LoadMate.Windows
 
             var statuses = Conn.loadMateEntities.OrderStatus.ToList();
             cmbStatus.ItemsSource = statuses;
-            cmbStatus.DisplayMemberPath = "Name";
-            cmbStatus.SelectedValuePath = "OrderStatus_id";
+
             cmbStatus.SelectedValue = currentStatusId;
         }
 
@@ -68,7 +67,6 @@ namespace LoadMate.Windows
 
                 var oldStatus = db.OrderStatus.FirstOrDefault(s => s.OrderStatus_id == order.OrderStatus_id);
                 var newStatus = db.OrderStatus.FirstOrDefault(s => s.OrderStatus_id == newStatusId);
-                var manager = db.User.FirstOrDefault(u => u.User_id == order.Manager_id);
 
                 var route = db.Route
                     .Include(r => r.Address)
@@ -123,7 +121,6 @@ namespace LoadMate.Windows
                         <div style='padding: 25px;'>
                             <p style='font-weight: bold; font-size: 16px;'>Здравствуйте, {client.Full_name}!</p>
                             <p>Статус вашего заказа <b>№{order.Order_number}</b> был обновлен.</p>
-                            
                             <div style='background-color: #f0f4f8; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;'>
                                 <div style='font-size: 12px; color: #64748b; margin-bottom: 5px;'>Предыдущий статус</div>
                                 <div style='font-size: 16px; font-weight: bold; color: #94a3b8;'>{oldStatus?.Name ?? "Не указан"}</div>
@@ -131,18 +128,10 @@ namespace LoadMate.Windows
                                 <div style='font-size: 12px; color: #64748b; margin-bottom: 5px;'>Новый статус</div>
                                 <div style='font-size: 20px; font-weight: bold; color: {statusColor};'>{newStatus?.Name ?? "Не указан"}</div>
                             </div>
-                            
                             <hr style='border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;'>
                             <p><b>Откуда:</b> {fromAddress}</p>
                             <p><b>Куда:</b> {toAddress}</p>
-                            <p><b>Груз:</b> {cargo.Description}</p>
-                            <p><b>Вес:</b> {cargo.Weight_kg} кг</p>
-                            <p><b>Объем:</b> {cargo.Volume_m3} м³</p>
-                            <p style='font-size: 16px; color: #5cb85c;'><b>Стоимость:</b> {order.Price:N2} ₽</p>
-                        </div>
-                        <div style='background-color: #f8fafc; padding: 15px; text-align: center; font-size: 11px; color: #94a3b8;'>
-                            © {DateTime.Now.Year} LoadMate System<br>
-                            Статус заказа можно отслеживать в личном кабинете
+                            <p><b>Стоимость:</b> {order.Price:N2} ₽</p>
                         </div>
                     </div>
                 </div>";
@@ -153,15 +142,10 @@ namespace LoadMate.Windows
                     smtp.EnableSsl = true;
                     smtp.Send(mail);
                 }
-
-                string managerMessage = $"Письмо клиенту {client.Full_name} об изменении статуса заказа №{order.Order_number} на \"{newStatus?.Name}\" успешно отправлено!";
-                MessageBox.Show(managerMessage, "Уведомление диспетчера");
             }
             catch (Exception ex)
             {
-                string managerError = $"Не удалось отправить письмо клиенту! Ошибка: {ex.Message}";
-                MessageBox.Show(managerError, "Уведомление диспетчера");
-                System.Diagnostics.Debug.WriteLine("Ошибка отправки письма о статусе: " + ex.Message);
+                MessageBox.Show($"Ошибка отправки письма: {ex.Message}");
             }
         }
     }
